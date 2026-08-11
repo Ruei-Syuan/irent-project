@@ -3,3 +3,7 @@ venv/
 .venv/
 __pycache__/
 node_modules/
+
+# MCP 
+# 檢測 HTML 問題
+.playwright-mcp

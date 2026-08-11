@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+      AI 車損複核｜iRent 智能車況管家
+    </title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/damage-review.css">
+  </head>
+  <body class="app-body" data-page="damage-review">
+    <div class="app-shell">
+      <aside class="app-sidebar" data-app-sidebar>
+      </aside>
+      <div class="app-workspace">
+        <header class="app-topbar" data-app-topbar>
+        </header>
+        <main class="page">
+          <section class="page-head">
+            <div>
+              <p class="eyebrow">
+                AI Damage Review
+              </p>
+              <h1>
+                AI 車損案件與人工複核
+              </h1>
+              <p class="subtitle">
+                比對取還車影像、確認新增損傷並決定派工、索賠或結案。
+              </p>
+            </div>
+            <div class="actions">
+              <button class="btn">
+                批次指派
+              </button>
+              <button class="btn primary">
+                匯出案件
+              </button>
+            </div>
+          </section>
+          <section class="metrics">
+            <article class="metric">
+              <div class="metric-label">
+                待人工複核
+                <span class="metric-icon">
+                  ◎
+                </span>
+              </div>
+              <b>
+                28
+              </b>
+              <small>
+                其中 8 件高風險
+              </small>
+            </article>
+            <article class="metric">
+              <div class="metric-label">
+                今日新增
+                <span class="metric-icon">
+                  ＋
+                </span>
+              </div>
+              <b>
+                52
+              </b>
+              <small>
+                較昨日減少 6 件
+              </small>
+            </article>
+            <article class="metric">
+              <div class="metric-label">
+                AI 準確率
+                <span class="metric-icon">
+                  ✓
+                </span>
+              </div>
+              <b>
+                94.8%
+              </b>
+              <small>
+                近 30 日人工複核結果
+              </small>
+            </article>
+            <article class="metric">
+              <div class="metric-label">
+                平均處理時間
+                <span class="metric-icon">
+                  ◷
+                </span>
+              </div>
+              <b>
+                4.2m
+              </b>
+              <small>
+                <span class="good">
+                  ▼ 18%
+                </span>
+                較上月
+              </small>
+            </article>
+            <article class="metric">
+              <div class="metric-label">
+                預估索賠
+                <span class="metric-icon">
+                  $
+                </span>
+              </div>
+              <b>
+                82K
+              </b>
+              <small>
+                本週已確認案件
+              </small>
+            </article>
+          </section>
+          <section class="review-layout">
+            <article class="card">
+              <div class="card-head">
+                <div>
+                  <h2>
+                    案件佇列
+                  </h2>
+                  <p>
+                    依風險分數排序
+                  </p>
+                </div>
+                <span class="badge red">
+                  28 待處理
+                </span>
+              </div>
+              <div class="card-body filters">
+                <input class="search" aria-label="搜尋案件" placeholder="搜尋車牌、案件編號">
+                <select class="select" aria-label="狀態">
+                  <option>
+                    全部狀態
+                  </option>
+                  <option>
+                    高風險
+                  </option>
+                </select>
+              </div>
+              <div class="case-list">
+                <a class="case active" href="#detail">
+                  <div class="case-top">
+                    <b>
+                      #DMG-260809-018
+                    </b>
+                    <span class="badge red">
+                      高風險
+                    </span>
+                  </div>
+                  <p>
+                    <b>
+                      RAC-4582 Toyota Yaris
+                    </b>
+                    <br>
+                    右後保桿・刮傷・8.4 cm²
+                  </p>
+                  <div class="case-foot">
+                    <span class="good">
+                      AI 96%
+                    </span>
+                    <small>
+                      等待 8 分鐘
+                    </small>
+                  </div>
+                </a>
+                <a class="case" href="#detail">
+                  <div class="case-top">
+                    <b>
+                      #DMG-260809-016
+                    </b>
+                    <span class="badge amber">
+                      待補件
+                    </span>
+                  </div>
+                  <p>
+                    <b>
+                      RBC-2108 Toyota Vios
+                    </b>
+                    <br>
+                    副駕座椅・液體髒污
+                  </p>
+                  <div class="case-foot">
+                    <span class="good">
+                      AI 88%
+                    </span>
+                    <small>
+                      等待 21 分鐘
+                    </small>
+                  </div>
+                </a>
+                <a class="case" href="#detail">
+                  <div class="case-top">
+                    <b>
+                      #DMG-260809-012
+                    </b>
+                    <span class="badge blue">
+                      一般
+                    </span>
+                  </div>
+                  <p>
+                    <b>
+                      RBA-6935 Honda Fit
+                    </b>
+                    <br>
+                    左前門・疑似淺刮痕
+                  </p>
+                  <div class="case-foot">
+                    <span class="good">
+                      AI 81%
+                    </span>
+                    <small>
+                      等待 32 分鐘
+                    </small>
+                  </div>
+                </a>
+              </div>
+            </article>
+            <article class="card" id="detail">
+              <div class="card-head">
+                <div>
+                  <h2>
+                    #DMG-260809-018 新增損傷比對
+                  </h2>
+                  <p>
+                    RAC-4582・台北市信義區 A07 站點
+                  </p>
+                </div>
+                <span class="badge red">
+                  高風險
+                </span>
+              </div>
+              <div class="card-body">
+                <div class="compare">
+                  <div class="photo">
+                    <span class="photo-label">
+                      取車影像 08/09 09:14
+                    </span>
+                  </div>
+                  <div class="photo after">
+                    <span class="photo-label">
+                      還車影像 08/09 13:37
+                    </span>
+                  </div>
+                </div>
+                <div class="ai-result">
+                  <div>
+                    <small>
+                      損傷類型
+                    </small>
+                    <strong>
+                      表面刮傷
+                    </strong>
+                  </div>
+                  <div>
+                    <small>
+                      位置
+                    </small>
+                    <strong>
+                      右後保桿
+                    </strong>
+                  </div>
+                  <div>
+                    <small>
+                      嚴重程度
+                    </small>
+                    <strong>
+                      中度
+                    </strong>
+                  </div>
+                  <div>
+                    <small>
+                      維修費預估
+                    </small>
+                    <strong>
+                      NT$ 3,200–4,800
+                    </strong>
+                  </div>
+                </div>
+                <div class="ai-note">
+                  <b>
+                    AI 歷史比對：
+                  </b>
+                  前 3 次租借影像未出現此刮傷；角度與亮度合格，建議判定為本次新增損傷。
+                </div>
+                <div class="decision">
+                  <div>
+                    <small class="cell-meta">
+                      租借人：陳○宇 訂單 #IR2608094731
+                    </small>
+                    <b>
+                      人工複核結果
+                    </b>
+                  </div>
+                  <div class="inline">
+                    <button class="btn">
+                      要求補拍
+                    </button>
+                    <button class="btn">
+                      判定非本次
+                    </button>
+                    <button class="btn primary">
+                      確認新增並派工
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </section>
+        </main>
+      </div>
+    </div>
+    <script src="js/layout.js" defer>
+    </script>
+  </body>
+</html>

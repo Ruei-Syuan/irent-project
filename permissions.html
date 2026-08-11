@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+      權限設定｜iRent 智能車況管家
+    </title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/permissions.css">
+  </head>
+  <body class="app-body" data-page="permissions">
+    <div class="app-shell">
+      <aside class="app-sidebar" data-app-sidebar>
+      </aside>
+      <div class="app-workspace">
+        <header class="app-topbar" data-app-topbar>
+        </header>
+        <main class="page">
+          <section class="page-head">
+            <div>
+              <p class="eyebrow">
+                Access Control
+              </p>
+              <h1>
+                權限與帳號設定
+              </h1>
+              <p class="subtitle">
+                管理角色、資料存取範圍、敏感操作驗證與完整稽核軌跡。
+              </p>
+            </div>
+            <div class="actions">
+              <button class="btn">
+                下載稽核紀錄
+              </button>
+              <button class="btn primary">
+                ＋ 邀請成員
+              </button>
+            </div>
+          </section>
+          <section class="settings">
+            <aside class="card">
+              <nav class="settings-menu" aria-label="設定分類">
+                <a class="active" href="#roles">
+                  角色與權限
+                </a>
+                <a href="#members">
+                  成員管理
+                </a>
+                <a href="#scope">
+                  資料範圍
+                </a>
+                <a href="#security">
+                  安全政策
+                </a>
+                <a href="#audit">
+                  操作紀錄
+                </a>
+                <a href="#api">
+                  系統整合
+                </a>
+              </nav>
+            </aside>
+            <div class="stack">
+              <article class="card" id="roles">
+                <div class="card-head">
+                  <div>
+                    <h2>
+                      角色權限矩陣
+                    </h2>
+                    <p>
+                      選擇角色後設定各模組可執行操作
+                    </p>
+                  </div>
+                  <button class="btn small">
+                    ＋ 新增角色
+                  </button>
+                </div>
+                <div class="card-body">
+                  <div class="role-tabs">
+                    <button class="role active">
+                      系統管理員 2
+                    </button>
+                    <button class="role">
+                      營運主管 8
+                    </button>
+                    <button class="role">
+                      案件審核員 16
+                    </button>
+                    <button class="role">
+                      派工人員 24
+                    </button>
+                    <button class="role">
+                      維修廠商 12
+                    </button>
+                  </div>
+                  <div class="table-wrap">
+                    <table class="perm">
+                      <thead>
+                        <tr>
+                          <th>
+                            模組與權限
+                          </th>
+                          <th>
+                            檢視
+                          </th>
+                          <th>
+                            新增
+                          </th>
+                          <th>
+                            編輯
+                          </th>
+                          <th>
+                            核准／結案
+                          </th>
+                          <th>
+                            匯出
+                          </th>
+                          <th>
+                            刪除
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <span class="cell-title">
+                              營運總覽
+                            </span>
+                            <span class="cell-meta">
+                              KPI、異常與即時狀態
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            —
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            —
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            —
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <span class="cell-title">
+                              AI 車損案件
+                            </span>
+                            <span class="cell-meta">
+                              影像、複核與索賠判定
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <span class="cell-title">
+                              車隊與派工
+                            </span>
+                            <span class="cell-meta">
+                              車輛狀態、清潔維修任務
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <span class="cell-title">
+                              報表分析
+                            </span>
+                            <span class="cell-meta">
+                              成本、營運與 AI 模型報表
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            —
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            —
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <span class="cell-title">
+                              帳號與權限
+                            </span>
+                            <span class="cell-meta">
+                              角色、成員與安全設定
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                          <td>
+                            <span class="check">
+                              ✓
+                            </span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="inline" style="justify-content:flex-end;margin-top:14px">
+                    <button class="btn">
+                      取消變更
+                    </button>
+                    <button class="btn primary">
+                      儲存權限
+                    </button>
+                  </div>
+                </div>
+              </article>
+              <section class="grid grid-equal">
+                <article class="card" id="members">
+                  <div class="card-head">
+                    <div>
+                      <h2>
+                        最近加入成員
+                      </h2>
+                      <p>
+                        目前共 62 個有效帳號
+                      </p>
+                    </div>
+                    <button class="btn small">
+                      管理全部
+                    </button>
+                  </div>
+                  <div class="card-body">
+                    <div class="member">
+                      <span class="avatar">
+                        陳
+                      </span>
+                      <div>
+                        <b>
+                          陳怡婷
+                        </b>
+                        <p>
+                          案件審核員・台北營運區
+                        </p>
+                      </div>
+                      <span class="badge green">
+                        啟用
+                      </span>
+                    </div>
+                    <div class="member">
+                      <span class="avatar">
+                        周
+                      </span>
+                      <div>
+                        <b>
+                          周志豪
+                        </b>
+                        <p>
+                          派工人員・板橋營運區
+                        </p>
+                      </div>
+                      <span class="badge green">
+                        啟用
+                      </span>
+                    </div>
+                    <div class="member">
+                      <span class="avatar">
+                        林
+                      </span>
+                      <div>
+                        <b>
+                          林柏宏
+                        </b>
+                        <p>
+                          維修廠商・信義速修中心
+                        </p>
+                      </div>
+                      <span class="badge amber">
+                        待驗證
+                      </span>
+                    </div>
+                  </div>
+                </article>
+                <article class="card" id="audit">
+                  <div class="card-head">
+                    <div>
+                      <h2>
+                        最新操作紀錄
+                      </h2>
+                      <p>
+                        不可修改的稽核軌跡
+                      </p>
+                    </div>
+                    <button class="btn small">
+                      查看全部
+                    </button>
+                  </div>
+                  <div class="card-body">
+                    <div class="audit">
+                      <i>
+                      </i>
+                      <div>
+                        <b>
+                          王立安變更「營運主管」匯出權限
+                        </b>
+                        <p>
+                          來源 IP：10.24.8.16・雙因素驗證通過
+                        </p>
+                      </div>
+                      <time>
+                        13:42
+                      </time>
+                    </div>
+                    <div class="audit">
+                      <i>
+                      </i>
+                      <div>
+                        <b>
+                          陳怡婷核准車損案件 #DMG-018
+                        </b>
+                        <p>
+                          結果：新增損傷並建立維修工單
+                        </p>
+                      </div>
+                      <time>
+                        13:31
+                      </time>
+                    </div>
+                    <div class="audit">
+                      <i>
+                      </i>
+                      <div>
+                        <b>
+                          系統停用逾期廠商帳號
+                        </b>
+                        <p>
+                          帳號 vendor_09・90 日未登入
+                        </p>
+                      </div>
+                      <time>
+                        12:00
+                      </time>
+                    </div>
+                  </div>
+                </article>
+              </section>
+              <article class="card" id="security">
+                <div class="card-head">
+                  <div>
+                    <h2>
+                      敏感操作安全政策
+                    </h2>
+                    <p>
+                      降低誤刪、越權與資料外洩風險
+                    </p>
+                  </div>
+                  <span class="badge green">
+                    已啟用
+                  </span>
+                </div>
+                <div class="card-body grid grid-equal">
+                  <div>
+                    <b>
+                      雙因素驗證
+                    </b>
+                    <p class="cell-meta">
+                      管理員、主管與外部廠商強制驗證。
+                    </p>
+                  </div>
+                  <div>
+                    <b>
+                      高風險操作二次確認
+                    </b>
+                    <p class="cell-meta">
+                      刪除、索賠核准與批次匯出重新驗證。
+                    </p>
+                  </div>
+                  <div>
+                    <b>
+                      資料存取範圍
+                    </b>
+                    <p class="cell-meta">
+                      依營運區、廠商與車隊群組限制。
+                    </p>
+                  </div>
+                  <div>
+                    <b>
+                      閒置工作階段
+                    </b>
+                    <p class="cell-meta">
+                      15 分鐘無操作後自動登出。
+                    </p>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+    <script src="js/layout.js" defer>
+    </script>
+  </body>
+</html>

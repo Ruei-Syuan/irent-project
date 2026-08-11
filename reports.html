@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+      報表分析｜iRent 智能車況管家
+    </title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/reports.css">
+  </head>
+  <body class="app-body" data-page="reports">
+    <div class="app-shell">
+      <aside class="app-sidebar" data-app-sidebar>
+      </aside>
+      <div class="app-workspace">
+        <header class="app-topbar" data-app-topbar>
+        </header>
+        <main class="page">
+          <section class="page-head">
+            <div>
+              <p class="eyebrow">
+                Fleet Analytics
+              </p>
+              <h1>
+                車隊營運與 AI 成效分析
+              </h1>
+              <p class="subtitle">
+                追蹤車隊稼動、不可租時間、AI 模型表現與維修清潔成本。
+              </p>
+            </div>
+            <div class="actions">
+              <select class="select" aria-label="報表期間">
+                <option>
+                  2026/08/03–08/09
+                </option>
+                <option>
+                  最近 30 日
+                </option>
+              </select>
+              <button class="btn primary">
+                匯出管理報表
+              </button>
+            </div>
+          </section>
+          <section class="metrics">
+            <article class="metric">
+              <div class="metric-label">
+                車隊稼動率
+                <span class="metric-icon">
+                  ↗
+                </span>
+              </div>
+              <b>
+                78.4%
+              </b>
+              <small>
+                <span class="good">
+                  ▲ 3.2%
+                </span>
+                年增
+              </small>
+            </article>
+            <article class="metric">
+              <div class="metric-label">
+                平均不可租
+                <span class="metric-icon">
+                  ◷
+                </span>
+              </div>
+              <b>
+                1.8h
+              </b>
+              <small>
+                <span class="good">
+                  ▼ 22%
+                </span>
+                導入 AI 後
+              </small>
+            </article>
+            <article class="metric">
+              <div class="metric-label">
+                AI 自動分流率
+                <span class="metric-icon">
+                  ◎
+                </span>
+              </div>
+              <b>
+                72.6%
+              </b>
+              <small>
+                3,248 件自動結案
+              </small>
+            </article>
+            <article class="metric">
+              <div class="metric-label">
+                每車維護成本
+                <span class="metric-icon">
+                  $
+                </span>
+              </div>
+              <b>
+                1,126
+              </b>
+              <small>
+                <span class="good">
+                  ▼ 8.4%
+                </span>
+                月減
+              </small>
+            </article>
+            <article class="metric">
+              <div class="metric-label">
+                照片合格率
+                <span class="metric-icon">
+                  ✓
+                </span>
+              </div>
+              <b>
+                96.1%
+              </b>
+              <small>
+                AI 引導拍攝流程
+              </small>
+            </article>
+          </section>
+          <section class="grid report-grid">
+            <article class="card">
+              <div class="card-head">
+                <div>
+                  <h2>
+                    不可租車時與完成任務
+                  </h2>
+                  <p>
+                    最近 7 日・小時／件數
+                  </p>
+                </div>
+                <div class="legend">
+                  <span>
+                    <i style="background:#09ae7b">
+                    </i>
+                    完成任務
+                  </span>
+                  <span>
+                    <i style="background:#2c78de">
+                    </i>
+                    不可租車時
+                  </span>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="chart-grid">
+                  <div class="bar-group">
+                    <span class="bar" style="height:58%">
+                    </span>
+                    <span class="bar alt" style="height:76%">
+                    </span>
+                    <small>
+                      8/03
+                    </small>
+                  </div>
+                  <div class="bar-group">
+                    <span class="bar" style="height:68%">
+                    </span>
+                    <span class="bar alt" style="height:70%">
+                    </span>
+                    <small>
+                      8/04
+                    </small>
+                  </div>
+                  <div class="bar-group">
+                    <span class="bar" style="height:64%">
+                    </span>
+                    <span class="bar alt" style="height:63%">
+                    </span>
+                    <small>
+                      8/05
+                    </small>
+                  </div>
+                  <div class="bar-group">
+                    <span class="bar" style="height:77%">
+                    </span>
+                    <span class="bar alt" style="height:57%">
+                    </span>
+                    <small>
+                      8/06
+                    </small>
+                  </div>
+                  <div class="bar-group">
+                    <span class="bar" style="height:72%">
+                    </span>
+                    <span class="bar alt" style="height:51%">
+                    </span>
+                    <small>
+                      8/07
+                    </small>
+                  </div>
+                  <div class="bar-group">
+                    <span class="bar" style="height:86%">
+                    </span>
+                    <span class="bar alt" style="height:46%">
+                    </span>
+                    <small>
+                      8/08
+                    </small>
+                  </div>
+                  <div class="bar-group">
+                    <span class="bar" style="height:92%">
+                    </span>
+                    <span class="bar alt" style="height:39%">
+                    </span>
+                    <small>
+                      今日
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <div>
+                  <h2>
+                    AI 營運洞察
+                  </h2>
+                  <p>
+                    依本週資料自動產生
+                  </p>
+                </div>
+                <span class="badge violet">
+                  AI
+                </span>
+              </div>
+              <div class="card-body">
+                <div class="insight">
+                  <span class="insight-icon">
+                    ↗
+                  </span>
+                  <div>
+                    <b>
+                      信義區週末需求提升
+                    </b>
+                    <p>
+                      建議週五晚間增加 18 輛健康分數 90 以上車輛。
+                    </p>
+                  </div>
+                </div>
+                <div class="insight">
+                  <span class="insight-icon">
+                    ◷
+                  </span>
+                  <div>
+                    <b>
+                      板橋維修等待偏高
+                    </b>
+                    <p>
+                      平均多 42 分鐘，建議增加機動維修組支援。
+                    </p>
+                  </div>
+                </div>
+                <div class="insight">
+                  <span class="insight-icon">
+                    ◎
+                  </span>
+                  <div>
+                    <b>
+                      夜間影像誤判改善
+                    </b>
+                    <p>
+                      模型 v3.4 上線後，低光誤報率下降 16.8%。
+                    </p>
+                  </div>
+                </div>
+                <div class="insight">
+                  <span class="insight-icon">
+                    $
+                  </span>
+                  <div>
+                    <b>
+                      清潔耗材可再優化
+                    </b>
+                    <p>
+                      深度清潔每件成本較目標高 NT$ 38。
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <div>
+                  <h2>
+                    AI 案件處理漏斗
+                  </h2>
+                  <p>
+                    本週分析 12,486 組取還車影像
+                  </p>
+                </div>
+              </div>
+              <div class="card-body funnel">
+                <div class="funnel-row">
+                  <span>
+                    完成分析
+                  </span>
+                  <div class="funnel-bar">
+                    <span style="width:100%">
+                      12,486
+                    </span>
+                  </div>
+                  <b>
+                    100%
+                  </b>
+                </div>
+                <div class="funnel-row">
+                  <span>
+                    偵測異常
+                  </span>
+                  <div class="funnel-bar">
+                    <span style="width:54%">
+                      1,842
+                    </span>
+                  </div>
+                  <b>
+                    14.8%
+                  </b>
+                </div>
+                <div class="funnel-row">
+                  <span>
+                    人工複核
+                  </span>
+                  <div class="funnel-bar">
+                    <span style="width:37%">
+                      504
+                    </span>
+                  </div>
+                  <b>
+                    4.0%
+                  </b>
+                </div>
+                <div class="funnel-row">
+                  <span>
+                    新增損傷
+                  </span>
+                  <div class="funnel-bar">
+                    <span style="width:25%">
+                      186
+                    </span>
+                  </div>
+                  <b>
+                    1.5%
+                  </b>
+                </div>
+                <div class="funnel-row">
+                  <span>
+                    維修工單
+                  </span>
+                  <div class="funnel-bar">
+                    <span style="width:17%">
+                      128
+                    </span>
+                  </div>
+                  <b>
+                    1.0%
+                  </b>
+                </div>
+              </div>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <div>
+                  <h2>
+                    模型辨識表現
+                  </h2>
+                  <p>
+                    近 30 日人工複核結果
+                  </p>
+                </div>
+                <span class="badge green">
+                  v3.4
+                </span>
+              </div>
+              <div class="card-body models">
+                <div class="model">
+                  <span>
+                    刮傷辨識
+                  </span>
+                  <div class="progress">
+                    <span style="width:96%">
+                    </span>
+                  </div>
+                  <b>
+                    96.2%
+                  </b>
+                </div>
+                <div class="model">
+                  <span>
+                    凹痕辨識
+                  </span>
+                  <div class="progress">
+                    <span style="width:93%">
+                    </span>
+                  </div>
+                  <b>
+                    93.4%
+                  </b>
+                </div>
+                <div class="model">
+                  <span>
+                    裂痕辨識
+                  </span>
+                  <div class="progress">
+                    <span style="width:95%">
+                    </span>
+                  </div>
+                  <b>
+                    95.1%
+                  </b>
+                </div>
+                <div class="model">
+                  <span>
+                    車內髒污
+                  </span>
+                  <div class="progress warn">
+                    <span style="width:89%">
+                    </span>
+                  </div>
+                  <b>
+                    89.7%
+                  </b>
+                </div>
+                <div class="model">
+                  <span>
+                    影像合格判定
+                  </span>
+                  <div class="progress">
+                    <span style="width:98%">
+                    </span>
+                  </div>
+                  <b>
+                    98.0%
+                  </b>
+                </div>
+              </div>
+            </article>
+          </section>
+        </main>
+      </div>
+    </div>
+    <script src="js/layout.js" defer>
+    </script>
+  </body>
+</html>

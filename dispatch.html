@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+      智慧派工｜iRent 智能車況管家
+    </title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/dispatch.css">
+  </head>
+  <body class="app-body" data-page="dispatch">
+    <div class="app-shell">
+      <aside class="app-sidebar" data-app-sidebar>
+      </aside>
+      <div class="app-workspace">
+        <header class="app-topbar" data-app-topbar>
+        </header>
+        <main class="page">
+          <section class="page-head">
+            <div>
+              <p class="eyebrow">
+                Smart Dispatch
+              </p>
+              <h1>
+                清潔／維修智慧派工
+              </h1>
+              <p class="subtitle">
+                依風險、地點、人力與預估工時自動排序任務，縮短車輛不可租時間。
+              </p>
+            </div>
+            <div class="actions">
+              <button class="btn">
+                自動排程設定
+              </button>
+              <button class="btn primary">
+                ＋ 建立派工
+              </button>
+            </div>
+          </section>
+          <section class="metrics">
+            <article class="metric">
+              <div class="metric-label">
+                待指派
+                <span class="metric-icon">
+                  ＋
+                </span>
+              </div>
+              <b>
+                31
+              </b>
+              <small>
+                <span class="bad">
+                  8 件高優先
+                </span>
+              </small>
+            </article>
+            <article class="metric">
+              <div class="metric-label">
+                執行中
+                <span class="metric-icon">
+                  ↗
+                </span>
+              </div>
+              <b>
+                46
+              </b>
+              <small>
+                清潔 32・維修 14
+              </small>
+            </article>
+            <article class="metric">
+              <div class="metric-label">
+                今日完成
+                <span class="metric-icon">
+                  ✓
+                </span>
+              </div>
+              <b>
+                128
+              </b>
+              <small>
+                <span class="good">
+                  ▲ 12%
+                </span>
+                較昨日
+              </small>
+            </article>
+            <article class="metric">
+              <div class="metric-label">
+                平均回復可租
+                <span class="metric-icon">
+                  ◷
+                </span>
+              </div>
+              <b>
+                42m
+              </b>
+              <small>
+                <span class="good">
+                  ▼ 9 分鐘
+                </span>
+              </small>
+            </article>
+            <article class="metric">
+              <div class="metric-label">
+                SLA 達成率
+                <span class="metric-icon">
+                  ◎
+                </span>
+              </div>
+              <b>
+                96.2%
+              </b>
+              <small>
+                近 7 日平均
+              </small>
+            </article>
+          </section>
+          <article class="card">
+            <div class="card-head">
+              <div>
+                <h2>
+                  今日派工看板
+                </h2>
+                <p>
+                  2026/08/09・台北都會區
+                </p>
+              </div>
+              <div class="filters">
+                <input class="search" aria-label="搜尋任務" placeholder="搜尋車牌、工單、站點">
+                <select class="select" aria-label="任務類型">
+                  <option>
+                    全部任務
+                  </option>
+                  <option>
+                    清潔
+                  </option>
+                  <option>
+                    維修
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="card-body kanban">
+              <section class="column">
+                <div class="column-title">
+                  <h2>
+                    待指派
+                  </h2>
+                  <span class="badge gray">
+                    31
+                  </span>
+                </div>
+                <article class="task risk">
+                  <span class="badge red">
+                    P1 緊急
+                  </span>
+                  <h3>
+                    RAC-4582 保桿刮傷
+                  </h3>
+                  <p>
+                    信義 A07・鈑噴快速修復・預估 90 分鐘
+                  </p>
+                  <div class="task-foot">
+                    <span>
+                      AI 建議：信義維修組
+                    </span>
+                    <button class="btn small">
+                      指派
+                    </button>
+                  </div>
+                </article>
+                <article class="task">
+                  <span class="badge green">
+                    深度清潔
+                  </span>
+                  <h3>
+                    RBC-2108 座椅髒污
+                  </h3>
+                  <p>
+                    台北車站 B03・需抽洗・預估 35 分鐘
+                  </p>
+                  <div class="task-foot">
+                    <span>
+                      等待 21 分鐘
+                    </span>
+                    <button class="btn small">
+                      指派
+                    </button>
+                  </div>
+                </article>
+                <article class="task warn">
+                  <span class="badge amber">
+                    P2 優先
+                  </span>
+                  <h3>
+                    RAD-7731 右前胎壓
+                  </h3>
+                  <p>
+                    板橋 C12・胎壓檢查・預估 20 分鐘
+                  </p>
+                  <div class="task-foot">
+                    <span>
+                      等待 35 分鐘
+                    </span>
+                    <button class="btn small">
+                      指派
+                    </button>
+                  </div>
+                </article>
+              </section>
+              <section class="column">
+                <div class="column-title">
+                  <h2>
+                    已指派
+                  </h2>
+                  <span class="badge blue">
+                    18
+                  </span>
+                </div>
+                <article class="task">
+                  <span class="badge green">
+                    一般清潔
+                  </span>
+                  <h3>
+                    RBE-1024 車內整理
+                  </h3>
+                  <p>
+                    南港 D05・預計 14:20 開始
+                  </p>
+                  <div class="task-foot">
+                    <span>
+                      林怡君
+                    </span>
+                    <span>
+                      15 分鐘後
+                    </span>
+                  </div>
+                </article>
+                <article class="task warn">
+                  <span class="badge amber">
+                    P2 優先
+                  </span>
+                  <h3>
+                    RCA-8830 雨刷異音
+                  </h3>
+                  <p>
+                    內湖 E11・預計 14:35 開始
+                  </p>
+                  <div class="task-foot">
+                    <span>
+                      周志豪
+                    </span>
+                    <span>
+                      30 分鐘後
+                    </span>
+                  </div>
+                </article>
+              </section>
+              <section class="column">
+                <div class="column-title">
+                  <h2>
+                    執行中
+                  </h2>
+                  <span class="badge amber">
+                    46
+                  </span>
+                </div>
+                <article class="task risk">
+                  <span class="badge red">
+                    P1 緊急
+                  </span>
+                  <h3>
+                    RDA-6612 左前燈裂痕
+                  </h3>
+                  <p>
+                    士林 F02・已執行 38 分鐘
+                  </p>
+                  <div class="task-foot">
+                    <span>
+                      黃柏翰
+                    </span>
+                    <b>
+                      68%
+                    </b>
+                  </div>
+                  <div class="progress warn">
+                    <span style="width:68%">
+                    </span>
+                  </div>
+                </article>
+                <article class="task">
+                  <span class="badge green">
+                    深度清潔
+                  </span>
+                  <h3>
+                    RBB-3277 後座異味
+                  </h3>
+                  <p>
+                    中山 G08・已執行 24 分鐘
+                  </p>
+                  <div class="task-foot">
+                    <span>
+                      陳美玲
+                    </span>
+                    <b>
+                      82%
+                    </b>
+                  </div>
+                  <div class="progress">
+                    <span style="width:82%">
+                    </span>
+                  </div>
+                </article>
+              </section>
+              <section class="column">
+                <div class="column-title">
+                  <h2>
+                    待驗收
+                  </h2>
+                  <span class="badge violet">
+                    12
+                  </span>
+                </div>
+                <article class="task">
+                  <span class="badge violet">
+                    AI 驗收
+                  </span>
+                  <h3>
+                    RCD-4098 車門刮傷修復
+                  </h3>
+                  <p>
+                    完工照片 6 張・AI 品質分數 94
+                  </p>
+                  <div class="task-foot">
+                    <span>
+                      完工 8 分鐘
+                    </span>
+                    <button class="btn primary small">
+                      驗收
+                    </button>
+                  </div>
+                </article>
+                <article class="task">
+                  <span class="badge violet">
+                    人工驗收
+                  </span>
+                  <h3>
+                    RAE-7215 全車深度清潔
+                  </h3>
+                  <p>
+                    完工照片 8 張・清潔品質分數 91
+                  </p>
+                  <div class="task-foot">
+                    <span>
+                      完工 16 分鐘
+                    </span>
+                    <button class="btn primary small">
+                      驗收
+                    </button>
+                  </div>
+                </article>
+              </section>
+            </div>
+          </article>
+          <article class="card" style="margin-top:17px">
+            <div class="card-head">
+              <div>
+                <h2>
+                  團隊負載
+                </h2>
+                <p>
+                  依目前任務量與可用人力計算
+                </p>
+              </div>
+              <span class="badge green">
+                24 組在線
+              </span>
+            </div>
+            <div class="card-body team-grid">
+              <div class="team">
+                <b>
+                  信義維修組
+                </b>
+                <p>
+                  4 人在線・6 件任務
+                </p>
+                <span class="cell-meta">
+                  負載 75%
+                </span>
+                <div class="progress warn">
+                  <span style="width:75%">
+                  </span>
+                </div>
+              </div>
+              <div class="team">
+                <b>
+                  台北清潔 A 組
+                </b>
+                <p>
+                  6 人在線・8 件任務
+                </p>
+                <span class="cell-meta">
+                  負載 62%
+                </span>
+                <div class="progress">
+                  <span style="width:62%">
+                  </span>
+                </div>
+              </div>
+              <div class="team">
+                <b>
+                  板橋機動組
+                </b>
+                <p>
+                  3 人在線・7 件任務
+                </p>
+                <span class="cell-meta">
+                  負載 88%
+                </span>
+                <div class="progress risk">
+                  <span style="width:88%">
+                  </span>
+                </div>
+              </div>
+              <div class="team">
+                <b>
+                  南港清潔組
+                </b>
+                <p>
+                  5 人在線・4 件任務
+                </p>
+                <span class="cell-meta">
+                  負載 46%
+                </span>
+                <div class="progress">
+                  <span style="width:46%">
+                  </span>
+                </div>
+              </div>
+            </div>
+          </article>
+        </main>
+      </div>
+    </div>
+    <script src="js/layout.js" defer>
+    </script>
+  </body>
+</html>

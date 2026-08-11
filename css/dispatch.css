@@ -1,0 +1,29 @@
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 11px
+}
+
+.team {
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    padding: 12px
+}
+
+.team p {
+    font-size: 9px;
+    color: var(--muted);
+    margin: 3px 0 10px
+}
+
+@media(max-width:1050px) {
+    .team-grid {
+        grid-template-columns: 1fr 1fr
+    }
+}
+
+@media(max-width:560px) {
+    .team-grid {
+        grid-template-columns: 1fr
+    }
+}

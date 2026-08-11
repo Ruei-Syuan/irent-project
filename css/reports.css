@@ -1,0 +1,80 @@
+.report-grid {
+    grid-template-columns: minmax(0, 1.42fr) minmax(300px, .7fr)
+}
+
+.insight {
+    display: grid;
+    grid-template-columns: 31px 1fr;
+    gap: 9px;
+    border-bottom: 1px solid #edf1f5;
+    padding: 11px 0
+}
+
+.insight:last-child {
+    border: 0
+}
+
+.insight-icon {
+    height: 31px;
+    border-radius: 8px;
+    background: var(--green-soft);
+    color: var(--green);
+    display: grid;
+    place-items: center
+}
+
+.insight p {
+    font-size: 9px;
+    color: var(--muted);
+    margin: 2px 0
+}
+
+.funnel {
+    display: grid;
+    gap: 8px
+}
+
+.funnel-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 42px;
+    gap: 8px;
+    align-items: center;
+    font-size: 9px
+}
+
+.funnel-bar {
+    height: 21px;
+    background: #e9f2ff;
+    border-radius: 5px;
+    overflow: hidden
+}
+
+.funnel-bar span {
+    height: 100%;
+    background: var(--blue);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 5px;
+    color: #fff;
+    font-size: 8px
+}
+
+.models {
+    display: grid;
+    gap: 12px
+}
+
+.model {
+    display: grid;
+    grid-template-columns: 100px 1fr 40px;
+    gap: 8px;
+    align-items: center;
+    font-size: 9px
+}
+
+@media(max-width:1080px) {
+    .report-grid {
+        grid-template-columns: 1fr
+    }
+}

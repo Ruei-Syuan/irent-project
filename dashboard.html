@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>營運總覽｜iRent 智能車況管家</title>
+  <link rel="stylesheet" href="css/common.css"><link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body class="app-body" data-page="dashboard">
+  <div class="app-shell">
+    <aside class="app-sidebar" data-app-sidebar></aside>
+
+    <div class="app-workspace">
+      <header class="app-topbar" data-app-topbar></header>
+
+      <main class="dashboard-main">
+        <section class="dashboard-metrics" aria-label="即時車隊指標">
+          <article class="dashboard-metric is-green">
+            <span class="metric-visual"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 11h14l-1.3-4A2 2 0 0 0 15.8 5H8.2a2 2 0 0 0-1.9 1.4L5 11Zm-1 3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4h-2v2h-2v-2H8v2H6v-2H4v-4Zm3 1.5A1.5 1.5 0 1 0 7 12.5a1.5 1.5 0 0 0 0 3Zm10 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/></svg></span>
+            <span class="metric-content"><span>可租車輛</span><strong>684</strong><small>占比 53.3%</small></span>
+          </article>
+          <article class="dashboard-metric is-blue">
+            <span class="metric-visual"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 0-3 9v2H7a3 3 0 0 0-3 3v4h16v-4a3 3 0 0 0-3-3h-2v-2a5 5 0 0 0-3-9Zm0 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4Zm-4 11h8a1 1 0 0 1 1 1H7a1 1 0 0 1 1-1Z"/></svg></span>
+            <span class="metric-content"><span>租用中</span><strong>437</strong><small>占比 34.0%</small></span>
+          </article>
+          <article class="dashboard-metric is-amber">
+            <span class="metric-visual"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 2h6v3l2 2v13H7V7l2-2V2Zm2 3h2V4h-2v1Zm-1 5 2 2 2-2 1.5 1.5-2 2 2 2L14 17l-2-2-2 2-1.5-1.5 2-2-2-2L10 10Z"/></svg></span>
+            <span class="metric-content"><span>待清潔</span><strong>86</strong><small>占比 6.7%</small></span>
+          </article>
+          <article class="dashboard-metric is-violet">
+            <span class="metric-visual"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M14.7 4.3a5 5 0 0 0-6.4 6.4L3 16v5h5l5.3-5.3a5 5 0 0 0 6.4-6.4l-3 3-2-2 3-3a5 5 0 0 0-3-3Z"/></svg></span>
+            <span class="metric-content"><span>待維修</span><strong>49</strong><small>占比 3.8%</small></span>
+          </article>
+          <article class="dashboard-metric is-red">
+            <span class="metric-visual"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2 1.5 21h21L12 2Zm-1 6h2v7h-2V8Zm0 9h2v2h-2v-2Z"/></svg></span>
+            <span class="metric-content"><span>異常案件</span><strong>28</strong><small>占比 2.2%</small></span>
+          </article>
+        </section>
+
+        <section class="dashboard-content-grid" aria-label="車隊營運資訊">
+          <article class="fleet-trend-card dashboard-card">
+            <header class="dashboard-card-head">
+              <div><h2>車隊狀態趨勢</h2><p>最近七日即時狀態變化</p></div>
+              <span class="period-pill">近 7 天 <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m7 9 5 5 5-5H7Z"/></svg></span>
+            </header>
+            <div class="trend-legend" aria-label="圖表圖例">
+              <span><i class="legend-green"></i>可租車輛</span>
+              <span><i class="legend-blue"></i>租用中</span>
+            </div>
+            <div class="trend-chart" role="img" aria-label="最近七日可租車輛與租用中車輛趨勢">
+              <div class="chart-axis"><span>750</span><span>500</span><span>250</span><span>0</span></div>
+              <div class="chart-plot">
+                <div class="trend-bars">
+                  <div class="trend-day"><span class="trend-value">628</span><i style="height:72%"></i><small>08/03</small></div>
+                  <div class="trend-day"><span class="trend-value">646</span><i style="height:75%"></i><small>08/04</small></div>
+                  <div class="trend-day"><span class="trend-value">651</span><i style="height:77%"></i><small>08/05</small></div>
+                  <div class="trend-day"><span class="trend-value">660</span><i style="height:79%"></i><small>08/06</small></div>
+                  <div class="trend-day"><span class="trend-value">671</span><i style="height:81%"></i><small>08/07</small></div>
+                  <div class="trend-day"><span class="trend-value">676</span><i style="height:83%"></i><small>08/08</small></div>
+                  <div class="trend-day"><span class="trend-value">684</span><i style="height:86%"></i><small>今日</small></div>
+                </div>
+                <svg class="trend-line" aria-hidden="true" viewBox="0 0 700 220" preserveAspectRatio="none">
+                  <polyline points="48,151 148,145 248,139 348,132 448,128 548,135 652,129"/>
+                  <g><circle cx="48" cy="151"/><circle cx="148" cy="145"/><circle cx="248" cy="139"/><circle cx="348" cy="132"/><circle cx="448" cy="128"/><circle cx="548" cy="135"/><circle cx="652" cy="129"/></g>
+                </svg>
+              </div>
+            </div>
+          </article>
+
+          <div class="dashboard-summary-column">
+            <article class="fleet-distribution-card dashboard-card">
+              <header class="dashboard-card-head"><div><h2>車況分布</h2><p>全部營運車輛</p></div><span class="live-label">即時</span></header>
+              <div class="distribution-body">
+                <div class="distribution-donut"><span><small>總車輛數</small><strong>1,284</strong></span></div>
+                <div class="distribution-list">
+                  <span><i class="legend-green"></i><em>可租</em><strong>684</strong></span>
+                  <span><i class="legend-blue"></i><em>租用中</em><strong>437</strong></span>
+                  <span><i class="legend-amber"></i><em>待清潔</em><strong>86</strong></span>
+                  <span><i class="legend-violet"></i><em>待維修</em><strong>49</strong></span>
+                  <span><i class="legend-red"></i><em>異常</em><strong>28</strong></span>
+                </div>
+              </div>
+            </article>
+
+            <article class="fleet-health-card dashboard-card">
+              <header class="dashboard-card-head"><div><h2>平均車況健康度</h2><p>較上週提升 3.2 分</p></div><span class="info-dot" aria-label="健康度依車況與維修紀錄計算">i</span></header>
+              <div class="health-body">
+                <div class="health-ring"><span><strong>91</strong><small>/100</small></span></div>
+                <div class="health-copy"><small>健康度等級</small><strong>優良</strong><span>▲ 3.2</span></div>
+              </div>
+            </article>
+          </div>
+
+          <article class="region-overview-card dashboard-card">
+            <header class="dashboard-card-head"><div><h2>區域車輛概況</h2><p>主要營運區域即時分布</p></div><span class="info-dot" aria-label="靜態區域分布示意">i</span></header>
+            <div class="region-map-canvas">
+              <svg class="taiwan-shape" aria-hidden="true" viewBox="0 0 180 360"><path d="M120 12c18 11 27 31 25 54-2 29-14 50-15 74-2 31 14 45 8 77-8 39-36 93-65 127-10 11-26 4-25-12 2-29 17-54 19-83 3-30-7-51-4-78 4-35 23-72 31-111 6-28 7-61 26-48Z"/></svg>
+              <span class="region-marker marker-taipei"><i>684</i><b>台北</b></span>
+              <span class="region-marker marker-taichung"><i>238</i><b>台中</b></span>
+              <span class="region-marker marker-tainan"><i>156</i><b>台南</b></span>
+              <span class="region-marker marker-kaohsiung"><i>206</i><b>高雄</b></span>
+            </div>
+            <div class="region-key"><span><i class="legend-green"></i>正常</span><span><i class="legend-amber"></i>注意</span><span><i class="legend-red"></i>異常</span></div>
+          </article>
+        </section>
+
+        <section class="dashboard-lower-grid" aria-label="待處理工作">
+          <article class="ai-alerts-card dashboard-card">
+            <header class="dashboard-card-head">
+              <div class="alert-title"><h2>最新 AI 異常警示</h2><span>9</span></div>
+              <a class="card-link" href="damage-review.html">查看全部 <span aria-hidden="true">→</span></a>
+            </header>
+            <div class="alerts-table-wrap">
+              <table class="alerts-table">
+                <thead><tr><th>車牌</th><th>車型</th><th>異常類型</th><th>AI 信心度</th><th>狀態</th><th>更新時間</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="vehicle-id"><i class="vehicle-thumb is-silver"></i>RAC-4582</span></td><td>Toyota Corolla Cross</td><td>右後保桿新刮傷</td><td><span class="confidence">96%<i><b style="width:96%"></b></i></span></td><td><span class="status-pill is-urgent">待處理</span></td><td>今日 09:58</td></tr>
+                  <tr><td><span class="vehicle-id"><i class="vehicle-thumb is-gray"></i>RBC-2108</span></td><td>Honda Fit</td><td>車內液體髒污</td><td><span class="confidence">92%<i><b style="width:92%"></b></i></span></td><td><span class="status-pill is-review">待確認</span></td><td>今日 09:47</td></tr>
+                  <tr><td><span class="vehicle-id"><i class="vehicle-thumb is-white"></i>RAD-7731</span></td><td>Toyota Yaris</td><td>右前輪胎壓異常</td><td><span class="confidence">89%<i><b style="width:89%"></b></i></span></td><td><span class="status-pill is-urgent">待處理</span></td><td>今日 09:32</td></tr>
+                  <tr><td><span class="vehicle-id"><i class="vehicle-thumb is-red"></i>RAF-8910</span></td><td>Nissan Kicks</td><td>左後視鏡損傷</td><td><span class="confidence">90%<i><b style="width:90%"></b></i></span></td><td><span class="status-pill is-review">待確認</span></td><td>今日 09:15</td></tr>
+                  <tr><td><span class="vehicle-id"><i class="vehicle-thumb is-dark"></i>RBG-1357</span></td><td>LUXGEN U5</td><td>後保桿擦傷</td><td><span class="confidence">85%<i><b style="width:85%"></b></i></span></td><td><span class="status-pill is-review">待確認</span></td><td>今日 08:59</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="priority-card dashboard-card">
+            <header class="dashboard-card-head"><div><h2>優先處理事項</h2><p>依等待時間與風險排序</p></div></header>
+            <div class="priority-list">
+              <a href="damage-review.html"><span class="priority-icon is-red"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2 1.5 21h21L12 2Zm-1 6h2v7h-2V8Zm0 9h2v2h-2v-2Z"/></svg></span><span><strong>高優先級 AI 異常案件</strong><small>需立即處理</small></span><b class="priority-count is-red">3</b><i>›</i></a>
+              <a href="work-orders.html"><span class="priority-icon is-violet"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M14.7 4.3a5 5 0 0 0-6.4 6.4L3 16v5h5l5.3-5.3a5 5 0 0 0 6.4-6.4l-3 3-2-2 3-3a5 5 0 0 0-3-3Z"/></svg></span><span><strong>待維修工單</strong><small>進廠未處理</small></span><b class="priority-count is-violet">7</b><i>›</i></a>
+              <a href="dispatch.html"><span class="priority-icon is-amber"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 2h6v3l2 2v13H7V7l2-2V2Zm2 3h2V4h-2v1Z"/></svg></span><span><strong>待清潔車輛</strong><small>超過 24 小時未清潔</small></span><b class="priority-count is-amber">21</b><i>›</i></a>
+              <a href="fleet.html"><span class="priority-icon is-blue"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 3h14v18H5V3Zm3 4h8V5H8v2Zm0 4h8V9H8v2Zm0 4h5v-2H8v2Z"/></svg></span><span><strong>即將到期保養</strong><small>7 天內到期</small></span><b class="priority-count is-blue">15</b><i>›</i></a>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+<script src="js/layout.js" defer></script></body>
+</html>

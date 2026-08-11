@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+      維修工單｜iRent 智能車況管家
+    </title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/work-orders.css">
+  </head>
+  <body class="app-body" data-page="work-orders">
+    <div class="app-shell">
+      <aside class="app-sidebar" data-app-sidebar>
+      </aside>
+      <div class="app-workspace">
+        <header class="app-topbar" data-app-topbar>
+        </header>
+        <main class="page">
+          <section class="page-head">
+            <div>
+              <p class="eyebrow">
+                Maintenance Orders
+              </p>
+              <h1>
+                維修工單管理
+              </h1>
+              <p class="subtitle">
+                從 AI 損傷判定、報價核准、進廠維修到完工驗收的完整追蹤。
+              </p>
+            </div>
+            <div class="actions">
+              <button class="btn">
+                匯出工單
+              </button>
+              <button class="btn primary">
+                ＋ 建立工單
+              </button>
+            </div>
+          </section>
+          <section class="metrics">
+            <article class="metric">
+              <div class="metric-label">
+                待報價
+                <span class="metric-icon">
+                  $
+                </span>
+              </div>
+              <b>
+                17
+              </b>
+              <small>
+                平均等待 3.8 小時
+              </small>
+            </article>
+            <article class="metric">
+              <div class="metric-label">
+                待核准
+                <span class="metric-icon">
+                  ✓
+                </span>
+              </div>
+              <b>
+                9
+              </b>
+              <small>
+                <span class="bad">
+                  3 件即將逾時
+                </span>
+              </small>
+            </article>
+            <article class="metric">
+              <div class="metric-label">
+                維修中
+                <span class="metric-icon">
+                  ⚒
+                </span>
+              </div>
+              <b>
+                34
+              </b>
+              <small>
+                今日預計完工 12 件
+              </small>
+            </article>
+            <article class="metric">
+              <div class="metric-label">
+                待驗收
+                <span class="metric-icon">
+                  ◎
+                </span>
+              </div>
+              <b>
+                12
+              </b>
+              <small>
+                AI 可自動驗收 8 件
+              </small>
+            </article>
+            <article class="metric">
+              <div class="metric-label">
+                本月維修費
+                <span class="metric-icon">
+                  ▥
+                </span>
+              </div>
+              <b>
+                1.24M
+              </b>
+              <small>
+                <span class="good">
+                  ▼ 6.2%
+                </span>
+                較上月
+              </small>
+            </article>
+          </section>
+          <section class="order-layout">
+            <article class="card">
+              <div class="card-head">
+                <div>
+                  <h2>
+                    工單清單
+                  </h2>
+                  <p>
+                    共 72 件進行中工單
+                  </p>
+                </div>
+                <div class="filters">
+                  <input class="search" aria-label="搜尋工單" placeholder="搜尋工單、車牌、廠商">
+                  <select class="select" aria-label="工單狀態">
+                    <option>
+                      全部狀態
+                    </option>
+                    <option>
+                      維修中
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>
+                        工單／車輛
+                      </th>
+                      <th>
+                        維修項目
+                      </th>
+                      <th>
+                        優先級
+                      </th>
+                      <th>
+                        合作廠商
+                      </th>
+                      <th>
+                        預估費用
+                      </th>
+                      <th>
+                        狀態
+                      </th>
+                      <th>
+                        預計完工
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="background:#f4fffb">
+                      <td>
+                        <span class="cell-title">
+                          #WO-260809-042
+                        </span>
+                        <span class="cell-meta">
+                          RAC-4582・Yaris
+                        </span>
+                      </td>
+                      <td>
+                        右後保桿鈑噴
+                      </td>
+                      <td>
+                        <span class="badge red">
+                          P1
+                        </span>
+                      </td>
+                      <td>
+                        信義速修中心
+                      </td>
+                      <td>
+                        NT$ 4,200
+                      </td>
+                      <td>
+                        <span class="badge blue">
+                          維修中
+                        </span>
+                      </td>
+                      <td>
+                        今日 17:30
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span class="cell-title">
+                          #WO-260809-039
+                        </span>
+                        <span class="cell-meta">
+                          RAD-7731・Fit
+                        </span>
+                      </td>
+                      <td>
+                        右前輪檢測
+                      </td>
+                      <td>
+                        <span class="badge amber">
+                          P2
+                        </span>
+                      </td>
+                      <td>
+                        板橋輪胎站
+                      </td>
+                      <td>
+                        NT$ 1,800
+                      </td>
+                      <td>
+                        <span class="badge amber">
+                          待核准
+                        </span>
+                      </td>
+                      <td>
+                        待確認
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span class="cell-title">
+                          #WO-260809-036
+                        </span>
+                        <span class="cell-meta">
+                          RCD-7721・Vios
+                        </span>
+                      </td>
+                      <td>
+                        右後燈更換
+                      </td>
+                      <td>
+                        <span class="badge red">
+                          P1
+                        </span>
+                      </td>
+                      <td>
+                        中山保修廠
+                      </td>
+                      <td>
+                        NT$ 6,500
+                      </td>
+                      <td>
+                        <span class="badge violet">
+                          待料
+                        </span>
+                      </td>
+                      <td>
+                        08/11 15:00
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span class="cell-title">
+                          #WO-260809-031
+                        </span>
+                        <span class="cell-meta">
+                          RDA-6612・Yaris
+                        </span>
+                      </td>
+                      <td>
+                        左前燈修復
+                      </td>
+                      <td>
+                        <span class="badge amber">
+                          P2
+                        </span>
+                      </td>
+                      <td>
+                        士林速修中心
+                      </td>
+                      <td>
+                        NT$ 3,600
+                      </td>
+                      <td>
+                        <span class="badge green">
+                          待驗收
+                        </span>
+                      </td>
+                      <td>
+                        已完工
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+            <aside class="card">
+              <div class="card-head">
+                <div>
+                  <h2>
+                    #WO-260809-042
+                  </h2>
+                  <p>
+                    RAC-4582・右後保桿鈑噴
+                  </p>
+                </div>
+                <span class="badge blue">
+                  維修中
+                </span>
+              </div>
+              <div class="card-body">
+                <div class="summary">
+                  <div>
+                    <small>
+                      建立來源
+                    </small>
+                    <strong>
+                      AI 車損案件
+                    </strong>
+                  </div>
+                  <div>
+                    <small>
+                      優先級
+                    </small>
+                    <strong>
+                      P1・高
+                    </strong>
+                  </div>
+                  <div>
+                    <small>
+                      建立時間
+                    </small>
+                    <strong>
+                      08/09 13:52
+                    </strong>
+                  </div>
+                  <div>
+                    <small>
+                      承辦人
+                    </small>
+                    <strong>
+                      王立安
+                    </strong>
+                  </div>
+                  <div>
+                    <small>
+                      AI 損傷信心
+                    </small>
+                    <strong>
+                      96%
+                    </strong>
+                  </div>
+                  <div>
+                    <small>
+                      不可租預估
+                    </small>
+                    <strong>
+                      4.5 小時
+                    </strong>
+                  </div>
+                </div>
+                <div class="cost">
+                  <div>
+                    <small>
+                      核准維修金額
+                    </small>
+                    <strong>
+                      NT$ 4,200
+                    </strong>
+                  </div>
+                  <span class="badge green">
+                    預算內
+                  </span>
+                </div>
+                <div class="vendor">
+                  <span>
+                    <b>
+                      信義速修中心
+                    </b>
+                    <p>
+                      合作評分 4.8・準時率 96%
+                    </p>
+                  </span>
+                  <button class="btn small">
+                    聯絡
+                  </button>
+                </div>
+                <div class="timeline">
+                  <div class="timeline-row">
+                    <span class="time-dot">
+                    </span>
+                    <div>
+                      <b>
+                        車輛已進廠
+                      </b>
+                      <p>
+                        15:08・里程 38,412 km
+                      </p>
+                    </div>
+                  </div>
+                  <div class="timeline-row">
+                    <span class="time-dot">
+                    </span>
+                    <div>
+                      <b>
+                        拆檢與修復中
+                      </b>
+                      <p>
+                        15:32・技師：林志宏
+                      </p>
+                    </div>
+                  </div>
+                  <div class="timeline-row pending">
+                    <span class="time-dot">
+                    </span>
+                    <div>
+                      <b>
+                        完工照片與 AI 驗收
+                      </b>
+                      <p>
+                        預計 17:10
+                      </p>
+                    </div>
+                  </div>
+                  <div class="timeline-row pending">
+                    <span class="time-dot">
+                    </span>
+                    <div>
+                      <b>
+                        恢復可租
+                      </b>
+                      <p>
+                        預計 17:30
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="inline">
+                  <button class="btn">
+                    查看原始案件
+                  </button>
+                  <button class="btn primary">
+                    更新進度
+                  </button>
+                </div>
+              </div>
+            </aside>
+          </section>
+        </main>
+      </div>
+    </div>
+    <script src="js/layout.js" defer>
+    </script>
+  </body>
+</html>

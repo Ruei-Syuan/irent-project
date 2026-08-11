@@ -1,6 +1,7 @@
 (() => {
   'use strict';
 
+  // 共用頁面設定：用於產生側欄導覽與判斷目前頁面。
   const pages = [
     { key: 'dashboard', label: '營運總覽', href: 'dashboard.html', icon: 'car' },
     { key: 'fleet', label: '車隊管理', href: 'fleet.html', icon: 'car' },
@@ -11,6 +12,7 @@
     { key: 'permissions', label: '權限設定', href: 'permissions.html', icon: 'shield' }
   ];
 
+  // 共用 SVG 圖示，避免各頁重複維護相同標記。
   const icons = {
     car: '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 11h14l-1.3-4.1A2 2 0 0 0 15.8 5H8.2a2 2 0 0 0-1.9 1.9L5 11Zm-1 2h16v5a2 2 0 0 1-2 2h-1v-2H7v2H6a2 2 0 0 1-2-2v-5Zm3 1.5A1.5 1.5 0 1 0 7 17a1.5 1.5 0 0 0 0-3Zm10 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z"/></svg>',
     ai: '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 2h6v2h3a2 2 0 0 1 2 2v3h2v6h-2v3a2 2 0 0 1-2 2h-3v2H9v-2H6a2 2 0 0 1-2-2v-3H2V9h2V6a2 2 0 0 1 2-2h3V2Zm-1 6v8h8V8H8Zm2 2h4v4h-4v-4Z"/></svg>',
@@ -24,6 +26,7 @@
     chevron: '<svg class="layout-user-chevron" aria-hidden="true" viewBox="0 0 24 24"><path d="m7 9 5 5 5-5H7Z"/></svg>'
   };
 
+  // 依目前頁面產生側欄，並標示作用中的導覽項目。
   function renderSidebar(activePage) {
     const navigation = pages.map(page => {
       const current = page.key === activePage.key ? ' aria-current="page"' : '';
@@ -42,6 +45,7 @@
       </div>`;
   }
 
+  // 產生各頁共用的標題、搜尋與使用者工具列。
   function renderTopbar(activePage) {
     return `
       <div class="app-heading">
@@ -70,15 +74,18 @@
       </div>`;
   }
 
+  // 保存跨共用搜尋與頁面篩選器使用的暫時狀態。
   const pageState = {
     applyFilter: null,
     globalQuery: ''
   };
 
+  // 統一搜尋文字格式，讓英文搜尋不受大小寫影響。
   function normalizeText(value) {
     return String(value || '').trim().toLocaleLowerCase('zh-Hant');
   }
 
+  // 依關鍵字及額外條件顯示或隱藏資料項目。
   function filterElements(elements, query, predicate = () => true) {
     const keyword = normalizeText(query);
     let visible = 0;
@@ -92,12 +99,14 @@
     return visible;
   }
 
+  // 將 active 狀態集中套用到指定項目。
   function setActive(elements, target, className = 'active') {
     Array.from(elements).forEach(element => {
       element.classList.toggle(className, element === target);
     });
   }
 
+  // 將二維資料轉為可由 Excel 正確開啟的 UTF-8 CSV。
   function rowsToCsv(rows) {
     const escapeCell = value => {
       const text = String(value ?? '');
@@ -107,6 +116,7 @@
     return `\uFEFF${rows.map(row => row.map(escapeCell).join(',')).join('\r\n')}`;
   }
 
+  // 在瀏覽器端建立並下載 CSV，不需額外套件或後端服務。
   function downloadCsv(filename, rows) {
     const blob = new Blob([rowsToCsv(rows)], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -117,14 +127,17 @@
     URL.revokeObjectURL(url);
   }
 
+  // 以原生提示提供操作結果，避免新增額外 UI 結構。
   function notify(message) {
     if (typeof window.alert === 'function') window.alert(message);
   }
 
+  // 依按鈕文字尋找既有控制項，沿用目前 HTML 結構。
   function findButton(scope, label) {
     return Array.from(scope.querySelectorAll('button')).find(button => normalizeText(button.textContent).includes(normalizeText(label)));
   }
 
+  // 擷取表格文字，供匯出功能使用。
   function getTableRows(table) {
     if (!table) return [];
     return Array.from(table.querySelectorAll('tr')).map(row =>
@@ -132,6 +145,7 @@
     );
   }
 
+  // 同步更新狀態標籤的文字與既有顏色類別。
   function setBadge(badge, text, color) {
     if (!badge) return;
     badge.textContent = text;
@@ -139,6 +153,82 @@
     badge.classList.add(color);
   }
 
+  // 內建基礎測試；需要時可在瀏覽器 Console 執行 IRentLayout.runSelfTests()。
+  function runSelfTests() {
+    const results = [];
+
+    // 執行單一測試並記錄成功或失敗，避免其中一項失敗時中斷其他測試。
+    const test = (name, callback) => {
+      try {
+        callback();
+        results.push({ name, passed: true });
+      } catch (error) {
+        results.push({ name, passed: false, error: error.message });
+      }
+    };
+
+    // 測試用斷言：條件不成立時回報指定錯誤。
+    const assert = (condition, message) => {
+      if (!condition) throw new Error(message);
+    };
+
+    // 建立最小化的 classList 模擬物件，測試 active 狀態切換。
+    const createClassList = initial => {
+      const values = new Set(initial);
+      return {
+        contains: value => values.has(value),
+        toggle: (value, force) => force ? values.add(value) : values.delete(value)
+      };
+    };
+
+    // 驗證關鍵字與狀態條件會共同決定項目的顯示狀態。
+    test('搜尋與狀態篩選', () => {
+      const elements = [
+        { textContent: 'RAC-4582 待維修', hidden: false },
+        { textContent: 'RBC-2108 待清潔', hidden: false },
+        { textContent: 'RBA-6935 可租', hidden: false }
+      ];
+      const visible = filterElements(elements, 'rbc', element => element.textContent.includes('待清潔'));
+      assert(visible === 1, '可見筆數應為 1');
+      assert(elements[0].hidden && !elements[1].hidden && elements[2].hidden, 'hidden 狀態不正確');
+    });
+
+    // 驗證切換後只有指定項目保留 active 類別。
+    test('作用中項目切換', () => {
+      const elements = [
+        { classList: createClassList(['active']) },
+        { classList: createClassList([]) },
+        { classList: createClassList([]) }
+      ];
+      setActive(elements, elements[1]);
+      assert(!elements[0].classList.contains('active'), '原項目不應保留 active');
+      assert(elements[1].classList.contains('active'), '指定項目應為 active');
+      assert(!elements[2].classList.contains('active'), '其他項目不應為 active');
+    });
+
+    // 驗證 CSV 會正確跳脫逗號、引號與換行字元。
+    test('CSV 特殊字元處理', () => {
+      const csv = rowsToCsv([
+        ['車牌', '說明'],
+        ['RAC-4582', '刮傷, 8 cm²'],
+        ['RBC-2108', '使用「深度清潔」\n處理']
+      ]);
+      const expected = '\uFEFF車牌,說明\r\nRAC-4582,"刮傷, 8 cm²"\r\nRBC-2108,"使用「深度清潔」\n處理"';
+      assert(csv === expected, 'CSV 內容不正確');
+    });
+
+    // 彙整測試結果並輸出至瀏覽器 Console，供開發時快速確認。
+    const summary = {
+      passed: results.filter(result => result.passed).length,
+      total: results.length,
+      results
+    };
+    const logger = summary.passed === summary.total ? console.info : console.error;
+    logger(`[iRent tests] ${summary.passed}/${summary.total} passed`, results);
+    return summary;
+  }
+
+  // 綁定所有頁面共用的頂部搜尋、通知與訊息按鈕。
   function initSharedInteractions() {
     const topSearch = document.querySelector('.app-search input');
     const utilityButtons = document.querySelectorAll('.layout-utility-button');
@@ -158,6 +248,7 @@
     });
   }
 
+  // 營運總覽：搜尋警示、切換趨勢期間並開啟案件頁面。
   function initDashboard() {
     const searchable = () => document.querySelectorAll('.alerts-table tbody tr, .priority-list > a');
     const period = document.querySelector('.period-pill');
@@ -194,6 +285,7 @@
     });
   }
 
+  // 車隊管理：車輛篩選、區域切換、查看、新增及 CSV 匯入。
   function initFleet() {
     const table = document.querySelector('table');
     const search = document.querySelector('.filters .search');
@@ -244,19 +336,32 @@
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = '.csv,text/csv';
-      input.addEventListener('change', () => notify(input.files?.[0] ? `已選擇 ${input.files[0].name}` : '未選擇檔案'));
+      input.addEventListener('change', () => {
+        const file = input.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.addEventListener('load', () => {
+          const lines = String(reader.result).split(/\r?\n/).filter(Boolean);
+          const records = lines.slice(1).map(line => line.split(',').map(value => value.trim()));
+          records.forEach(([plate, model = '未設定車型', station = '待分配']) => {
+            if (!plate) return;
+            const row = document.createElement('tr');
+            row.innerHTML = `<td><span class="cell-title"></span><span class="cell-meta"></span></td><td></td><td><span class="badge green">可租</span></td><td><b>100</b><div class="progress"><span style="width:100%"></span></div></td><td>0 km</td><td>無</td><td><button class="btn small">查看</button></td>`;
+            row.querySelector('.cell-title').textContent = plate.toUpperCase();
+            row.querySelector('.cell-meta').textContent = model;
+            row.children[1].textContent = station;
+            table.querySelector('tbody').append(row);
+          });
+          pageState.applyFilter();
+          notify(`已匯入 ${records.length} 輛車。`);
+        });
+        reader.readAsText(file, 'utf-8');
+      });
       input.click();
     });
   }
 
-  function updateColumnCounts() {
-    document.querySelectorAll('.kanban .column').forEach(column => {
-      const count = column.querySelectorAll('.task:not([hidden])').length;
-      const badge = column.querySelector('.column-title .badge');
-      if (badge) badge.textContent = count;
-    });
-  }
-
+  // 智慧派工：任務篩選、指派、驗收及新增派工。
   function initDispatch() {
     const board = document.querySelector('.kanban');
     const search = document.querySelector('.filters .search');
@@ -264,13 +369,11 @@
     const getTasks = () => board?.querySelectorAll('.task') || [];
 
     pageState.applyFilter = () => {
-      const visible = filterElements(getTasks(), `${pageState.globalQuery} ${search?.value || ''}`, task => {
+      return filterElements(getTasks(), `${pageState.globalQuery} ${search?.value || ''}`, task => {
         if (!type || type.value === '全部任務') return true;
         const cleaning = /清潔|髒污|整理|抽洗|異味/.test(task.textContent);
         return type.value === '清潔' ? cleaning : !cleaning;
       });
-      updateColumnCounts();
-      return visible;
     };
     search?.addEventListener('input', pageState.applyFilter);
     type?.addEventListener('change', pageState.applyFilter);
@@ -281,14 +384,20 @@
       if (!button || !task) return;
 
       if (button.textContent.includes('指派')) {
+        const sourceColumn = task.closest('.column');
         const assignedColumn = board.querySelectorAll('.column')[1];
+        const sourceCount = sourceColumn.querySelector('.column-title .badge');
+        const assignedCount = assignedColumn.querySelector('.column-title .badge');
         task.querySelector('.task-foot').innerHTML = '<span>AI 智慧指派</span><span>剛剛</span>';
         assignedColumn.append(task);
-        updateColumnCounts();
+        sourceCount.textContent = Math.max(0, Number.parseInt(sourceCount.textContent, 10) - 1);
+        assignedCount.textContent = Number.parseInt(assignedCount.textContent, 10) + 1;
       } else if (button.textContent.includes('驗收')) {
+        const count = task.closest('.column').querySelector('.column-title .badge');
         setBadge(task.querySelector('.badge'), '已驗收', 'green');
         button.textContent = '驗收完成';
         button.disabled = true;
+        count.textContent = Math.max(0, Number.parseInt(count.textContent, 10) - 1);
       }
     });
 
@@ -299,7 +408,10 @@
       task.className = 'task';
       task.innerHTML = `<span class="badge blue">新任務</span><h3></h3><p>待補充任務內容・預估 30 分鐘</p><div class="task-foot"><span>等待指派</span><button class="btn small">指派</button></div>`;
       task.querySelector('h3').textContent = `${plate.toUpperCase()} 新增派工`;
-      board.querySelector('.column').append(task);
+      const pendingColumn = board.querySelector('.column');
+      pendingColumn.append(task);
+      const count = pendingColumn.querySelector('.column-title .badge');
+      count.textContent = Number.parseInt(count.textContent, 10) + 1;
       pageState.applyFilter();
     });
 
@@ -311,12 +423,14 @@
     });
   }
 
+  // 案件清單切換時使用的靜態展示資料。
   const damageDetails = {
     '#DMG-260809-018': ['表面刮傷', '右後保桿', '中度', 'NT$ 3,200–4,800', '前 3 次租借影像未出現此刮傷；角度與亮度合格，建議判定為本次新增損傷。'],
     '#DMG-260809-016': ['液體髒污', '副駕座椅', '中度', 'NT$ 1,200–2,200', '影像顯示本次還車後新增液體痕跡，建議要求補拍近距離照片。'],
     '#DMG-260809-012': ['疑似淺刮痕', '左前門', '輕度', 'NT$ 1,800–2,800', '低角度反光可能影響判定，建議人工確認是否為既有損傷。']
   };
 
+  // 車損案件：案件篩選、詳情切換、判定與匯出。
   function initDamageReview() {
     const list = document.querySelector('.case-list');
     const search = document.querySelector('.filters .search');
@@ -369,7 +483,9 @@
     });
 
     findButton(document, '批次指派')?.addEventListener('click', event => {
-      const count = Array.from(getCases()).filter(item => !item.hidden).length;
+      const cases = Array.from(getCases()).filter(item => !item.hidden);
+      cases.forEach(item => setBadge(item.querySelector('.badge'), '已指派', 'green'));
+      const count = cases.length;
       event.currentTarget.textContent = `已指派 ${count} 件`;
       event.currentTarget.disabled = true;
     });
@@ -383,6 +499,7 @@
     });
   }
 
+  // 維修工單：清單篩選、詳情同步、進度更新與匯出。
   function initWorkOrders() {
     const table = document.querySelector('.order-layout table');
     const detail = document.querySelector('.order-layout aside');
@@ -437,6 +554,7 @@
     findButton(document, '匯出工單')?.addEventListener('click', () => downloadCsv('irent-work-orders.csv', getTableRows(table)));
   }
 
+  // 報表分析：切換期間資料並匯出目前管理指標。
   function initReports() {
     const period = document.querySelector('.page-head .select');
     const exportButton = findButton(document, '匯出管理報表');
@@ -471,12 +589,13 @@
     ]));
   }
 
+  // 權限設定：角色切換、權限矩陣、成員及稽核資料操作。
   function initPermissions() {
     const menuLinks = document.querySelectorAll('.settings-menu a');
     const roleContainer = document.querySelector('.role-tabs');
     const permissionRows = document.querySelectorAll('.perm tbody tr');
     const roleProfiles = [
-      [5, 63, 63, 53, 63],
+      [21, 63, 63, 53, 63],
       [5, 31, 31, 21, 1],
       [1, 45, 13, 17, 0],
       [1, 9, 15, 1, 0],
@@ -497,7 +616,13 @@
       });
     };
 
-    menuLinks.forEach(link => link.addEventListener('click', () => setActive(menuLinks, link)));
+    menuLinks.forEach(link => link.addEventListener('click', event => {
+      setActive(menuLinks, link);
+      if (!document.querySelector(link.getAttribute('href'))) {
+        event.preventDefault();
+        notify(`${link.textContent.trim()}尚無可顯示的設定內容。`);
+      }
+    }));
     roleContainer?.addEventListener('click', event => {
       const role = event.target.closest('.role');
       if (!role) return;
@@ -559,6 +684,7 @@
     renderPermissions();
   }
 
+  // 僅初始化目前頁面需要的互動，避免跨頁選取不存在的元件。
   function initPageInteractions(pageKey) {
     pageState.applyFilter = null;
     pageState.globalQuery = '';
@@ -574,6 +700,7 @@
     initializers[pageKey]?.();
   }
 
+  // 共用入口：先渲染版型，再掛載目前頁面的互動。
   function init() {
     const pageKey = document.body.dataset.page;
     const activePage = pages.find(page => page.key === pageKey);
@@ -598,6 +725,7 @@
   window.IRentLayout = {
     init,
     initPageInteractions,
+    runSelfTests,
     helpers: { filterElements, normalizeText, rowsToCsv, setActive }
   };
 

@@ -66,11 +66,11 @@
             ${icons.message}<span class="layout-utility-badge">2</span>
           </button>
         </div>
-        <div class="app-user" aria-label="目前使用者 Celine，管理者">
-          <span class="app-avatar">CE</span>
-          <span class="app-user-copy"><strong>Celine</strong><small>管理者</small></span>
+        <button class="app-user" type="button" aria-label="目前使用者選單" data-user-menu>
+          <span class="app-avatar">--</span>
+          <span class="app-user-copy"><strong>載入中</strong><small>驗證登入狀態</small></span>
           ${icons.chevron}
-        </div>
+        </button>
       </div>`;
   }
 
@@ -246,6 +246,29 @@
         notify(label === '通知' ? '目前沒有新的未讀通知。' : '目前沒有新的未讀訊息。');
       });
     });
+
+    fetch('/api/auth/me').then(async response => {
+      if (response.status === 401) {
+        window.location.replace('/login.html');
+        return null;
+      }
+      if (!response.ok) throw new Error('無法取得登入資料');
+      return response.json();
+    }).then(result => {
+      if (!result) return;
+      const user = result.item;
+      window.IRentCurrentUser = user;
+      const userButton = document.querySelector('[data-user-menu]');
+      userButton.querySelector('.app-avatar').textContent = user.name.slice(-2);
+      userButton.querySelector('strong').textContent = user.name;
+      userButton.querySelector('small').textContent = user.role.name;
+      userButton.setAttribute('aria-label', `目前使用者 ${user.name}，${user.role.name}；點擊登出`);
+      userButton.addEventListener('click', async () => {
+        if (!window.confirm(`確定要登出 ${user.name}？`)) return;
+        await fetch('/api/auth/logout', { method: 'POST' });
+        window.location.replace('/login.html');
+      });
+    }).catch(error => console.error('[iRent auth]', error));
   }
 
   // 營運總覽：搜尋警示、切換趨勢期間並開啟案件頁面。
@@ -695,7 +718,7 @@
       dispatch: initDispatch,
       'work-orders': initWorkOrders,
       reports: initReports,
-      permissions: initPermissions
+      permissions: () => {}
     };
     initializers[pageKey]?.();
   }
@@ -726,6 +749,7 @@
     init,
     initPageInteractions,
     runSelfTests,
+    downloadCsv,
     helpers: { filterElements, normalizeText, rowsToCsv, setActive }
   };
 

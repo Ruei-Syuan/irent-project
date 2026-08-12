@@ -3,7 +3,13 @@ venv/
 .venv/
 __pycache__/
 node_modules/
+data/*.sqlite
+data/*.sqlite-shm
+data/*.sqlite-wal
 
 # MCP 
 # 檢測 HTML 問題
 .playwright-mcp
+
+# user guide
+.user_guide

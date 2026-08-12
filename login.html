@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>登入｜iRent 智能車況管家</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/login.css">
+  </head>
+  <body class="login-page">
+    <main class="login-card">
+      <div class="login-brand"><strong>iRent</strong><span>智能車況管家</span></div>
+      <p class="eyebrow">Operations Console</p>
+      <h1>員工登入</h1>
+      <p class="login-subtitle">使用員工編號與密碼進入管理後台。</p>
+      <form data-login-form>
+        <label>員工編號<input name="employeeNo" value="ADM001" maxlength="6" autocomplete="username" required></label>
+        <label>密碼<input name="password" type="password" value="Admin@1234" autocomplete="current-password" required></label>
+        <p class="login-message" data-login-message aria-live="polite"></p>
+        <button class="btn primary" type="submit">登入系統</button>
+      </form>
+      <p class="login-hint">測試管理員：ADM001 / Admin@1234</p>
+    </main>
+    <script src="js/login.js" defer></script>
+  </body>
+</html>

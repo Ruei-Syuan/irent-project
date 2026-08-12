@@ -1,0 +1,17 @@
+{
+  "name": "irent-operations-console",
+  "version": "1.0.0",
+  "private": true,
+  "description": "iRent 智能車況管家",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test tests/*.test.cjs"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

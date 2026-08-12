@@ -47,7 +47,7 @@ foreach ($key in $pages.Values) {
     if (-not $layoutJs.Contains("key: '$key'")) { throw "layout.js missing page key: $key" }
 }
 
-foreach ($requiredJsMarker in @('window.IRentLayout', 'aria-current', 'Celine')) {
+foreach ($requiredJsMarker in @('window.IRentLayout', 'aria-current', '/api/auth/me', '/api/auth/logout')) {
     if (-not $layoutJs.Contains($requiredJsMarker)) { throw "layout.js missing marker: $requiredJsMarker" }
 }
 

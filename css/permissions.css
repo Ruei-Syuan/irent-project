@@ -38,6 +38,11 @@
     color: var(--muted)
 }
 
+.role span {
+    opacity: .7;
+    margin-left: 3px
+}
+
 .role.active {
     background: var(--navy);
     border-color: var(--navy);
@@ -58,6 +63,175 @@
     background: var(--green-soft);
     color: var(--green);
     font-weight: 900
+}
+
+.permission-toggle {
+    display: inline-grid;
+    cursor: pointer
+}
+
+.permission-toggle input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none
+}
+
+.permission-toggle span {
+    display: inline-grid;
+    place-items: center;
+    width: 23px;
+    height: 23px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: transparent;
+    background: #fff
+}
+
+.permission-toggle input:checked+span {
+    border-color: var(--green);
+    background: var(--green-soft);
+    color: var(--green);
+    font-weight: 900
+}
+
+.permission-toggle input:focus-visible+span {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px
+}
+
+.permission-toggle input:disabled+span {
+    cursor: not-allowed;
+    opacity: .6
+}
+
+.permission-unavailable {
+    color: #c1c8d0
+}
+
+.matrix-actions {
+    justify-content: flex-end;
+    margin-top: 14px
+}
+
+.matrix-actions .form-message {
+    margin-right: auto
+}
+
+.account-filters {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) 180px;
+    gap: 10px;
+    margin-bottom: 14px
+}
+
+.row-actions {
+    white-space: nowrap
+}
+
+.btn.danger {
+    color: #b22d2d;
+    border-color: #f0caca
+}
+
+.empty-state {
+    padding: 28px !important;
+    color: var(--muted);
+    text-align: center !important
+}
+
+.department-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+    border-bottom: 1px solid #edf1f5;
+    padding: 11px 0
+}
+
+.department-row:last-child {
+    border-bottom: 0
+}
+
+.department-row p {
+    margin: 3px 0 0;
+    color: var(--muted);
+    font-size: 10px
+}
+
+.management-dialog {
+    width: min(650px, calc(100vw - 32px));
+    border: 0;
+    border-radius: 15px;
+    padding: 0;
+    box-shadow: 0 22px 70px rgba(16, 35, 54, .24)
+}
+
+.management-dialog::backdrop {
+    background: rgba(10, 24, 38, .52)
+}
+
+.management-dialog form {
+    padding: 22px
+}
+
+.dialog-head,
+.dialog-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px
+}
+
+.dialog-head h2 {
+    margin: 0
+}
+
+.dialog-close {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 27px;
+    cursor: pointer
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 22px 0
+}
+
+.form-grid label {
+    display: grid;
+    gap: 6px;
+    color: #405166;
+    font-size: 11px;
+    font-weight: 800
+}
+
+.form-grid input,
+.form-grid select {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    padding: 10px;
+    font: inherit
+}
+
+.form-grid input[readonly] {
+    background: #f2f4f6;
+    color: var(--muted)
+}
+
+.form-message {
+    min-height: 18px;
+    color: #b22d2d;
+    font-size: 11px
+}
+
+.dialog-actions {
+    justify-content: flex-end
 }
 
 .member {
@@ -114,5 +288,16 @@
 @media(max-width:560px) {
     .settings-menu {
         grid-template-columns: 1fr 1fr
+    }
+
+    .account-filters,
+    .form-grid {
+        grid-template-columns: 1fr
+    }
+
+    .row-actions .btn {
+        display: block;
+        width: 100%;
+        margin: 3px 0
     }
 }

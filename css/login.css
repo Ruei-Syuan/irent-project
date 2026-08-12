@@ -1,0 +1,104 @@
+:root {
+    color-scheme: light
+}
+
+* {
+    box-sizing: border-box
+}
+
+.login-page {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 24px;
+    background: radial-gradient(circle at top right, #d9f8ef 0, transparent 38%), #f2f5f8;
+    color: var(--navy);
+    font-family: Arial, "Noto Sans TC", sans-serif
+}
+
+.login-card {
+    width: min(100%, 410px);
+    padding: 36px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 22px 60px rgba(25, 45, 67, .12)
+}
+
+.login-brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 36px
+}
+
+.login-brand strong {
+    color: var(--green);
+    font-size: 30px
+}
+
+.login-brand span,
+.login-subtitle,
+.login-hint {
+    color: var(--muted)
+}
+
+.login-card h1 {
+    margin: 7px 0
+}
+
+.login-subtitle {
+    margin: 0 0 24px;
+    font-size: 14px
+}
+
+.login-card form,
+.login-card label {
+    display: grid;
+    gap: 8px
+}
+
+.login-card form {
+    gap: 18px
+}
+
+.login-card label {
+    color: #435467;
+    font-size: 13px;
+    font-weight: 700
+}
+
+.login-card input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 12px 13px;
+    font: inherit
+}
+
+.login-card .btn {
+    justify-content: center;
+    padding: 12px
+}
+
+.login-message {
+    min-height: 18px;
+    margin: 0;
+    color: #bd2e2e;
+    font-size: 12px
+}
+
+.login-hint {
+    margin: 22px 0 0;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+    font-size: 11px;
+    text-align: center
+}
+
+@media(max-width:560px) {
+    .login-card {
+        padding: 26px 22px
+    }
+}

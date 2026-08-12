@@ -271,7 +271,11 @@
 .app-user {
   min-width: 132px;
   padding-left: 14px;
+  border: 0;
   border-left: 1px solid var(--dash-border);
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 9px;

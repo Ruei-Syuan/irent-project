@@ -20,16 +20,12 @@
               <h1>權限與帳號設定</h1>
               <p class="subtitle">角色權限矩陣與角色帳號分開管理，所有異動皆保留稽核軌跡。</p>
             </div>
-            <div class="actions">
-              <button class="btn" type="button" data-action="export-audit">下載稽核紀錄</button>
-              <button class="btn primary" type="button" data-action="add-user">＋ 新增帳號</button>
-            </div>
           </section>
 
           <section class="settings">
             <aside class="card">
               <nav class="settings-menu" aria-label="設定分類">
-                <a class="active" href="#role-matrix">角色權限矩陣</a>
+                <a class="active" href="#role-matrix" aria-current="page">角色權限矩陣</a>
                 <a href="#accounts">角色帳號管理</a>
                 <a href="#departments">部門資料</a>
                 <a href="#audit">操作紀錄</a>
@@ -38,7 +34,7 @@
             </aside>
 
             <div class="stack">
-              <article class="card" id="role-matrix">
+              <article class="card" id="role-matrix" data-settings-panel>
                 <div class="card-head">
                   <div>
                     <h2>角色權限矩陣</h2>
@@ -76,7 +72,7 @@
                 </div>
               </article>
 
-              <article class="card" id="accounts">
+              <article class="card" id="accounts" data-settings-panel hidden>
                 <div class="card-head">
                   <div>
                     <h2>角色帳號管理</h2>
@@ -109,31 +105,32 @@
                 </div>
               </article>
 
-              <section class="grid grid-equal">
-                <article class="card" id="departments">
+              <section class="grid grid-equal settings-panel-group">
+                <article class="card" id="departments" data-settings-panel hidden>
                   <div class="card-head">
-                  <div>
-                    <h2>部門資料</h2>
-                    <p>帳號透過 department_id 關聯所屬部門。</p>
-                  </div>
-                  <button class="btn small" type="button" data-action="add-department">＋ 新增部門</button>
-                  <button class="btn small" type="button" data-action="add-department">＋ 新增部門</button>
+                    <div>
+                      <h2>部門資料</h2>
+                      <p>帳號透過 department_id 關聯所屬部門。</p>
+                    </div>
+                    <button class="btn small" type="button" data-action="add-department">＋ 新增部門</button>
+                    <button class="btn small" type="button" data-action="add-department">＋ 新增部門</button>
                   </div>
                   <div class="card-body" data-department-list></div>
                 </article>
 
-                <article class="card" id="audit">
+                <article class="card" id="audit" data-settings-panel hidden>
                   <div class="card-head">
                     <div>
                       <h2>最新操作紀錄</h2>
                       <p>登入、帳號及角色異動皆自動記錄。</p>
                     </div>
+                    <button class="btn small" type="button" data-action="export-audit">下載稽核紀錄</button>
                   </div>
                   <div class="card-body" data-audit-list></div>
                 </article>
               </section>
 
-              <article class="card" id="security">
+              <article class="card" id="security" data-settings-panel hidden>
                 <div class="card-head">
                   <div>
                     <h2>登入與資料安全</h2>

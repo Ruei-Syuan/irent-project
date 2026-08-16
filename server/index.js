@@ -3,6 +3,7 @@
 const { createApp } = require('./app');
 const { createDatabase } = require('./database');
 
+// 啟動 Server
 const port = Number(process.env.PORT) || 3000;
 const database = createDatabase();
 const app = createApp({ database });

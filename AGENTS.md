@@ -1,3 +1,8 @@
+---
+name: Codex
+description: "Codex 工作規則 - 修改 HTML、CSS 或 JavaScript 時的指引"
+---
+
 # Codex 工作規則
 
 ## 修改方式

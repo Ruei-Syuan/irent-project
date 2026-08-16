@@ -29,6 +29,28 @@
     return [...groups.values()];
   }
 
+  function activateSettingsPanel(links, panels, targetId) {
+    const panelList = [...panels];
+    const linkList = [...links];
+    const requestedId = String(targetId || '').replace(/^#/, '');
+    const activeId = panelList.some(panel => panel.id === requestedId)
+      ? requestedId
+      : panelList[0]?.id || '';
+
+    panelList.forEach(panel => {
+      panel.hidden = panel.id !== activeId;
+    });
+    linkList.forEach(link => {
+      const linkId = String(link.getAttribute('href') || '').replace(/^#/, '');
+      const isActive = linkId === activeId;
+      link.classList.toggle('active', isActive);
+      if (isActive) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+
+    return activeId;
+  }
+
   function validateUserPayload(payload, editing = false) {
     if (!/^[A-Z]{3}\d{3}$/.test(String(payload.employeeNo || '').trim().toUpperCase())) {
       return '員工編號格式需為 3 碼英文加 3 碼數字';
@@ -65,6 +87,10 @@
     const roleTabs = document.querySelector('[data-role-tabs]');
     if (!roleTabs) return;
 
+    const settingsMenu = document.querySelector('.settings-menu');
+    const settingsLinks = settingsMenu?.querySelectorAll('a[href^="#"]') || [];
+    const settingsPanels = document.querySelectorAll('[data-settings-panel]');
+
     const state = {
       roles: [],
       permissions: [],
@@ -81,6 +107,20 @@
     const userDialog = document.querySelector('[data-user-dialog]');
     const userForm = document.querySelector('[data-user-form]');
     const matrixMessage = document.querySelector('[data-matrix-message]');
+
+    activateSettingsPanel(settingsLinks, settingsPanels, window.location.hash);
+
+    settingsMenu?.addEventListener('click', event => {
+      const link = event.target.closest('a[href^="#"]');
+      if (!link || !settingsMenu.contains(link)) return;
+      event.preventDefault();
+      const activeId = activateSettingsPanel(settingsLinks, settingsPanels, link.getAttribute('href'));
+      window.history.replaceState(null, '', `#${activeId}`);
+    });
+
+    window.addEventListener('hashchange', () => {
+      activateSettingsPanel(settingsLinks, settingsPanels, window.location.hash);
+    });
 
     const activeRole = () => state.roles.find(role => role.id === state.activeRoleId);
     const can = code => window.IRentCurrentUser?.permissions?.includes(code);
@@ -198,6 +238,7 @@
       userDialog.showModal();
     }
 
+    // 前端請求
     async function refreshData() {
       const [roles, permissions, users, departments, auditLogs] = await Promise.all([
         request('/api/roles'), request('/api/permissions'), request('/api/users'),
@@ -355,5 +396,5 @@
     else init();
   }
 
-  return { groupPermissions, init, validateUserPayload };
+  return { activateSettingsPanel, groupPermissions, init, validateUserPayload };
 });

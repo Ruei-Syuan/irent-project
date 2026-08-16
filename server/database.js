@@ -54,7 +54,7 @@ const actionLabels = {
 };
 
 const users = [
-  ['ADM001', '王立安', '系統管理員', '資訊安全處', 'active'],
+  ['ADM001', 'Celine Yang', '系統管理員', '資訊安全處', 'active'],
   ['OPS101', '林芷晴', '營運主管', '營運管理處', 'active'],
   ['DSP208', '陳柏宇', '調度主管', '車隊管理部', 'active'],
   ['FLT315', '張雅雯', '車隊管理員', '車隊管理部', 'active'],
@@ -101,6 +101,16 @@ const auditLogs = [
   ['RPT607', 'report.export', 'report', 'weekly-2026-32', '吳俊傑匯出第 32 週營運報表', '10.22.7.09', '2026-08-12 11:15:00'],
   ['CSV718', 'case.view', 'damage_case', 'DMG-260809-016', '蔡佩珊檢視會員申訴案件', '10.19.6.27', '2026-08-12 10:48:00'],
   ['AUD829', 'audit.export', 'audit_log', '2026-08-11', '許家豪匯出昨日稽核紀錄', '10.24.9.12', '2026-08-12 09:30:00']
+];
+
+const inboxTemplates = [
+  ['notification', '高優先車損案件待審核', 'RFD-0332 的右前車損已由 AI 標記為高風險，請優先確認。', 'damage-review.html', 'danger', null, '2026-08-16 10:35:00'],
+  ['notification', '維修工單即將逾期', '工單 #WO-260816-018 距離預計完成時間剩下 2 小時。', 'work-orders.html', 'warning', null, '2026-08-16 09:48:00'],
+  ['notification', '新車輛調度任務', '台北車站新增 3 輛待調度車輛，請安排處理。', 'dispatch.html', 'info', null, '2026-08-16 09:12:00'],
+  ['notification', '車輛電量低於 20%', 'RAC-4582 目前電量為 18%，已列入優先處理清單。', 'fleet.html', 'warning', null, '2026-08-16 08:46:00'],
+  ['notification', '每日營運報表已產生', '8 月 16 日營運報表已完成，可前往報表分析查看。', 'reports.html', 'success', null, '2026-08-16 08:05:00'],
+  ['message', '請協助確認北區調度', '今天下午的北區車輛需求增加，麻煩確認可支援數量。', 'dispatch.html', 'info', '調度中心', '2026-08-16 10:02:00'],
+  ['message', '工單照片已補齊', '#WO-260816-011 的完工照片已上傳，請協助驗收。', 'work-orders.html', 'success', '維修團隊', '2026-08-16 09:25:00']
 ];
 
 function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
@@ -196,10 +206,25 @@ function createSchema(database) {
       FOREIGN KEY (actor_user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE SET NULL
     );
 
+    CREATE TABLE IF NOT EXISTS inbox_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      kind TEXT NOT NULL CHECK (kind IN ('notification', 'message')),
+      title TEXT NOT NULL,
+      body TEXT NOT NULL,
+      href TEXT NOT NULL DEFAULT '',
+      tone TEXT NOT NULL DEFAULT 'info' CHECK (tone IN ('danger', 'warning', 'info', 'success')),
+      sender TEXT,
+      is_read INTEGER NOT NULL DEFAULT 0 CHECK (is_read IN (0, 1)),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE
+    );
+
     CREATE INDEX IF NOT EXISTS idx_users_role_id ON users(role_id);
     CREATE INDEX IF NOT EXISTS idx_users_department_id ON users(department_id);
     CREATE INDEX IF NOT EXISTS idx_sessions_token_hash ON sessions(token_hash);
     CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_inbox_items_user_unread ON inbox_items(user_id, kind, is_read, created_at DESC);
   `);
 }
 
@@ -275,10 +300,34 @@ function seedDatabase(database) {
   }
 }
 
+function seedInbox(database) {
+  const existing = database.prepare('SELECT COUNT(*) AS count FROM inbox_items').get().count;
+  if (existing > 0) return;
+
+  const insertInboxItem = database.prepare(`
+    INSERT INTO inbox_items (user_id, kind, title, body, href, tone, sender, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  const userRows = database.prepare('SELECT id FROM users ORDER BY id').all();
+
+  database.exec('BEGIN');
+  try {
+    userRows.forEach(user => {
+      inboxTemplates.forEach(item => insertInboxItem.run(user.id, ...item));
+    });
+    database.exec('COMMIT');
+  } catch (error) {
+    database.exec('ROLLBACK');
+    throw error;
+  }
+}
+
+// 資料庫連線：
 function createDatabase(filename = DEFAULT_DATABASE_PATH) {
   const database = new DatabaseSync(filename);
   createSchema(database);
   seedDatabase(database);
+  seedInbox(database);
   return database;
 }
 

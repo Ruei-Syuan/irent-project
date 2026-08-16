@@ -29,6 +29,7 @@ describe('SQLite 權限資料庫', () => {
     assert.deepEqual(tables, [
       'audit_logs',
       'departments',
+      'inbox_items',
       'permissions',
       'role_permissions',
       'roles',
@@ -38,6 +39,8 @@ describe('SQLite 權限資料庫', () => {
     assert.equal(database.prepare('SELECT COUNT(*) AS count FROM roles').get().count, 10);
     assert.equal(database.prepare('SELECT COUNT(*) AS count FROM users').get().count, 10);
     assert.equal(database.prepare('SELECT COUNT(*) AS count FROM audit_logs').get().count, 10);
+    assert.equal(database.prepare("SELECT COUNT(*) AS count FROM inbox_items WHERE kind = 'notification'").get().count, 50);
+    assert.equal(database.prepare("SELECT COUNT(*) AS count FROM inbox_items WHERE kind = 'message'").get().count, 20);
     assert.ok(database.prepare('SELECT COUNT(*) AS count FROM role_permissions').get().count > 10);
   });
 

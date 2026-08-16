@@ -117,6 +117,38 @@ function validationError(response, message) {
   return response.status(400).json({ error: message });
 }
 
+function mapInboxItem(row) {
+  return {
+    id: row.id,
+    kind: row.kind,
+    title: row.title,
+    body: row.body,
+    href: row.href,
+    tone: row.tone,
+    sender: row.sender,
+    isRead: Boolean(row.is_read),
+    createdAt: row.created_at
+  };
+}
+
+function getInbox(database, userId) {
+  const items = database.prepare(`
+    SELECT id, kind, title, body, href, tone, sender, is_read, created_at
+    FROM inbox_items
+    WHERE user_id = ?
+    ORDER BY created_at DESC, id DESC
+    LIMIT 50
+  `).all(userId).map(mapInboxItem);
+
+  return {
+    items,
+    unread: {
+      notifications: items.filter(item => item.kind === 'notification' && !item.isRead).length,
+      messages: items.filter(item => item.kind === 'message' && !item.isRead).length
+    }
+  };
+}
+
 function createApp({ database }) {
   if (!database) throw new Error('createApp 需要 database');
   const app = express();
@@ -205,6 +237,35 @@ function createApp({ database }) {
 
   app.get('/api/auth/me', requireAuth, (request, response) => response.json({ item: publicUser(request.user) }));
 
+  app.get('/api/inbox', requireAuth, (request, response) => {
+    response.json(getInbox(database, request.user.id));
+  });
+
+  app.patch('/api/inbox/:id/read', requireAuth, (request, response) => {
+    const item = database.prepare(`
+      SELECT id, kind, title, body, href, tone, sender, is_read, created_at
+      FROM inbox_items
+      WHERE id = ? AND user_id = ?
+    `).get(request.params.id, request.user.id);
+    if (!item) return response.status(404).json({ error: '找不到通知或訊息' });
+
+    database.prepare('UPDATE inbox_items SET is_read = 1 WHERE id = ? AND user_id = ?')
+      .run(item.id, request.user.id);
+    item.is_read = 1;
+    return response.json({ item: mapInboxItem(item) });
+  });
+
+  app.post('/api/inbox/read-all', requireAuth, (request, response) => {
+    const kind = String(request.body?.kind || '');
+    if (!['notification', 'message'].includes(kind)) return validationError(response, '通知類型錯誤');
+    const result = database.prepare(`
+      UPDATE inbox_items SET is_read = 1
+      WHERE user_id = ? AND kind = ? AND is_read = 0
+    `).run(request.user.id, kind);
+    return response.json({ updated: Number(result.changes) });
+  });
+
+  // API 收到請求後，透過 database.prepare(...).all/get/run() 操作 SQLite
   app.get('/api/roles', requireAuth, requirePermission('permissions.view'), (request, response) => {
     response.json({ items: listRoles(database) });
   });

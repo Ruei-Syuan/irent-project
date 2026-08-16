@@ -61,6 +61,39 @@ describe('權限管理 API', () => {
     assert.equal(response.status, 403);
   });
 
+  test('登入者可取得通知與訊息，並將未讀項目標示為已讀', async () => {
+    const { cookie } = await login();
+    const inboxResponse = await fetch(`${baseUrl}/api/inbox`, { headers: { cookie } });
+    const inbox = await inboxResponse.json();
+
+    assert.equal(inboxResponse.status, 200);
+    assert.equal(inbox.unread.notifications, 5);
+    assert.equal(inbox.unread.messages, 2);
+    assert.equal(inbox.items.filter(item => item.kind === 'notification').length, 5);
+    assert.equal(inbox.items.filter(item => item.kind === 'message').length, 2);
+
+    const firstNotification = inbox.items.find(item => item.kind === 'notification');
+    const readResponse = await fetch(`${baseUrl}/api/inbox/${firstNotification.id}/read`, {
+      method: 'PATCH',
+      headers: { cookie }
+    });
+    const readResult = await readResponse.json();
+
+    assert.equal(readResponse.status, 200);
+    assert.equal(readResult.item.isRead, true);
+
+    const readAllResponse = await fetch(`${baseUrl}/api/inbox/read-all`, {
+      method: 'POST',
+      headers: { cookie, 'content-type': 'application/json' },
+      body: JSON.stringify({ kind: 'message' })
+    });
+    assert.equal(readAllResponse.status, 200);
+
+    const refreshed = await (await fetch(`${baseUrl}/api/inbox`, { headers: { cookie } })).json();
+    assert.equal(refreshed.unread.notifications, 4);
+    assert.equal(refreshed.unread.messages, 0);
+  });
+
   test('角色與帳號可分開新增、編輯及刪除', async () => {
     const { cookie } = await login();
     const jsonHeaders = { cookie, 'content-type': 'application/json' };

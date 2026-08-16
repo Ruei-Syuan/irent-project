@@ -12,6 +12,13 @@
     { key: 'permissions', label: '權限設定', href: 'permissions.html', icon: 'shield' }
   ];
 
+  const searchSources = [
+    { href: 'fleet.html', category: '車輛', selector: 'table tbody tr', titleSelector: '.cell-title' },
+    { href: 'damage-review.html', category: '車損案件', selector: '.case-list .case', titleSelector: '.case-top b', hash: '#detail' },
+    { href: 'dispatch.html', category: '調度任務', selector: '.kanban .task', titleSelector: 'h3' },
+    { href: 'work-orders.html', category: '維修工單', selector: 'table tbody tr', titleSelector: '.cell-title' }
+  ];
+
   // 共用 SVG 圖示，避免各頁重複維護相同標記。
   const icons = {
     car: '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 11h14l-1.3-4.1A2 2 0 0 0 15.8 5H8.2a2 2 0 0 0-1.9 1.9L5 11Zm-1 2h16v5a2 2 0 0 1-2 2h-1v-2H7v2H6a2 2 0 0 1-2-2v-5Zm3 1.5A1.5 1.5 0 1 0 7 17a1.5 1.5 0 0 0 0-3Zm10 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z"/></svg>',
@@ -53,18 +60,47 @@
         <p>掌握車隊營運與車況健康</p>
       </div>
       <div class="app-topbar-tools">
-        <label class="app-search">
-          <span class="sr-only">搜尋車輛或案件</span>
-          <input type="search" placeholder="搜尋車牌、車輛、案件編號" aria-label="搜尋車牌、車輛、案件編號">
+        <div class="app-search" data-global-search>
+          <label class="sr-only" for="global-search-input">搜尋車輛或案件</label>
+          <input id="global-search-input" type="search" placeholder="搜尋車牌、車輛、案件編號" aria-label="搜尋車牌、車輛、案件編號" autocomplete="off" aria-controls="global-search-results" aria-expanded="false">
           ${icons.search}
-        </label>
+          <section class="layout-inbox-panel layout-search-panel" id="global-search-results" aria-label="全站搜尋結果" hidden>
+            <header class="layout-inbox-head layout-search-head">
+              <div><span>全站搜尋</span><h2>搜尋結果</h2></div>
+              <small>搜尋範圍：全部功能</small>
+            </header>
+            <div class="layout-inbox-list layout-search-results" data-search-results>
+              <p class="layout-inbox-status layout-search-status">輸入車牌、案件或工單編號開始搜尋。</p>
+            </div>
+          </section>
+        </div>
         <div class="app-utilities" aria-label="使用者工具">
-          <button class="layout-utility-button" type="button" aria-label="通知">
-            ${icons.notification}<span class="layout-utility-badge">5</span>
-          </button>
-          <button class="layout-utility-button" type="button" aria-label="訊息">
-            ${icons.message}<span class="layout-utility-badge">2</span>
-          </button>
+          <div class="layout-inbox" data-inbox="notification">
+            <button class="layout-utility-button" type="button" aria-label="通知" aria-controls="notification-panel" aria-expanded="false" data-inbox-trigger>
+              ${icons.notification}<span class="layout-utility-badge" data-inbox-badge hidden></span>
+            </button>
+            <section class="layout-inbox-panel" id="notification-panel" aria-label="通知清單" hidden>
+              <header class="layout-inbox-head">
+                <div><span>通知中心</span><h2>最新通知</h2></div>
+                <button type="button" data-inbox-read-all>全部已讀</button>
+              </header>
+              <div class="layout-inbox-list" data-inbox-list><p class="layout-inbox-status">通知載入中…</p></div>
+              <p class="layout-inbox-feedback" aria-live="polite" data-inbox-feedback></p>
+            </section>
+          </div>
+          <div class="layout-inbox" data-inbox="message">
+            <button class="layout-utility-button" type="button" aria-label="訊息" aria-controls="message-panel" aria-expanded="false" data-inbox-trigger>
+              ${icons.message}<span class="layout-utility-badge" data-inbox-badge hidden></span>
+            </button>
+            <section class="layout-inbox-panel" id="message-panel" aria-label="訊息清單" hidden>
+              <header class="layout-inbox-head">
+                <div><span>內部訊息</span><h2>最新訊息</h2></div>
+                <button type="button" data-inbox-read-all>全部已讀</button>
+              </header>
+              <div class="layout-inbox-list" data-inbox-list><p class="layout-inbox-status">訊息載入中…</p></div>
+              <p class="layout-inbox-feedback" aria-live="polite" data-inbox-feedback></p>
+            </section>
+          </div>
         </div>
         <button class="app-user" type="button" aria-label="目前使用者選單" data-user-menu>
           <span class="app-avatar">--</span>
@@ -80,9 +116,47 @@
     globalQuery: ''
   };
 
+  const inboxState = {
+    items: []
+  };
+
+  const searchState = {
+    catalogPromise: null
+  };
+
+  function countUnread(items) {
+    return {
+      notifications: items.filter(item => item.kind === 'notification' && !item.isRead).length,
+      messages: items.filter(item => item.kind === 'message' && !item.isRead).length
+    };
+  }
+
   // 統一搜尋文字格式，讓英文搜尋不受大小寫影響。
   function normalizeText(value) {
     return String(value || '').trim().toLocaleLowerCase('zh-Hant');
+  }
+
+  function searchCatalog(catalog, query, limit = 10) {
+    const keyword = normalizeText(query);
+    if (!keyword) return [];
+    const categoryRank = { 車輛: 0, 車損案件: 1, 調度任務: 2, 維修工單: 3 };
+
+    return catalog.map((item, index) => {
+      const title = normalizeText(item.title);
+      const content = normalizeText(item.searchText);
+      if (!content.includes(keyword)) return null;
+      const score = title === keyword
+        ? 0
+        : title.startsWith(keyword)
+          ? 10
+          : title.includes(keyword)
+            ? 20
+            : 30 + (categoryRank[item.category] ?? 9);
+      return { item, index, score };
+    }).filter(Boolean)
+      .sort((left, right) => left.score - right.score || left.index - right.index)
+      .slice(0, limit)
+      .map(result => result.item);
   }
 
   // 依關鍵字及額外條件顯示或隱藏資料項目。
@@ -228,24 +302,279 @@
     return summary;
   }
 
+  function loadSearchCatalog() {
+    if (searchState.catalogPromise) return searchState.catalogPromise;
+
+    searchState.catalogPromise = Promise.all(searchSources.map(async source => {
+      const response = await fetch(source.href);
+      if (response.status === 403) return [];
+      if (!response.ok || response.url.endsWith('/login.html')) throw new Error('無法讀取全站搜尋資料');
+      const html = await response.text();
+      const page = new DOMParser().parseFromString(html, 'text/html');
+
+      return Array.from(page.querySelectorAll(source.selector)).map(element => {
+        const title = element.querySelector(source.titleSelector)?.textContent.replace(/\s+/g, ' ').trim();
+        const searchText = element.textContent.replace(/\s+/g, ' ').trim();
+        return title ? {
+          title,
+          category: source.category,
+          searchText,
+          summary: searchText.replace(title, '').trim().slice(0, 110),
+          href: `${source.href}?search=${encodeURIComponent(title)}${source.hash || ''}`
+        } : null;
+      }).filter(Boolean);
+    })).then(groups => groups.flat());
+
+    return searchState.catalogPromise;
+  }
+
+  function closeSearchPanel() {
+    const search = document.querySelector('[data-global-search]');
+    if (!search) return;
+    search.querySelector('.layout-search-panel').hidden = true;
+    search.querySelector('input').setAttribute('aria-expanded', 'false');
+  }
+
+  async function renderSearchResults(query) {
+    const search = document.querySelector('[data-global-search]');
+    const input = search.querySelector('input');
+    const panel = search.querySelector('.layout-search-panel');
+    const container = search.querySelector('[data-search-results]');
+    const keyword = String(query || '').trim();
+
+    panel.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+    if (!keyword) {
+      container.innerHTML = '<p class="layout-inbox-status layout-search-status">輸入車牌、案件或工單編號開始搜尋。</p>';
+      return;
+    }
+
+    container.innerHTML = '<p class="layout-inbox-status layout-search-status">搜尋中…</p>';
+    try {
+      const catalog = await loadSearchCatalog();
+      if (input.value.trim() !== keyword) return;
+      const results = searchCatalog(catalog, keyword);
+      container.replaceChildren();
+
+      if (results.length === 0) {
+        const empty = document.createElement('p');
+        empty.className = 'layout-inbox-status layout-search-status';
+        empty.textContent = `找不到「${keyword}」相關資料。`;
+        container.append(empty);
+        return;
+      }
+
+      results.forEach(result => {
+        const link = document.createElement('a');
+        link.className = 'layout-inbox-item layout-search-result';
+        link.href = result.href;
+        const marker = document.createElement('span');
+        marker.className = 'layout-inbox-marker';
+        marker.setAttribute('aria-hidden', 'true');
+        const copy = document.createElement('span');
+        copy.className = 'layout-inbox-copy';
+        const category = document.createElement('span');
+        category.className = 'layout-inbox-meta';
+        category.textContent = result.category;
+        const title = document.createElement('strong');
+        title.textContent = result.title;
+        const summary = document.createElement('span');
+        summary.className = 'layout-inbox-body';
+        summary.textContent = result.summary;
+        copy.append(category, title, summary);
+        link.append(marker, copy);
+        container.append(link);
+      });
+    } catch (error) {
+      container.innerHTML = '<p class="layout-inbox-status layout-search-status is-error">搜尋資料載入失敗，請重新整理後再試。</p>';
+      console.error('[iRent search]', error);
+    }
+  }
+
+  function formatInboxTime(value) {
+    const date = new Date(String(value).replace(' ', 'T'));
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleString('zh-TW', {
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  }
+
+  function updateInboxBadges() {
+    const unread = countUnread(inboxState.items);
+    document.querySelectorAll('[data-inbox]').forEach(inbox => {
+      const kind = inbox.dataset.inbox;
+      const count = kind === 'notification' ? unread.notifications : unread.messages;
+      const badge = inbox.querySelector('[data-inbox-badge]');
+      const trigger = inbox.querySelector('[data-inbox-trigger]');
+      badge.textContent = count > 99 ? '99+' : String(count);
+      badge.hidden = count === 0;
+      trigger.setAttribute('aria-label', `${kind === 'notification' ? '通知' : '訊息'}，${count} 則未讀`);
+    });
+  }
+
+  function setInboxFeedback(inbox, message, isError = false) {
+    const feedback = inbox.querySelector('[data-inbox-feedback]');
+    feedback.textContent = message;
+    feedback.classList.toggle('is-error', isError);
+  }
+
+  function renderInboxPanel(kind) {
+    const inbox = document.querySelector(`[data-inbox="${kind}"]`);
+    if (!inbox) return;
+    const list = inbox.querySelector('[data-inbox-list]');
+    const items = inboxState.items.filter(item => item.kind === kind);
+    list.replaceChildren();
+
+    if (items.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'layout-inbox-status';
+      empty.textContent = kind === 'notification' ? '目前沒有通知。' : '目前沒有訊息。';
+      list.append(empty);
+      return;
+    }
+
+    items.forEach(item => {
+      const link = document.createElement('a');
+      link.className = `layout-inbox-item tone-${item.tone}${item.isRead ? '' : ' is-unread'}`;
+      link.href = /^[\w-]+\.html$/.test(item.href) ? item.href : '#';
+      link.dataset.inboxItemId = String(item.id);
+
+      const marker = document.createElement('span');
+      marker.className = 'layout-inbox-marker';
+      marker.setAttribute('aria-hidden', 'true');
+
+      const copy = document.createElement('span');
+      copy.className = 'layout-inbox-copy';
+      const meta = document.createElement('span');
+      meta.className = 'layout-inbox-meta';
+      meta.textContent = item.sender || (item.isRead ? '已讀通知' : '未讀通知');
+      const title = document.createElement('strong');
+      title.textContent = item.title;
+      const body = document.createElement('span');
+      body.className = 'layout-inbox-body';
+      body.textContent = item.body;
+      const time = document.createElement('time');
+      time.dateTime = item.createdAt;
+      time.textContent = formatInboxTime(item.createdAt);
+      copy.append(meta, title, body, time);
+      link.append(marker, copy);
+
+      link.addEventListener('click', async event => {
+        if (link.href.endsWith('#')) return;
+        event.preventDefault();
+        try {
+          if (!item.isRead) {
+            const response = await fetch(`/api/inbox/${item.id}/read`, { method: 'PATCH' });
+            if (!response.ok) throw new Error('無法更新已讀狀態');
+            item.isRead = true;
+            updateInboxBadges();
+          }
+          window.location.href = link.getAttribute('href');
+        } catch (error) {
+          setInboxFeedback(inbox, error.message, true);
+        }
+      });
+      list.append(link);
+    });
+  }
+
+  function renderInbox() {
+    renderInboxPanel('notification');
+    renderInboxPanel('message');
+    updateInboxBadges();
+  }
+
+  function closeInboxPanels(except = null) {
+    document.querySelectorAll('[data-inbox]').forEach(inbox => {
+      if (inbox === except) return;
+      inbox.querySelector('.layout-inbox-panel').hidden = true;
+      inbox.querySelector('[data-inbox-trigger]').setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  async function loadInbox() {
+    try {
+      const response = await fetch('/api/inbox');
+      if (!response.ok) throw new Error('無法載入通知與訊息');
+      const result = await response.json();
+      inboxState.items = result.items;
+      renderInbox();
+    } catch (error) {
+      document.querySelectorAll('[data-inbox]').forEach(inbox => {
+        const list = inbox.querySelector('[data-inbox-list]');
+        list.innerHTML = '<p class="layout-inbox-status is-error">載入失敗，請稍後再試。</p>';
+        setInboxFeedback(inbox, error.message, true);
+      });
+      console.error('[iRent inbox]', error);
+    }
+  }
+
   // 綁定所有頁面共用的頂部搜尋、通知與訊息按鈕。
   function initSharedInteractions() {
     const topSearch = document.querySelector('.app-search input');
-    const utilityButtons = document.querySelectorAll('.layout-utility-button');
 
     topSearch?.addEventListener('input', () => {
       pageState.globalQuery = topSearch.value;
       pageState.applyFilter?.();
+      renderSearchResults(topSearch.value);
     });
+    topSearch?.addEventListener('focus', () => renderSearchResults(topSearch.value));
 
-    utilityButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const label = button.getAttribute('aria-label');
-        button.querySelector('.layout-utility-badge')?.remove();
-        button.setAttribute('aria-pressed', 'true');
-        notify(label === '通知' ? '目前沒有新的未讀通知。' : '目前沒有新的未讀訊息。');
+    document.querySelectorAll('[data-inbox]').forEach(inbox => {
+      const trigger = inbox.querySelector('[data-inbox-trigger]');
+      const panel = inbox.querySelector('.layout-inbox-panel');
+      trigger.addEventListener('click', event => {
+        event.stopPropagation();
+        const opening = panel.hidden;
+        closeInboxPanels(opening ? inbox : null);
+        panel.hidden = !opening;
+        trigger.setAttribute('aria-expanded', String(opening));
+      });
+
+      inbox.querySelector('[data-inbox-read-all]').addEventListener('click', async () => {
+        const kind = inbox.dataset.inbox;
+        try {
+          const response = await fetch('/api/inbox/read-all', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ kind })
+          });
+          if (!response.ok) throw new Error('無法更新已讀狀態');
+          inboxState.items.forEach(item => {
+            if (item.kind === kind) item.isRead = true;
+          });
+          renderInboxPanel(kind);
+          updateInboxBadges();
+          setInboxFeedback(inbox, '已將全部項目標示為已讀。');
+        } catch (error) {
+          setInboxFeedback(inbox, error.message, true);
+        }
       });
     });
+
+    document.addEventListener('click', event => {
+      if (!event.target.closest('[data-inbox]')) closeInboxPanels();
+      if (!event.target.closest('[data-global-search]')) closeSearchPanel();
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        closeInboxPanels();
+        closeSearchPanel();
+      }
+    });
+
+    loadInbox();
+
+    const initialSearch = new URLSearchParams(window.location.search).get('search');
+    if (initialSearch) {
+      topSearch.value = initialSearch;
+      pageState.globalQuery = initialSearch;
+      pageState.applyFilter?.();
+    }
 
     fetch('/api/auth/me').then(async response => {
       if (response.status === 401) {
@@ -750,7 +1079,7 @@
     initPageInteractions,
     runSelfTests,
     downloadCsv,
-    helpers: { filterElements, normalizeText, rowsToCsv, setActive }
+    helpers: { countUnread, filterElements, normalizeText, rowsToCsv, searchCatalog, setActive }
   };
 
   if (document.readyState === 'loading') {

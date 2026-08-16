@@ -220,10 +220,27 @@
   pointer-events: none;
 }
 
+.layout-search-panel {
+  z-index: 2;
+}
+
+.layout-search-panel[hidden] { display: none; }
+
+.layout-search-head > small {
+  color: var(--dash-muted);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.layout-search-result .layout-inbox-marker { border-color: var(--dash-green); }
+.layout-search-status.is-error { color: var(--dash-red); }
+
 .app-utilities {
   display: flex;
   gap: 6px;
 }
+
+.layout-inbox { position: relative; }
 
 .layout-utility-button {
   position: relative;
@@ -267,6 +284,154 @@
   font-size: 8px;
   font-weight: 900;
 }
+
+.layout-utility-badge[hidden],
+.layout-inbox-panel[hidden] { display: none; }
+
+.layout-inbox-panel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: -12px;
+  width: min(380px, calc(100vw - 28px));
+  max-height: min(610px, calc(100vh - 96px));
+  border: 1px solid #dfe6ed;
+  border-radius: 16px;
+  overflow: hidden;
+  color: var(--dash-text);
+  background: #fff;
+  box-shadow: 0 20px 55px rgba(9, 30, 54, .2);
+}
+
+.layout-inbox-head {
+  min-height: 72px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #edf0f3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: linear-gradient(135deg, #f5fbf8, #fff);
+}
+
+.layout-inbox-head span {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--dash-green-dark);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.layout-inbox-head h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.layout-inbox-head button {
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--dash-green-dark);
+  background: #e8f7f1;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.layout-inbox-head button:hover { background: #d9f1e8; }
+
+.layout-inbox-list {
+  max-height: min(480px, calc(100vh - 190px));
+  overflow-y: auto;
+}
+
+.layout-inbox-item {
+  min-height: 104px;
+  padding: 13px 15px;
+  border-bottom: 1px solid #edf0f3;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: inherit;
+  background: #fff;
+  transition: background-color .18s ease;
+}
+
+.layout-inbox-item:hover { background: #f7faf9; }
+.layout-inbox-item.is-unread { background: #f2fbf7; }
+
+.layout-inbox-marker {
+  width: 10px;
+  height: 10px;
+  margin-top: 6px;
+  flex: 0 0 10px;
+  border: 3px solid #d9e1e8;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.layout-inbox-item.is-unread .layout-inbox-marker { border-color: var(--dash-green); }
+.layout-inbox-item.tone-danger.is-unread .layout-inbox-marker { border-color: var(--dash-red); }
+.layout-inbox-item.tone-warning.is-unread .layout-inbox-marker { border-color: var(--dash-amber); }
+.layout-inbox-item.tone-info.is-unread .layout-inbox-marker { border-color: var(--dash-blue); }
+
+.layout-inbox-copy {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 3px;
+}
+
+.layout-inbox-copy strong {
+  color: #24364a;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.layout-inbox-meta {
+  color: var(--dash-green-dark);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.layout-inbox-body {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #69798a;
+  font-size: 10px;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.layout-inbox-copy time {
+  margin-top: 2px;
+  color: #98a4b0;
+  font-size: 9px;
+}
+
+.layout-inbox-status {
+  margin: 0;
+  padding: 34px 18px;
+  color: var(--dash-muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.layout-inbox-status.is-error,
+.layout-inbox-feedback.is-error { color: var(--dash-red); }
+
+.layout-inbox-feedback {
+  min-height: 0;
+  margin: 0;
+  padding: 0 16px;
+  color: var(--dash-green-dark);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.layout-inbox-feedback:not(:empty) { padding-block: 8px; }
 
 .app-user {
   min-width: 132px;
@@ -435,6 +600,17 @@
     grid-area: utilities;
     margin-left: 0;
   }
+
+  .layout-inbox-panel {
+    top: calc(100% + 8px);
+    right: auto;
+    left: 0;
+    width: calc(100vw - 24px);
+    max-height: calc(100vh - 150px);
+  }
+
+  .layout-inbox[data-inbox="message"] .layout-inbox-panel { left: -40px; }
+  .layout-inbox-list { max-height: calc(100vh - 244px); }
 
   .layout-utility-button {
     width: 34px;

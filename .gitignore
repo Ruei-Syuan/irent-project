@@ -1,4 +1,4 @@
-.env
+# .env
 venv/
 .venv/
 __pycache__/
@@ -9,7 +9,11 @@ data/*.sqlite-wal
 
 # MCP 
 # 檢測 HTML 問題
-.playwright-mcp
+.playwright-mcp/
+tests/
 
 # user guide
-.user_guide
+#.user_guide
+
+# AI指令
+AGENTS.md

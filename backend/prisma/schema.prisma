@@ -1,0 +1,178 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Department {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String   @default("")
+  createdAt   String   @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  users       User[]
+
+  @@map("departments")
+}
+
+model Role {
+  id              Int              @id @default(autoincrement())
+  name            String           @unique
+  description     String           @default("")
+  isSystem        Boolean          @default(false) @map("is_system")
+  createdAt       String           @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt       String           @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
+  users           User[]
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id              Int              @id @default(autoincrement())
+  code            String           @unique
+  module          String
+  moduleLabel     String           @map("module_label")
+  action          String
+  actionLabel     String           @map("action_label")
+  rolePermissions RolePermission[]
+
+  @@unique([module, action])
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       Int        @map("role_id")
+  permissionId Int        @map("permission_id")
+  createdAt    String     @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model User {
+  id             Int         @id @default(autoincrement())
+  employeeNo     String      @unique @map("employee_no")
+  name           String
+  email          String?     @unique
+  phone          String?
+  passwordHash   String      @map("password_hash")
+  roleId         Int         @map("role_id")
+  departmentId   Int         @map("department_id")
+  status         String      @default("active")
+  lastLoginAt    String?     @map("last_login_at")
+  createdAt      String      @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt      String      @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
+  role           Role        @relation(fields: [roleId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  department     Department  @relation(fields: [departmentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  sessions       Session[]
+  auditLogs      AuditLog[]
+  inboxItems     InboxItem[]
+
+  @@index([roleId])
+  @@index([departmentId])
+  @@map("users")
+}
+
+model Session {
+  id        Int    @id @default(autoincrement())
+  userId    Int    @map("user_id")
+  tokenHash String @unique @map("token_hash")
+  ip        String?
+  userAgent String? @map("user_agent")
+  expiresAt String @map("expires_at")
+  createdAt String @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([tokenHash])
+  @@map("sessions")
+}
+
+model AuditLog {
+  id          Int     @id @default(autoincrement())
+  actorUserId Int?    @map("actor_user_id")
+  action      String
+  targetType  String  @map("target_type")
+  targetId    String? @map("target_id")
+  summary     String
+  ip          String?
+  createdAt   String  @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  actor       User?   @relation(fields: [actorUserId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model InboxItem {
+  id        Int     @id @default(autoincrement())
+  userId    Int     @map("user_id")
+  kind      String
+  title     String
+  body      String
+  href      String  @default("")
+  tone      String  @default("info")
+  sender    String?
+  isRead    Boolean @default(false) @map("is_read")
+  createdAt String  @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId, kind, isRead, createdAt])
+  @@map("inbox_items")
+}
+
+model Station {
+  id          Int       @id @default(autoincrement())
+  code        String    @unique
+  name        String
+  city        String
+  district    String
+  address     String
+  latitude    Float?
+  longitude   Float?
+  stationType String    @default("station") @map("station_type")
+  status      String    @default("active")
+  createdAt   String    @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt   String    @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
+  vehicles    Vehicle[]
+
+  @@index([city, district, status])
+  @@map("stations")
+}
+
+model Vehicle {
+  id             Int              @id @default(autoincrement())
+  licensePlate   String           @unique @map("license_plate")
+  model          String
+  color          String
+  stationId      Int              @map("station_id")
+  status         String           @default("available")
+  healthScore    Int              @default(100) @map("health_score")
+  todayMileage   Float            @default(0) @map("today_mileage")
+  latestAnomaly  String?          @map("latest_anomaly")
+  createdAt      String           @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt      String           @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
+  station        Station          @relation(fields: [stationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  anomalyAlerts  AiAnomalyAlert[]
+
+  @@index([stationId, status])
+  @@map("vehicles")
+}
+
+model AiAnomalyAlert {
+  id          Int     @id @default(autoincrement())
+  vehicleId   Int     @map("vehicle_id")
+  anomalyType String  @map("anomaly_type")
+  confidence  Int
+  status      String  @default("pending")
+  detectedAt  String  @default(dbgenerated("CURRENT_TIMESTAMP")) @map("detected_at")
+  createdAt   String  @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt   String  @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
+  vehicle     Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([vehicleId, status, detectedAt])
+  @@map("ai_anomaly_alerts")
+}

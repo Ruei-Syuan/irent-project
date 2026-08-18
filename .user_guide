@@ -1,0 +1,47 @@
+使用方式：
+
+1. 在專案目錄開啟 PowerShell：
+
+```powershell
+cd D:\code\2026\irent-project
+npm install
+npm start
+```
+
+2. 瀏覽器開啟：
+
+`http://localhost:3000`
+
+3. 使用測試管理員登入：
+
+- 員工編號：`ADM001`
+- 密碼：`Admin@1234`
+
+登入後進入「權限設定」，可以分別管理：
+
+- 角色權限矩陣
+- 角色帳號
+- 部門資料
+- 稽核紀錄
+
+注意：不要直接雙擊 HTML 檔案，必須先執行 `npm start`。停止系統可在 PowerShell 按 `Ctrl + C`。
+
+4. Swagger API 使用指南
+- 啟動後端服務後，在瀏覽器輸入：
+`http://localhost:3000/docs`
+- 若後端使用其他連接埠，請將 `3000` 改成實際 Port，例如：`http://localhost:3001/docs`
+- 啟動後端服務
+在 VS Code 終端機執行：
+```bash
+npm run dev
+# 或
+node backend/server.js
+```
+
+當終端機顯示以下訊息時，代表後端已成功啟動：
+```text
+Server listening at http://127.0.0.1:3000
+```
+
+接著開啟 `/docs`，即可查看所有 API 說明、請求欄位與回傳格式，也能直接測試 API。
+

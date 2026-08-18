@@ -1,0 +1,27 @@
+import aiAnomalyAlertRoutes from './ai-anomaly-alerts.js';
+import auditLogRoutes from './audit-logs.js';
+import authRoutes from './auth.js';
+import departmentRoutes from './departments.js';
+import inboxRoutes from './inbox.js';
+import permissionRoutes from './permissions.js';
+import roleRoutes from './roles.js';
+import stationRoutes from './stations.js';
+import userRoutes from './users.js';
+import vehicleRoutes from './vehicles.js';
+
+export default async function apiRoutes(app, options) {
+  const routeOptions = { auth: options.auth, prisma: options.prisma };
+
+  await app.register(authRoutes, { ...routeOptions, prefix: '/auth' });
+  await app.register(inboxRoutes, { ...routeOptions, prefix: '/inbox' });
+  await app.register(roleRoutes, { ...routeOptions, prefix: '/roles' });
+  await app.register(permissionRoutes, { ...routeOptions, prefix: '/permissions' });
+  await app.register(departmentRoutes, { ...routeOptions, prefix: '/departments' });
+  await app.register(userRoutes, { ...routeOptions, prefix: '/users' });
+  await app.register(auditLogRoutes, { ...routeOptions, prefix: '/audit-logs' });
+  await app.register(stationRoutes, { ...routeOptions, prefix: '/stations' });
+  await app.register(vehicleRoutes, { ...routeOptions, prefix: '/vehicles' });
+  await app.register(aiAnomalyAlertRoutes, { ...routeOptions, prefix: '/ai-anomaly-alerts' });
+
+  app.setNotFoundHandler((request, reply) => reply.code(404).send({ error: '找不到 API' }));
+}

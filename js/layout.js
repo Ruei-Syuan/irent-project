@@ -588,7 +588,10 @@
       const user = result.item;
       window.IRentCurrentUser = user;
       const userButton = document.querySelector('[data-user-menu]');
-      userButton.querySelector('.app-avatar').textContent = user.name.slice(-2);
+
+      // 右上角button只放入名字的第一個字
+      userButton.querySelector('.app-avatar').textContent = Array.from(user.name.trim())[0] || '?';
+
       userButton.querySelector('strong').textContent = user.name;
       userButton.querySelector('small').textContent = user.role.name;
       userButton.setAttribute('aria-label', `目前使用者 ${user.name}，${user.role.name}；點擊登出`);
@@ -612,10 +615,10 @@
       period.setAttribute('tabindex', '0');
       const togglePeriod = () => {
         const isSevenDays = period.textContent.includes('7');
-        period.childNodes[0].textContent = isSevenDays ? '近 30 天 ' : '近 7 天 ';
+        period.childNodes[0].textContent = isSevenDays ? '近 1 個月 ' : '近 1 周 ';
         document.querySelector('.fleet-trend-card .dashboard-card-head p').textContent = isSevenDays
-          ? '最近三十日即時狀態變化'
-          : '最近七日即時狀態變化';
+          ? '最近 1 個月即時狀態變化'
+          : '最近 1 周即時狀態變化';
       };
       period.addEventListener('click', togglePeriod);
       period.addEventListener('keydown', event => {
@@ -637,79 +640,16 @@
     });
   }
 
-  // 車隊管理：車輛篩選、區域切換、查看、新增及 CSV 匯入。
+  // 車隊管理：由獨立模組串接後端車輛與站點 API。
   function initFleet() {
-    const table = document.querySelector('table');
-    const search = document.querySelector('.filters .search');
-    const status = document.querySelector('.filters .select');
-    const region = document.querySelector('.fleet-grid .select');
-    const getRows = () => table?.querySelectorAll('tbody tr') || [];
-
-    pageState.applyFilter = () => filterElements(getRows(), `${pageState.globalQuery} ${search?.value || ''}`, row =>
-      !status || status.value === '全部狀態' || !row.textContent.includes('可租')
-    );
-    search?.addEventListener('input', pageState.applyFilter);
-    status?.addEventListener('change', pageState.applyFilter);
-
-    const regionCounts = {
-      台北都會區: ['38', '52', '8', '27'],
-      桃園: ['24', '31', '5', '18']
-    };
-    region?.addEventListener('change', () => {
-      const counts = regionCounts[region.value] || regionCounts.台北都會區;
-      document.querySelectorAll('.map .pin span').forEach((pin, index) => { pin.textContent = counts[index]; });
-      document.querySelector('.map')?.setAttribute('aria-label', `${region.value}車隊位置示意地圖`);
-    });
-
-    table?.addEventListener('click', event => {
-      const button = event.target.closest('button');
-      if (!button) return;
-      const row = button.closest('tr');
-      Array.from(getRows()).forEach(item => item.removeAttribute('aria-selected'));
-      row.setAttribute('aria-selected', 'true');
-      notify(row.textContent.replace(/\s+/g, ' ').trim());
-    });
-
-    findButton(document, '新增車輛')?.addEventListener('click', () => {
-      const plate = window.prompt('請輸入車牌');
-      if (!plate) return;
-      const model = window.prompt('請輸入車型', 'Toyota Yaris') || '未設定車型';
-      const station = window.prompt('請輸入站點', '待分配') || '待分配';
-      const row = document.createElement('tr');
-      row.innerHTML = `<td><span class="cell-title"></span><span class="cell-meta"></span></td><td></td><td><span class="badge green">可租</span></td><td><b>100</b><div class="progress"><span style="width:100%"></span></div></td><td>0 km</td><td>無</td><td><button class="btn small">查看</button></td>`;
-      row.querySelector('.cell-title').textContent = plate.toUpperCase();
-      row.querySelector('.cell-meta').textContent = model;
-      row.children[1].textContent = station;
-      table.querySelector('tbody').append(row);
-      pageState.applyFilter();
-    });
-
-    findButton(document, '匯入車輛')?.addEventListener('click', () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.csv,text/csv';
-      input.addEventListener('change', () => {
-        const file = input.files?.[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.addEventListener('load', () => {
-          const lines = String(reader.result).split(/\r?\n/).filter(Boolean);
-          const records = lines.slice(1).map(line => line.split(',').map(value => value.trim()));
-          records.forEach(([plate, model = '未設定車型', station = '待分配']) => {
-            if (!plate) return;
-            const row = document.createElement('tr');
-            row.innerHTML = `<td><span class="cell-title"></span><span class="cell-meta"></span></td><td></td><td><span class="badge green">可租</span></td><td><b>100</b><div class="progress"><span style="width:100%"></span></div></td><td>0 km</td><td>無</td><td><button class="btn small">查看</button></td>`;
-            row.querySelector('.cell-title').textContent = plate.toUpperCase();
-            row.querySelector('.cell-meta').textContent = model;
-            row.children[1].textContent = station;
-            table.querySelector('tbody').append(row);
-          });
-          pageState.applyFilter();
-          notify(`已匯入 ${records.length} 輛車。`);
-        });
-        reader.readAsText(file, 'utf-8');
-      });
-      input.click();
+    if (!window.IRentFleet) {
+      console.error('[iRent fleet] Missing fleet module.');
+      return;
+    }
+    window.IRentFleet.init({
+      notify,
+      getGlobalQuery: () => pageState.globalQuery,
+      setApplyFilter: callback => { pageState.applyFilter = callback; }
     });
   }
 

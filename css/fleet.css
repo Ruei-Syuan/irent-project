@@ -59,6 +59,12 @@
     top: 63%
 }
 
+.fleet-empty {
+    padding: 28px;
+    color: var(--muted);
+    text-align: center
+}
+
 .health {
     display: grid;
     grid-template-columns: 125px 1fr;

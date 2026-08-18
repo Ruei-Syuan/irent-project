@@ -31,10 +31,10 @@
               </p>
             </div>
             <div class="actions">
-              <button class="btn">
+              <button class="btn" type="button" data-action="import-vehicles">
                 匯入車輛
               </button>
-              <button class="btn primary">
+              <button class="btn primary" type="button" data-action="add-vehicle">
                 ＋ 新增車輛
               </button>
             </div>
@@ -47,10 +47,10 @@
                   ◆
                 </span>
               </div>
-              <b>
+              <b data-fleet-stat="total">
                 1,284
               </b>
-              <small>
+              <small data-fleet-meta="total">
                 7 種車型・96 個站點
               </small>
             </article>
@@ -61,14 +61,11 @@
                   ♥
                 </span>
               </div>
-              <b>
+              <b data-fleet-stat="health">
                 91.8
               </b>
-              <small>
-                <span class="good">
-                  ▲ 1.6
-                </span>
-                較上月
+              <small data-fleet-meta="health">
+                載入中
               </small>
             </article>
             <article class="metric">
@@ -78,7 +75,7 @@
                   !
                 </span>
               </div>
-              <b>
+              <b data-fleet-stat="attention">
                 77
               </b>
               <small>
@@ -87,33 +84,30 @@
             </article>
             <article class="metric">
               <div class="metric-label">
-                在線率
+                可租率
                 <span class="metric-icon">
                   ⌁
                 </span>
               </div>
-              <b>
+              <b data-fleet-stat="available">
                 97.1%
               </b>
-              <small>
-                37 輛設備離線
+              <small data-fleet-meta="available">
+                載入中
               </small>
             </article>
             <article class="metric">
               <div class="metric-label">
-                本月稼動率
+                今日總里程
                 <span class="metric-icon">
                   ↗
                 </span>
               </div>
-              <b>
+              <b data-fleet-stat="mileage">
                 78.4%
               </b>
-              <small>
-                <span class="good">
-                  ▲ 3.2%
-                </span>
-                年增
+              <small data-fleet-meta="mileage">
+                載入中
               </small>
             </article>
           </section>
@@ -128,7 +122,7 @@
                     台北都會區・點位顏色代表健康狀態
                   </p>
                 </div>
-                <select class="select" aria-label="營運區">
+                <select class="select" aria-label="營運區" data-fleet-region>
                   <option>
                     台北都會區
                   </option>
@@ -179,7 +173,7 @@
                 </div>
                 <div class="card-body health">
                   <div class="ring">
-                    <b>
+                    <b data-fleet-health-average>
                       91.8
                     </b>
                   </div>
@@ -246,7 +240,7 @@
                     </p>
                   </div>
                 </div>
-                <div class="card-body stack">
+                <div class="card-body stack" data-region-risk>
                   <div class="inline" style="justify-content:space-between">
                     <span>
                       <b>
@@ -301,13 +295,19 @@
                 </p>
               </div>
               <div class="filters">
-                <input class="search" aria-label="搜尋車輛" placeholder="搜尋車牌、車型、站點">
-                <select class="select" aria-label="健康狀態">
-                  <option>
+                <input class="search" aria-label="搜尋車輛" placeholder="搜尋車牌、車型、站點" data-fleet-search>
+                <select class="select" aria-label="車輛狀態" data-fleet-status>
+                  <option value="">
                     全部狀態
                   </option>
-                  <option>
-                    需關注
+                  <option value="available">
+                    可租
+                  </option>
+                  <option value="cleaning">
+                    待清潔
+                  </option>
+                  <option value="maintenance">
+                    待維修
                   </option>
                 </select>
               </div>
@@ -339,7 +339,7 @@
                     </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody data-fleet-body>
                   <tr>
                     <td>
                       <span class="cell-title">
@@ -461,6 +461,12 @@
         </main>
       </div>
     </div>
+    <script src="js/api/client.js" defer>
+    </script>
+    <script src="js/api/vehicles.js" defer>
+    </script>
+    <script src="js/fleet.js" defer>
+    </script>
     <script src="js/layout.js" defer>
     </script>
   </body>

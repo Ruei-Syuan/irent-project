@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import { findUserByEmployeeNo, toPublicUser, userInclude } from '../repositories/user-repository.js';
 
 const SESSION_HOURS = 8;
+const SESSION_CACHE_MS = 5 * 1000;
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const MAX_LOGIN_FAILURES = 5;
 
@@ -26,6 +27,7 @@ function hashSessionToken(token) {
 
 export function createAuthService(prisma, passwordVerifier = verifyPassword) {
   const loginFailures = new Map();
+  const sessionCache = new Map();
 
   return {
     async login(employeeNo, password, metadata = {}) {
@@ -68,25 +70,44 @@ export function createAuthService(prisma, passwordVerifier = verifyPassword) {
           }
         })
       ]);
-      return { token, user: toPublicUser(user) };
+      const publicUser = toPublicUser(user);
+      sessionCache.set(hashSessionToken(token), {
+        user: publicUser,
+        expiresAt: Date.now() + SESSION_CACHE_MS
+      });
+      return { token, user: publicUser };
     },
 
     async currentUser(token) {
       if (!token) return null;
+      const tokenHash = hashSessionToken(token);
+      const cached = sessionCache.get(tokenHash);
+      if (cached?.expiresAt > Date.now()) return cached.user;
+      if (cached) sessionCache.delete(tokenHash);
+
       const session = await prisma.session.findFirst({
         where: {
-          tokenHash: hashSessionToken(token),
+          tokenHash,
           expiresAt: { gt: new Date().toISOString() },
           user: { status: 'active' }
         },
         include: { user: { include: userInclude } }
       });
-      return session ? toPublicUser(session.user) : null;
+      if (!session) return null;
+
+      const user = toPublicUser(session.user);
+      sessionCache.set(tokenHash, {
+        user,
+        expiresAt: Date.now() + SESSION_CACHE_MS
+      });
+      return user;
     },
 
     async logout(token) {
       if (!token) return;
-      await prisma.session.deleteMany({ where: { tokenHash: hashSessionToken(token) } });
+      const tokenHash = hashSessionToken(token);
+      sessionCache.delete(tokenHash);
+      await prisma.session.deleteMany({ where: { tokenHash } });
     }
   };
 }

@@ -8,10 +8,10 @@ datasource db {
 }
 
 model Department {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String   @default("")
-  createdAt   String   @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  id          Int    @id @default(autoincrement())
+  name        String @unique
+  description String @default("")
+  createdAt   String @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
   users       User[]
 
   @@map("departments")
@@ -55,23 +55,23 @@ model RolePermission {
 }
 
 model User {
-  id             Int         @id @default(autoincrement())
-  employeeNo     String      @unique @map("employee_no")
-  name           String
-  email          String?     @unique
-  phone          String?
-  passwordHash   String      @map("password_hash")
-  roleId         Int         @map("role_id")
-  departmentId   Int         @map("department_id")
-  status         String      @default("active")
-  lastLoginAt    String?     @map("last_login_at")
-  createdAt      String      @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
-  updatedAt      String      @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
-  role           Role        @relation(fields: [roleId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  department     Department  @relation(fields: [departmentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  sessions       Session[]
-  auditLogs      AuditLog[]
-  inboxItems     InboxItem[]
+  id           Int         @id @default(autoincrement())
+  employeeNo   String      @unique @map("employee_no")
+  name         String
+  email        String?     @unique
+  phone        String?
+  passwordHash String      @map("password_hash")
+  roleId       Int         @map("role_id")
+  departmentId Int         @map("department_id")
+  status       String      @default("active")
+  lastLoginAt  String?     @map("last_login_at")
+  createdAt    String      @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt    String      @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
+  role         Role        @relation(fields: [roleId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  department   Department  @relation(fields: [departmentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  sessions     Session[]
+  auditLogs    AuditLog[]
+  inboxItems   InboxItem[]
 
   @@index([roleId])
   @@index([departmentId])
@@ -79,14 +79,14 @@ model User {
 }
 
 model Session {
-  id        Int    @id @default(autoincrement())
-  userId    Int    @map("user_id")
-  tokenHash String @unique @map("token_hash")
+  id        Int     @id @default(autoincrement())
+  userId    Int     @map("user_id")
+  tokenHash String  @unique @map("token_hash")
   ip        String?
   userAgent String? @map("user_agent")
-  expiresAt String @map("expires_at")
-  createdAt String @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
-  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  expiresAt String  @map("expires_at")
+  createdAt String  @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([tokenHash])
   @@map("sessions")
@@ -144,22 +144,72 @@ model Station {
 }
 
 model Vehicle {
-  id             Int              @id @default(autoincrement())
-  licensePlate   String           @unique @map("license_plate")
+  id             Int                    @id @default(autoincrement())
+  licensePlate   String                 @unique @map("license_plate")
   model          String
   color          String
-  stationId      Int              @map("station_id")
-  status         String           @default("available")
-  healthScore    Int              @default(100) @map("health_score")
-  todayMileage   Float            @default(0) @map("today_mileage")
-  latestAnomaly  String?          @map("latest_anomaly")
-  createdAt      String           @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
-  updatedAt      String           @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
-  station        Station          @relation(fields: [stationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  stationId      Int                    @map("station_id")
+  status         String                 @default("available")
+  cabinCondition String                 @default("clean") @map("cabin_condition")
+  healthScore    Int                    @default(100) @map("health_score")
+  todayMileage   Float                  @default(0) @map("today_mileage")
+  latestAnomaly  String?                @map("latest_anomaly")
+  createdAt      String                 @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt      String                 @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
+  station        Station                @relation(fields: [stationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   anomalyAlerts  AiAnomalyAlert[]
+  rentals        Rental[]
+  serviceRecords VehicleServiceRecord[]
 
   @@index([stationId, status])
   @@map("vehicles")
+}
+
+model Rental {
+  id         Int       @id @default(autoincrement())
+  vehicleId  Int       @map("vehicle_id")
+  customerId Int?      @map("customer_id")
+  startedAt  String    @map("started_at")
+  endedAt    String?   @map("ended_at")
+  status     String    @default("completed")
+  rentalFee  Int       @default(0) @map("rental_fee")
+  createdAt  String    @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt  String    @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
+  vehicle    Vehicle   @relation(fields: [vehicleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@unique([vehicleId, startedAt, endedAt])
+  @@index([customerId])
+  @@index([startedAt, endedAt, status])
+  @@map("rentals")
+}
+
+model Customer {
+  id        Int      @id @default(autoincrement())
+  memberNo  String   @unique @map("member_no")
+  fullName  String   @map("full_name")
+  phone     String
+  createdAt String   @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt String   @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
+  rentals   Rental[]
+
+  @@map("customers")
+}
+
+model VehicleServiceRecord {
+  id          Int     @id @default(autoincrement())
+  vehicleId   Int     @map("vehicle_id")
+  type        String
+  performedAt String  @map("performed_at")
+  cost        Int     @default(0)
+  note        String  @default("")
+  createdAt   String  @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt   String  @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
+  vehicle     Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([vehicleId, type, performedAt])
+  @@index([vehicleId, performedAt])
+  @@map("vehicle_service_records")
 }
 
 model AiAnomalyAlert {

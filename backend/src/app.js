@@ -12,11 +12,11 @@ import apiRoutes from './routes/index.js';
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const pagePermissions = {
   'dashboard.html': 'dashboard.view',
-  'fleet.html': 'fleet.view',
+  'car-management.html': 'fleet.view',
   'damage-review.html': 'damage.view',
-  'dispatch.html': 'dispatch.view',
+  'clear-orders.html': 'dispatch.view',
   'work-orders.html': 'work_orders.view',
-  'reports.html': 'reports.view',
+  // 報表分析暫時停用：'reports.html': 'reports.view',
   'permissions.html': 'permissions.view'
 };
 
@@ -41,7 +41,7 @@ export async function buildApp(options = {}) {
   app.addHook('onRequest', async (request, reply) => {
     reply.header('X-Content-Type-Options', 'nosniff');
     reply.header('X-Frame-Options', 'DENY');
-    reply.header('Referrer-Policy', 'same-origin');
+    reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
     reply.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   });
 
@@ -69,6 +69,9 @@ export async function buildApp(options = {}) {
     prefix: '/js/',
     decorateReply: false
   });
+  app.get('/data/taiwan-counties.geojson', async (request, reply) => (
+    reply.sendFile('taiwan-counties.geojson', path.join(projectRoot, 'data'))
+  ));
   app.get('/login.html', async (request, reply) => {
     const user = await auth.service.currentUser(request.cookies.irent_session);
     if (user) return reply.redirect('/dashboard.html');

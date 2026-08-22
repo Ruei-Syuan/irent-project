@@ -1,9 +1,11 @@
 import 'dotenv/config';
 import { buildApp } from './app.js';
+import { warmPrisma } from './plugins/prisma.js';
 import { initializeDatabase } from './services/database-setup.js';
 
 await initializeDatabase();
 const app = await buildApp();
+await warmPrisma(app.prisma);
 const port = Number(process.env.PORT) || 3000;
 const host = process.env.HOST || '127.0.0.1';
 

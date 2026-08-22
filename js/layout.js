@@ -3,29 +3,30 @@
 
   // 共用頁面設定：用於產生側欄導覽與判斷目前頁面。
   const pages = [
-    { key: 'dashboard', label: '營運總覽', href: 'dashboard.html', icon: 'car' },
-    { key: 'fleet', label: '車隊管理', href: 'fleet.html', icon: 'car' },
-    { key: 'damage-review', label: 'AI 車損案件', href: 'damage-review.html', icon: 'ai' },
-    { key: 'dispatch', label: '清潔維修派工', href: 'dispatch.html', icon: 'dispatch' },
+    { key: 'dashboard', label: '營運總覽', href: 'dashboard.html', icon: 'dashboard' },
+    { key: 'fleet', label: '車隊管理', href: 'car-management.html', icon: 'car' },
+    { key: 'damage-review', label: '人工複合車損', href: 'damage-review.html', icon: 'ai' },
+    { key: 'dispatch', label: '清潔工單', href: 'clear-orders.html', icon: 'dispatch' },
     { key: 'work-orders', label: '維修工單', href: 'work-orders.html', icon: 'wrench' },
-    { key: 'reports', label: '報表分析', href: 'reports.html', icon: 'chart' },
+    // 報表分析暫時停用：{ key: 'reports', label: '報表分析', href: 'reports.html', icon: 'chart' },
     { key: 'permissions', label: '權限設定', href: 'permissions.html', icon: 'shield' }
   ];
 
   const searchSources = [
-    { href: 'fleet.html', category: '車輛', selector: 'table tbody tr', titleSelector: '.cell-title' },
+    { href: 'car-management.html', category: '車輛', selector: 'table tbody tr', titleSelector: '.cell-title' },
     { href: 'damage-review.html', category: '車損案件', selector: '.case-list .case', titleSelector: '.case-top b', hash: '#detail' },
-    { href: 'dispatch.html', category: '調度任務', selector: '.kanban .task', titleSelector: 'h3' },
+    { href: 'clear-orders.html', category: '調度任務', selector: '.kanban .task', titleSelector: 'h3' },
     { href: 'work-orders.html', category: '維修工單', selector: 'table tbody tr', titleSelector: '.cell-title' }
   ];
 
   // 共用 SVG 圖示，避免各頁重複維護相同標記。
   const icons = {
+    dashboard: '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 3h8v8H3V3Zm10 0h8v5h-8V3Zm0 7h8v11h-8V10ZM3 13h8v8H3v-8Z"/></svg>',
     car: '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 11h14l-1.3-4.1A2 2 0 0 0 15.8 5H8.2a2 2 0 0 0-1.9 1.9L5 11Zm-1 2h16v5a2 2 0 0 1-2 2h-1v-2H7v2H6a2 2 0 0 1-2-2v-5Zm3 1.5A1.5 1.5 0 1 0 7 17a1.5 1.5 0 0 0 0-3Zm10 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z"/></svg>',
     ai: '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 2h6v2h3a2 2 0 0 1 2 2v3h2v6h-2v3a2 2 0 0 1-2 2h-3v2H9v-2H6a2 2 0 0 1-2-2v-3H2V9h2V6a2 2 0 0 1 2-2h3V2Zm-1 6v8h8V8H8Zm2 2h4v4h-4v-4Z"/></svg>',
     dispatch: '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15.8 3.2 5 5-2 2-1.2-1.2-5.9 5.9 1.2 1.2-2.8 2.8-5-5 2.8-2.8 1.2 1.2 5.9-5.9-1.2-1.2 2-2ZM3 17l4 4H3v-4Z"/></svg>',
     wrench: '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M14.7 4.3a5 5 0 0 0-6.4 6.4L3 16v5h5l5.3-5.3a5 5 0 0 0 6.4-6.4l-3 3-3-3 3-3-2-2ZM5 17h2v2H5v-2Z"/></svg>',
-    chart: '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 20h3V10H4v10Zm6 0h4V4h-4v16Zm7 0h3V7h-3v13Z"/></svg>',
+    // 報表分析暫時停用：chart: '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 20h3V10H4v10Zm6 0h4V4h-4v16Zm7 0h3V7h-3v13Z"/></svg>',
     shield: '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 2 8 3v6c0 5.1-3.4 9.5-8 11-4.6-1.5-8-5.9-8-11V5l8-3Zm0 5a3 3 0 0 0-1 5.8V17h2v-4.2A3 3 0 0 0 12 7Z"/></svg>',
     search: '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m20 20-4.4-4.4m2.4-5.1a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>',
     notification: '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Zm-8 11h4a2 2 0 0 1-4 0Z"/></svg>',
@@ -57,7 +58,6 @@
     return `
       <div class="app-heading">
         <h1>${activePage.label}</h1>
-        <p>掌握車隊營運與車況健康</p>
       </div>
       <div class="app-topbar-tools">
         <div class="app-search" data-global-search>
@@ -603,41 +603,10 @@
     }).catch(error => console.error('[iRent auth]', error));
   }
 
-  // 營運總覽：搜尋警示、切換趨勢期間並開啟案件頁面。
+  // 營運總覽：載入七日車隊趨勢。
   function initDashboard() {
-    const searchable = () => document.querySelectorAll('.alerts-table tbody tr, .priority-list > a');
-    const period = document.querySelector('.period-pill');
-
-    pageState.applyFilter = () => filterElements(searchable(), pageState.globalQuery);
-
-    if (period) {
-      period.setAttribute('role', 'button');
-      period.setAttribute('tabindex', '0');
-      const togglePeriod = () => {
-        const isSevenDays = period.textContent.includes('7');
-        period.childNodes[0].textContent = isSevenDays ? '近 1 個月 ' : '近 1 周 ';
-        document.querySelector('.fleet-trend-card .dashboard-card-head p').textContent = isSevenDays
-          ? '最近 1 個月即時狀態變化'
-          : '最近 1 周即時狀態變化';
-      };
-      period.addEventListener('click', togglePeriod);
-      period.addEventListener('keydown', event => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          togglePeriod();
-        }
-      });
-    }
-
-    document.querySelectorAll('.alerts-table tbody tr').forEach(row => {
-      row.tabIndex = 0;
-      row.setAttribute('role', 'link');
-      const openCase = () => { window.location.href = 'damage-review.html'; };
-      row.addEventListener('click', openCase);
-      row.addEventListener('keydown', event => {
-        if (event.key === 'Enter') openCase();
-      });
-    });
+    pageState.applyFilter = () => 0;
+    window.IRentDashboard?.init();
   }
 
   // 車隊管理：由獨立模組串接後端車輛與站點 API。
@@ -846,7 +815,7 @@
     findButton(document, '匯出工單')?.addEventListener('click', () => downloadCsv('irent-work-orders.csv', getTableRows(table)));
   }
 
-  // 報表分析：切換期間資料並匯出目前管理指標。
+  /* 報表分析互動暫時停用：恢復頁面時請解除此區塊註解。
   function initReports() {
     const period = document.querySelector('.page-head .select');
     const exportButton = findButton(document, '匯出管理報表');
@@ -880,6 +849,7 @@
       ])
     ]));
   }
+  */
 
   // 權限設定：角色切換、權限矩陣、成員及稽核資料操作。
   function initPermissions() {
@@ -986,7 +956,7 @@
       'damage-review': initDamageReview,
       dispatch: initDispatch,
       'work-orders': initWorkOrders,
-      reports: initReports,
+      // 報表分析暫時停用：reports: initReports,
       permissions: () => {}
     };
     initializers[pageKey]?.();

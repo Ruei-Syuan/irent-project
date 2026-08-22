@@ -1,3 +1,4 @@
+/* 報表分析樣式暫時停用；恢復頁面時請同步還原 reports.css 檔名。 */
 .report-grid {
     grid-template-columns: minmax(0, 1.42fr) minmax(300px, .7fr)
 }

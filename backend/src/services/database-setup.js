@@ -2,7 +2,14 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Database from 'better-sqlite3';
-import { anomalySeeds, stationSeeds, vehicleSeeds } from '../data/operations-seed.js';
+import {
+  anomalySeeds,
+  createRentalSeeds,
+  createServiceSeeds,
+  customerSeeds,
+  stationSeeds,
+  vehicleSeeds
+} from '../data/operations-seed.js';
 import { hashPassword } from './auth.js';
 
 const backendRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -14,6 +21,19 @@ const migrations = [
   {
     table: 'stations',
     path: path.join(backendRoot, 'prisma', 'migrations', '0002_fleet_operations', 'migration.sql')
+  },
+  {
+    table: 'rentals',
+    path: path.join(backendRoot, 'prisma', 'migrations', '0003_rentals', 'migration.sql')
+  },
+  {
+    table: 'vehicles',
+    column: 'cabin_condition',
+    path: path.join(backendRoot, 'prisma', 'migrations', '0004_vehicle_cabin_condition', 'migration.sql')
+  },
+  {
+    table: 'vehicle_service_records',
+    path: path.join(backendRoot, 'prisma', 'migrations', '0005_vehicle_history', 'migration.sql')
   }
 ];
 
@@ -23,7 +43,7 @@ const permissionModules = [
   ['damage', '車損審核', ['view', 'review', 'export']],
   ['dispatch', '調度管理', ['view', 'create', 'edit', 'delete']],
   ['work_orders', '工單管理', ['view', 'create', 'edit', 'delete', 'approve', 'export']],
-  ['reports', '報表中心', ['view', 'export']],
+  // 報表分析暫時停用：['reports', '報表中心', ['view', 'export']],
   ['permissions', '權限設定', ['view', 'manage']],
   ['users', '帳號管理', ['view', 'create', 'edit', 'delete']],
   ['audit', '稽核紀錄', ['view', 'export']],
@@ -102,16 +122,24 @@ function bootstrapAdmin(database, options) {
 function seedOperations(database) {
   const insertStation = database.prepare(`
     INSERT OR IGNORE INTO stations
-      (code, name, city, district, address, station_type, status)
+      (code, name, city, district, address, latitude, longitude, station_type, status)
     VALUES
-      (@code, @name, @city, @district, @address, @stationType, 'active')
+      (@code, @name, @city, @district, @address, @latitude, @longitude, @stationType, 'active')
+  `);
+  const updateStationCoordinates = database.prepare(`
+    UPDATE stations
+    SET latitude = @latitude, longitude = @longitude
+    WHERE code = @code
+      AND @latitude IS NOT NULL
+      AND @longitude IS NOT NULL
+      AND (latitude IS NULL OR longitude IS NULL)
   `);
   const findStation = database.prepare('SELECT id FROM stations WHERE code = ?');
   const insertVehicle = database.prepare(`
     INSERT OR IGNORE INTO vehicles
-      (license_plate, model, color, station_id, status, health_score, today_mileage, latest_anomaly)
+      (license_plate, model, color, station_id, status, cabin_condition, health_score, today_mileage, latest_anomaly)
     VALUES
-      (@licensePlate, @model, @color, @stationId, @status, @healthScore, @todayMileage, @latestAnomaly)
+      (@licensePlate, @model, @color, @stationId, @status, @cabinCondition, @healthScore, @todayMileage, @latestAnomaly)
   `);
   const findVehicle = database.prepare('SELECT id FROM vehicles WHERE license_plate = ?');
   const findAlert = database.prepare(`
@@ -124,12 +152,43 @@ function seedOperations(database) {
     VALUES
       (@vehicleId, @anomalyType, @confidence, @status, @detectedAt)
   `);
+  const insertRental = database.prepare(`
+    INSERT OR IGNORE INTO rentals
+      (vehicle_id, customer_id, started_at, ended_at, status, rental_fee)
+    VALUES
+      (@vehicleId, @customerId, @startedAt, @endedAt, @status, @rentalFee)
+  `);
+  const insertCustomer = database.prepare(`
+    INSERT OR IGNORE INTO customers (member_no, full_name, phone)
+    VALUES (@memberNo, @fullName, @phone)
+  `);
+  const findCustomer = database.prepare('SELECT id FROM customers WHERE member_no = ?');
+  const updateRentalHistory = database.prepare(`
+    UPDATE rentals
+    SET customer_id = @customerId,
+        rental_fee = CASE WHEN rental_fee = 0 THEN @rentalFee ELSE rental_fee END
+    WHERE id = @id AND customer_id IS NULL
+  `);
+  const insertServiceRecord = database.prepare(`
+    INSERT OR IGNORE INTO vehicle_service_records
+      (vehicle_id, type, performed_at, cost, note)
+    VALUES
+      (@vehicleId, @type, @performedAt, @cost, @note)
+  `);
 
   const seed = database.transaction(() => {
-    const created = { stations: 0, vehicles: 0, anomalyAlerts: 0 };
+    const created = {
+      stations: 0,
+      vehicles: 0,
+      anomalyAlerts: 0,
+      customers: 0,
+      rentals: 0,
+      serviceRecords: 0
+    };
 
     for (const station of stationSeeds) {
       created.stations += insertStation.run(station).changes;
+      updateStationCoordinates.run(station);
     }
 
     for (const vehicle of vehicleSeeds) {
@@ -143,6 +202,44 @@ function seedOperations(database) {
       if (!vehicle) throw new Error(`Vehicle seed not found: ${alert.licensePlate}`);
       if (findAlert.get(vehicle.id, alert.anomalyType, alert.detectedAt)) continue;
       created.anomalyAlerts += insertAlert.run({ ...alert, vehicleId: vehicle.id }).changes;
+    }
+
+    for (const customer of customerSeeds) {
+      created.customers += insertCustomer.run(customer).changes;
+    }
+
+    const rentalCount = database.prepare('SELECT COUNT(*) AS count FROM rentals').get().count;
+    if (rentalCount === 0) {
+      for (const rental of createRentalSeeds()) {
+        const vehicle = findVehicle.get(rental.licensePlate);
+        const customer = findCustomer.get(rental.customerMemberNo);
+        if (!vehicle) throw new Error(`Vehicle seed not found: ${rental.licensePlate}`);
+        if (!customer) throw new Error(`Customer seed not found: ${rental.customerMemberNo}`);
+        created.rentals += insertRental.run({
+          ...rental,
+          vehicleId: vehicle.id,
+          customerId: customer.id
+        }).changes;
+      }
+    } else {
+      const rentals = database.prepare('SELECT id FROM rentals ORDER BY id').all();
+      rentals.forEach((rental, index) => {
+        const customer = findCustomer.get(customerSeeds[index % customerSeeds.length].memberNo);
+        updateRentalHistory.run({
+          id: rental.id,
+          customerId: customer.id,
+          rentalFee: 780 + index % 8 * 120
+        });
+      });
+    }
+
+    for (const record of createServiceSeeds()) {
+      const vehicle = findVehicle.get(record.licensePlate);
+      if (!vehicle) throw new Error(`Vehicle seed not found: ${record.licensePlate}`);
+      created.serviceRecords += insertServiceRecord.run({
+        ...record,
+        vehicleId: vehicle.id
+      }).changes;
     }
 
     return created;
@@ -163,7 +260,12 @@ export async function initializeDatabase(options = {}) {
     `);
     const migrationsApplied = [];
     for (const migration of migrations) {
-      if (hasTable.get(migration.table)) continue;
+      const alreadyApplied = migration.column
+        ? database.prepare(`PRAGMA table_info("${migration.table}")`)
+          .all()
+          .some(column => column.name === migration.column)
+        : Boolean(hasTable.get(migration.table));
+      if (alreadyApplied) continue;
       database.exec(await readFile(migration.path, 'utf8'));
       migrationsApplied.push(path.basename(path.dirname(migration.path)));
     }

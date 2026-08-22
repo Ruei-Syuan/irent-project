@@ -5,3 +5,8 @@ export function createPrisma(databaseUrl = process.env.DATABASE_URL ?? 'file:../
   const adapter = new PrismaBetterSqlite3({ url: databaseUrl });
   return new PrismaClient({ adapter });
 }
+
+export async function warmPrisma(prisma) {
+  await prisma.$connect();
+  return prisma.user.count();
+}

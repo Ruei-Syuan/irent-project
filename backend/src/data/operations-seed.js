@@ -101,14 +101,53 @@ const stationRows = [
   ['臺東縣', '臺東市', 'iRent台東車站站', '岩灣路101巷598號']
 ];
 
-export const stationSeeds = stationRows.map((row, index) => ({
-  code: `ST${String(index + 1).padStart(3, '0')}`,
-  city: row[0],
-  district: row[1],
-  name: row[2],
-  address: `${row[0]}${row[1]}${row[3]}`,
-  stationType: row[2].includes('停車場') ? 'parking' : 'station'
-}));
+const stationCoordinates = new Map([
+  ['ST001', [25.1209755, 121.7233243]],
+  ['ST004', [25.0977723, 121.7163953]],
+  ['ST007', [25.0659860, 121.5155140]],
+  ['ST010', [25.0333448, 121.5668963]],
+  ['ST013', [25.0918396, 121.5242068]],
+  ['ST016', [25.0696640, 121.5889983]],
+  ['ST019', [25.1324190, 121.5013790]],
+  ['ST022', [25.1813044, 121.4531477]],
+  ['ST025', [25.0092350, 121.5200703]],
+  ['ST028', [24.9907063, 121.4205326]],
+  ['ST031', [25.0614860, 121.4881020]],
+  ['ST034', [24.9722010, 121.4433480]],
+  ['ST037', [24.9653531, 121.2249260]],
+  ['ST040', [24.9939230, 121.3016800]],
+  ['ST043', [25.0506448, 121.2917322]],
+  ['ST046', [24.8047326, 120.9736257]],
+  ['ST049', [24.8187543, 120.9600440]],
+  ['ST052', [24.8396820, 121.0040779]],
+  ['ST055', [24.1413800, 120.6710400]],
+  ['ST058', [24.1822644, 120.6862883]],
+  ['ST061', [24.1653026, 120.6336550]],
+  ['ST064', [24.1822644, 120.6862883]],
+  ['ST067', [24.0807667, 120.5423000]],
+  ['ST070', [23.8612667, 120.5809667]],
+  ['ST073', [23.4642846, 120.4348533]],
+  ['ST076', [22.9921516, 120.2059575]],
+  ['ST079', [23.0138559, 120.1999226]],
+  ['ST082', [22.9921516, 120.2059575]],
+  ['ST085', [22.9671694, 120.2938390]],
+  ['ST088', [22.6476949, 120.2996219]]
+]);
+
+export const stationSeeds = stationRows.map((row, index) => {
+  const code = `ST${String(index + 1).padStart(3, '0')}`;
+  const [latitude, longitude] = stationCoordinates.get(code) ?? [null, null];
+  return {
+    code,
+    city: row[0],
+    district: row[1],
+    name: row[2],
+    address: `${row[0]}${row[1]}${row[3]}`,
+    latitude,
+    longitude,
+    stationType: row[2].includes('停車場') ? 'parking' : 'station'
+  };
+});
 
 const plates = [
   'RAC-4582', 'RBC-2108', 'RBA-6935', 'RAD-7731', 'RAF-8910', 'RBG-1357',
@@ -121,6 +160,20 @@ const plates = [
 const models = ['Toyota Yaris', 'Toyota Vios', 'Honda Fit', 'Toyota Corolla Cross', 'Nissan Kicks', 'LUXGEN U5', 'Mitsubishi Colt Plus'];
 const colors = ['白', '銀', '藍', '灰', '紅', '黑', '橘'];
 
+const customerNames = [
+  '王小明', '陳怡君', '林志豪', '張雅婷', '李冠廷', '黃筱雯',
+  '吳俊傑', '劉品妤', '蔡承恩', '楊佳穎', '許家維', '鄭詩涵',
+  '謝孟哲', '洪郁婷', '郭柏宇', '邱思妤', '曾建宏', '廖婉婷',
+  '賴彥廷', '徐鈺涵', '周子翔', '葉欣儀', '蘇祐辰', '莊佩珊',
+  '呂宗翰', '江宛庭', '何宇軒', '蕭佳琪', '羅文凱', '高語彤'
+];
+
+export const customerSeeds = customerNames.map((fullName, index) => ({
+  memberNo: `MEM${String(index + 1).padStart(4, '0')}`,
+  fullName,
+  phone: `09${String(12000000 + index * 17391).slice(-8)}`
+}));
+
 export const vehicleSeeds = plates.map((licensePlate, index) => {
   const isMaintenance = [0, 3, 11, 18, 25].includes(index);
   const isCleaning = [1, 8, 14, 22, 28].includes(index);
@@ -130,6 +183,7 @@ export const vehicleSeeds = plates.map((licensePlate, index) => {
     color: colors[index % colors.length],
     stationCode: `ST${String((index * 3) % 100 + 1).padStart(3, '0')}`,
     status: isMaintenance ? 'maintenance' : isCleaning ? 'cleaning' : 'available',
+    cabinCondition: isCleaning ? 'dirty' : index % 3 === 0 ? 'average' : 'clean',
     healthScore: isMaintenance ? 62 + index % 8 : isCleaning ? 76 + index % 8 : 88 + index % 12,
     todayMileage: Number((18.4 + index * 2.7).toFixed(1)),
     latestAnomaly: isMaintenance ? ['右後保桿刮傷', '右前輪胎壓異常', '左後視鏡損傷'][index % 3] : isCleaning ? '車內髒污待清潔' : null
@@ -143,3 +197,66 @@ export const anomalySeeds = [
   { licensePlate: 'RAF-8910', anomalyType: '左後視鏡損傷', confidence: 90, status: 'review', detectedAt: '2026-08-17 09:15:00' },
   { licensePlate: 'RBG-1357', anomalyType: '後保桿擦傷', confidence: 85, status: 'review', detectedAt: '2026-08-17 08:59:00' }
 ];
+
+const TAIPEI_OFFSET_MS = 8 * 60 * 60 * 1000;
+
+function taipeiDayStart(date, dayOffset) {
+  const taipeiNow = new Date(date.getTime() + TAIPEI_OFFSET_MS);
+  return new Date(Date.UTC(
+    taipeiNow.getUTCFullYear(),
+    taipeiNow.getUTCMonth(),
+    taipeiNow.getUTCDate() + dayOffset
+  ) - TAIPEI_OFFSET_MS);
+}
+
+export function createRentalSeeds(today = new Date()) {
+  const dailyCounts = [7, 9, 8, 11, 10, 12, 9];
+  const rentals = [];
+
+  dailyCounts.forEach((count, dayIndex) => {
+    const dayStart = taipeiDayStart(today, dayIndex - 6);
+    for (let vehicleIndex = 0; vehicleIndex < count; vehicleIndex += 1) {
+      const startedAt = new Date(dayStart.getTime() + (9 + vehicleIndex % 5) * 60 * 60 * 1000);
+      const endedAt = new Date(startedAt.getTime() + (2 + vehicleIndex % 3) * 60 * 60 * 1000);
+      rentals.push({
+        licensePlate: plates[(vehicleIndex + dayIndex * 3) % plates.length],
+        customerMemberNo: customerSeeds[(vehicleIndex + dayIndex) % customerSeeds.length].memberNo,
+        startedAt: startedAt.toISOString(),
+        endedAt: endedAt.toISOString(),
+        status: dayIndex === 6 ? 'active' : 'completed',
+        rentalFee: 720 + (2 + vehicleIndex % 3) * 180
+      });
+    }
+  });
+
+  const multiDayStart = new Date(taipeiDayStart(today, -4).getTime() + 15 * 60 * 60 * 1000);
+  rentals.push({
+    licensePlate: plates.at(-1),
+    customerMemberNo: customerSeeds.at(-1).memberNo,
+    startedAt: multiDayStart.toISOString(),
+    endedAt: new Date(taipeiDayStart(today, 1).getTime() + 60 * 60 * 1000).toISOString(),
+    status: 'active',
+    rentalFee: 2880
+  });
+
+  return rentals;
+}
+
+export function createServiceSeeds() {
+  return plates.flatMap((licensePlate, index) => [
+    {
+      licensePlate,
+      type: 'cleaning',
+      performedAt: new Date(Date.UTC(2026, 7, 2 + index % 16, 2, 0)).toISOString(),
+      cost: 450 + index % 4 * 80,
+      note: index % 2 ? '車內基礎清潔' : '內裝深度清潔'
+    },
+    {
+      licensePlate,
+      type: 'maintenance',
+      performedAt: new Date(Date.UTC(2026, 6, 3 + index % 20, 3, 0)).toISOString(),
+      cost: 1800 + index % 6 * 650,
+      note: index % 3 ? '定期保養與安全檢查' : '更換耗材與煞車檢查'
+    }
+  ]);
+}

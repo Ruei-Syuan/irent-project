@@ -60,6 +60,7 @@ description: Codex 專案開發規則
 ```text
 iRent 專案
 ├─ *.html、css/、js/       前端頁面
+├─ 視覺化套件             MapLibre GL JS（互動式地圖與氣泡圖）
 ├─ data/irent.sqlite      SQLite 正式資料庫
 ├─ backend/
 │  ├─ src/

@@ -283,6 +283,65 @@
     color: #8997a8
 }
 
+@media(min-width:1051px) {
+    .app-body[data-page="permissions"] {
+        height: 100vh;
+        overflow: hidden
+    }
+
+    .app-body[data-page="permissions"] .app-shell,
+    .app-body[data-page="permissions"] .app-workspace {
+        height: 100%
+    }
+
+    .app-body[data-page="permissions"] .app-workspace,
+    .app-body[data-page="permissions"] .page,
+    .settings > .stack,
+    .settings [data-settings-panel]:not([hidden]) {
+        display: flex;
+        flex-direction: column
+    }
+
+    .app-body[data-page="permissions"] .page {
+        width: 100%;
+        max-width: none;
+        flex: 1;
+        min-height: 0;
+        margin: 0;
+        padding: 16px 20px 20px
+    }
+
+    .app-body[data-page="permissions"] .page-head {
+        flex: 0 0 auto;
+        margin-bottom: 14px
+    }
+
+    .app-body[data-page="permissions"] .settings {
+        flex: 1;
+        min-height: 0
+    }
+
+    .settings > .card,
+    .settings > .stack,
+    .settings [data-settings-panel]:not([hidden]) {
+        min-height: 0
+    }
+
+    .settings [data-settings-panel]:not([hidden]) {
+        flex: 1
+    }
+
+    .settings [data-settings-panel]:not([hidden]) .card-head {
+        flex: 0 0 auto
+    }
+
+    .settings [data-settings-panel]:not([hidden]) .card-body {
+        flex: 1;
+        min-height: 0;
+        overflow: auto
+    }
+}
+
 @media(max-width:1050px) {
     .settings {
         grid-template-columns: 1fr

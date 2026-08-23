@@ -184,7 +184,6 @@ export const vehicleSeeds = plates.map((licensePlate, index) => {
     stationCode: `ST${String((index * 3) % 100 + 1).padStart(3, '0')}`,
     status: isMaintenance ? 'maintenance' : isCleaning ? 'cleaning' : 'available',
     cabinCondition: isCleaning ? 'dirty' : index % 3 === 0 ? 'average' : 'clean',
-    healthScore: isMaintenance ? 62 + index % 8 : isCleaning ? 76 + index % 8 : 88 + index % 12,
     todayMileage: Number((18.4 + index * 2.7).toFixed(1)),
     latestAnomaly: isMaintenance ? ['右後保桿刮傷', '右前輪胎壓異常', '左後視鏡損傷'][index % 3] : isCleaning ? '車內髒污待清潔' : null
   };
@@ -261,6 +260,48 @@ export function createServiceSeeds() {
   ]);
 }
 
+export function createCleaningOrderSeeds() {
+  const currentOrders = vehicleSeeds.map((vehicle, index) => {
+    const createdAt = new Date(Date.UTC(2026, 7, 23 - index % 12, 1 + index % 8, 0)).toISOString();
+    return {
+      orderNumber: `CO-260823-${String(index + 1).padStart(3, '0')}`,
+      licensePlate: vehicle.licensePlate,
+      condition: vehicle.cabinCondition,
+      dispatchStatus: index % 5 === 0 ? 'unassigned' : 'assigned',
+      originalCondition: vehicle.cabinCondition === 'clean' ? 'dirty' : vehicle.cabinCondition,
+      cleaningFee: vehicle.cabinCondition === 'dirty' ? 500 + index % 4 * 80 : 420 + index % 4 * 80,
+      cleaningProvider: ['clean', 'dirty'].includes(vehicle.cabinCondition)
+        ? 'external_company'
+        : index % 3 === 0 ? 'external_company' : 'irent_staff',
+      note: vehicle.cabinCondition === 'dirty' ? '車內髒污，等待安排清潔' : '例行車內清潔檢查',
+      createdAt,
+      updatedAt: createdAt
+    };
+  });
+  const historicalConditions = ['dirty', 'average', 'clean'];
+  const historicalOrders = vehicleSeeds.slice(0, 15).map((vehicle, index) => {
+    const createdAt = new Date(Date.UTC(2026, 6, 5 + index, 2 + index % 6, 30)).toISOString();
+    return {
+      orderNumber: `CO-2607-${String(index + 1).padStart(3, '0')}`,
+      licensePlate: vehicle.licensePlate,
+      condition: historicalConditions[index % historicalConditions.length],
+      dispatchStatus: 'assigned',
+      originalCondition: historicalConditions[index % historicalConditions.length] === 'clean'
+        ? 'dirty'
+        : historicalConditions[index % historicalConditions.length],
+      cleaningFee: historicalConditions[index % historicalConditions.length] === 'dirty' ? 500 + index % 3 * 90 : 380 + index % 3 * 90,
+      cleaningProvider: ['clean', 'dirty'].includes(historicalConditions[index % historicalConditions.length])
+        ? 'external_company'
+        : index % 2 ? 'external_company' : 'irent_staff',
+      note: '歷史清潔狀態紀錄',
+      createdAt,
+      updatedAt: createdAt
+    };
+  });
+
+  return [...currentOrders, ...historicalOrders];
+}
+
 export function createRepairOrderSeeds() {
   return [
     ['信義速修中心', 'RO-260809-042', 'RAC-4582', '右後保桿鈑噴', '維修中', 4200],
@@ -282,7 +323,7 @@ export function createRepairOrderSeeds() {
 export function createAdditionalRepairOrderSeeds() {
   return [
     ['南港維修中心', 'RO-260823-001', 'RBC-2108', '定期保養與換油', '維修完畢', 2800, 2650, '2026-08-20T09:00:00.000Z', 'ops101@irent.example.tw'],
-    ['松山汽車工坊', 'RO-260823-002', 'RBA-6935', '煞車系統檢修', '維修中', 5200, null, null, 'dsp208@irent.example.tw'],
+    ['松山汽車工坊', 'RO-260823-002', 'RBA-6935', '煞車系統檢修', '待派工', 5200, null, null, 'dsp208@irent.example.tw'],
     ['內湖保修廠', 'RO-260823-003', 'RAF-8910', '冷氣濾網更換', '待驗收', 1600, null, null, 'flt315@irent.example.tw'],
     ['大直維修中心', 'RO-260823-004', 'RBG-1357', '左側車門鈑金', '維修完畢', 7800, 7600, '2026-08-18T08:30:00.000Z', 'dmg422@irent.example.tw'],
     ['士林速修中心', 'RO-260823-005', 'RAH-2468', '輪胎更換', '維修完畢', 4400, 4400, '2026-08-19T11:20:00.000Z', 'mnt536@irent.example.tw'],

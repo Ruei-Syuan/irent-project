@@ -69,6 +69,11 @@ export async function buildApp(options = {}) {
     prefix: '/js/',
     decorateReply: false
   });
+  await app.register(fastifyStatic, {
+    root: path.join(projectRoot, 'backend', 'node_modules', '@tanstack', 'table-core', 'build', 'umd'),
+    prefix: '/vendor/tanstack-table/',
+    decorateReply: false
+  });
   app.get('/data/taiwan-counties.geojson', async (request, reply) => (
     reply.sendFile('taiwan-counties.geojson', path.join(projectRoot, 'data'))
   ));

@@ -10,6 +10,23 @@
     padding: 12px
 }
 
+.clear-order-metrics [data-cleaning-filter] {
+    cursor: pointer;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease
+}
+
+.clear-order-metrics [data-cleaning-filter]:hover,
+.clear-order-metrics [data-cleaning-filter]:focus-visible {
+    border-color: var(--metric-color);
+    transform: translateY(-1px);
+    outline: none
+}
+
+.clear-order-metrics [data-cleaning-filter].is-selected {
+    border-color: var(--metric-color);
+    box-shadow: 0 0 0 2px var(--metric-soft), 0 7px 18px rgba(21, 39, 61, .08)
+}
+
 .cleaning-order-pagination {
     display: flex;
     justify-content: space-between;

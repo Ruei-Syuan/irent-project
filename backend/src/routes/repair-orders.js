@@ -1,4 +1,4 @@
-const repairOrderStatuses = ['待驗收', '維修中', '維修完畢'];
+const repairOrderStatuses = ['待派工', '待驗收', '維修中', '維修完畢'];
 
 const repairOrderInclude = {
   vehicle: { select: { licensePlate: true, model: true } },
@@ -60,7 +60,7 @@ export default async function repairOrderRoutes(app, options) {
       const end = formatDate(new Date(Date.UTC(year, month, 1)));
       and.push({ OR: [
         { completedAt: { gte: start, lt: end } },
-        { status: { in: ['待驗收', '維修中'] }, createdAt: { gte: start, lt: end } }
+        { status: { in: ['待派工', '待驗收', '維修中'] }, createdAt: { gte: start, lt: end } }
       ] });
     }
     if (search) {

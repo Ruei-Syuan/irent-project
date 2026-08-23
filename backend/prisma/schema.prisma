@@ -152,7 +152,6 @@ model Vehicle {
   stationId      Int                    @map("station_id")
   status         String                 @default("available")
   cabinCondition String                 @default("clean") @map("cabin_condition")
-  healthScore    Int                    @default(100) @map("health_score")
   todayMileage   Float                  @default(0) @map("today_mileage")
   latestAnomaly  String?                @map("latest_anomaly")
   createdAt      String                 @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
@@ -162,6 +161,7 @@ model Vehicle {
   rentals        Rental[]
   serviceRecords VehicleServiceRecord[]
   repairOrders   RepairOrder[]
+  cleaningOrders CleaningOrder[]
 
   @@index([stationId, status])
   @@map("vehicles")
@@ -232,6 +232,26 @@ model RepairOrder {
   @@index([vehicleLicensePlate, status, createdAt])
   @@index([assignedManagerId, status])
   @@map("repair_orders")
+}
+
+model CleaningOrder {
+  id                  Int     @id @default(autoincrement())
+  orderNumber         String  @unique @map("order_number")
+  vehicleLicensePlate String  @map("vehicle_license_plate")
+  condition           String
+  dispatchStatus      String   @default("unassigned") @map("dispatch_status")
+  originalCondition   String  @default("dirty") @map("original_condition")
+  cleaningFee         Int     @default(0) @map("cleaning_fee")
+  cleaningProvider    String  @default("irent_staff") @map("cleaning_provider")
+  note                String  @default("")
+  createdAt           String  @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt           String  @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
+  vehicle             Vehicle @relation(fields: [vehicleLicensePlate], references: [licensePlate], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([vehicleLicensePlate, createdAt])
+  @@index([condition, createdAt])
+  @@index([dispatchStatus, createdAt])
+  @@map("cleaning_orders")
 }
 
 model AiAnomalyAlert {

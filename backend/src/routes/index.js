@@ -1,6 +1,7 @@
 import aiAnomalyAlertRoutes from './ai-anomaly-alerts.js';
 import auditLogRoutes from './audit-logs.js';
 import authRoutes from './auth.js';
+import cleaningOrderRoutes from './cleaning-orders.js';
 import departmentRoutes from './departments.js';
 import dashboardRoutes from './dashboard.js';
 import inboxRoutes from './inbox.js';
@@ -24,6 +25,7 @@ export default async function apiRoutes(app, options) {
   await app.register(auditLogRoutes, { ...routeOptions, prefix: '/audit-logs' });
   await app.register(stationRoutes, { ...routeOptions, prefix: '/stations' });
   await app.register(vehicleRoutes, { ...routeOptions, prefix: '/vehicles' });
+  await app.register(cleaningOrderRoutes, { ...routeOptions, prefix: '/cleaning-orders' });
   await app.register(aiAnomalyAlertRoutes, { ...routeOptions, prefix: '/ai-anomaly-alerts' });
   await app.register(repairOrderRoutes, { ...routeOptions, prefix: '/repair-orders' });
 

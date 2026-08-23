@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import Database from 'better-sqlite3';
 import {
   anomalySeeds,
+  createCleaningOrderSeeds,
   createRentalSeeds,
   createAdditionalRepairOrderSeeds,
   createLastMonthRepairOrderSeeds,
@@ -41,6 +42,45 @@ const migrations = [
   {
     table: 'repair_orders',
     path: path.join(backendRoot, 'prisma', 'migrations', '0006_repair_orders', 'migration.sql')
+  },
+  {
+    table: 'cleaning_orders',
+    path: path.join(backendRoot, 'prisma', 'migrations', '0007_cleaning_orders', 'migration.sql')
+  },
+  {
+    table: 'vehicles',
+    removedColumn: 'health_score',
+    path: path.join(backendRoot, 'prisma', 'migrations', '0008_remove_vehicle_health_score', 'migration.sql')
+  },
+  {
+    table: 'cleaning_orders',
+    column: 'cleaning_fee',
+    path: path.join(backendRoot, 'prisma', 'migrations', '0009_cleaning_order_fee_and_provider', 'migration.sql')
+  },
+  {
+    table: 'cleaning_orders',
+    column: 'original_condition',
+    path: path.join(backendRoot, 'prisma', 'migrations', '0010_cleaning_order_original_condition', 'migration.sql')
+  },
+  {
+    table: 'cleaning_orders',
+    trigger: 'cleaning_orders_original_condition_before_update',
+    path: path.join(backendRoot, 'prisma', 'migrations', '0011_cleaning_order_original_condition_constraint', 'migration.sql')
+  },
+  {
+    table: 'cleaning_orders',
+    trigger: 'cleaning_orders_dirty_original_before_update',
+    path: path.join(backendRoot, 'prisma', 'migrations', '0012_cleaning_order_dirty_original_constraint', 'migration.sql')
+  },
+  {
+    table: 'cleaning_orders',
+    trigger: 'cleaning_orders_dispatch_status_before_update',
+    path: path.join(backendRoot, 'prisma', 'migrations', '0013_cleaning_order_dispatch_status', 'migration.sql')
+  },
+  {
+    table: 'repair_orders',
+    trigger: 'repair_orders_status_before_update',
+    path: path.join(backendRoot, 'prisma', 'migrations', '0014_repair_order_dispatch_status', 'migration.sql')
   }
 ];
 
@@ -144,9 +184,9 @@ function seedOperations(database) {
   const findStation = database.prepare('SELECT id FROM stations WHERE code = ?');
   const insertVehicle = database.prepare(`
     INSERT OR IGNORE INTO vehicles
-      (license_plate, model, color, station_id, status, cabin_condition, health_score, today_mileage, latest_anomaly)
+      (license_plate, model, color, station_id, status, cabin_condition, today_mileage, latest_anomaly)
     VALUES
-      (@licensePlate, @model, @color, @stationId, @status, @cabinCondition, @healthScore, @todayMileage, @latestAnomaly)
+      (@licensePlate, @model, @color, @stationId, @status, @cabinCondition, @todayMileage, @latestAnomaly)
   `);
   const findVehicle = database.prepare('SELECT id FROM vehicles WHERE license_plate = ?');
   const findAlert = database.prepare(`
@@ -188,6 +228,12 @@ function seedOperations(database) {
     VALUES
       (@repairCenter, @orderNumber, @licensePlate, @maintenanceItem, @status, @assignedManagerId, @estimatedCost, @actualCost, @completedAt)
   `);
+  const insertCleaningOrder = database.prepare(`
+    INSERT OR IGNORE INTO cleaning_orders
+      (order_number, vehicle_license_plate, condition, dispatch_status, original_condition, cleaning_fee, cleaning_provider, note, created_at, updated_at)
+    VALUES
+      (@orderNumber, @licensePlate, @condition, @dispatchStatus, @originalCondition, @cleaningFee, @cleaningProvider, @note, @createdAt, @updatedAt)
+  `);
   const repairCompletedCosts = database.prepare(`
     UPDATE repair_orders
     SET actual_cost = estimated_cost
@@ -203,6 +249,7 @@ function seedOperations(database) {
       customers: 0,
       rentals: 0,
       serviceRecords: 0,
+      cleaningOrders: 0,
       repairOrders: 0
     };
 
@@ -216,7 +263,6 @@ function seedOperations(database) {
       if (!station) throw new Error(`Station seed not found: ${vehicle.stationCode}`);
       created.vehicles += insertVehicle.run({ ...vehicle, stationId: station.id }).changes;
     }
-
     for (const alert of anomalySeeds) {
       const vehicle = findVehicle.get(alert.licensePlate);
       if (!vehicle) throw new Error(`Vehicle seed not found: ${alert.licensePlate}`);
@@ -262,6 +308,12 @@ function seedOperations(database) {
       }).changes;
     }
 
+    for (const order of createCleaningOrderSeeds()) {
+      const vehicle = findVehicle.get(order.licensePlate);
+      if (!vehicle) throw new Error(`Cleaning order vehicle seed not found: ${order.licensePlate}`);
+      created.cleaningOrders += insertCleaningOrder.run(order).changes;
+    }
+
     for (const order of [...createRepairOrderSeeds(), ...createAdditionalRepairOrderSeeds(), ...createLastMonthRepairOrderSeeds()]) {
       const vehicle = findVehicle.get(order.licensePlate);
       if (!vehicle) throw new Error(`Repair order vehicle seed not found: ${order.licensePlate}`);
@@ -289,13 +341,19 @@ export async function initializeDatabase(options = {}) {
     const hasTable = database.prepare(`
       SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?
     `);
+    const hasTrigger = database.prepare(`
+      SELECT name FROM sqlite_master WHERE type = 'trigger' AND name = ?
+    `);
     const migrationsApplied = [];
     for (const migration of migrations) {
-      const alreadyApplied = migration.column
-        ? database.prepare(`PRAGMA table_info("${migration.table}")`)
-          .all()
-          .some(column => column.name === migration.column)
-        : Boolean(hasTable.get(migration.table));
+      const columns = database.prepare(`PRAGMA table_info("${migration.table}")`).all();
+      const alreadyApplied = migration.trigger
+        ? Boolean(hasTrigger.get(migration.trigger))
+        : migration.column
+        ? columns.some(column => column.name === migration.column)
+        : migration.removedColumn
+          ? !columns.some(column => column.name === migration.removedColumn)
+          : Boolean(hasTable.get(migration.table));
       if (alreadyApplied) continue;
       database.exec(await readFile(migration.path, 'utf8'));
       migrationsApplied.push(path.basename(path.dirname(migration.path)));

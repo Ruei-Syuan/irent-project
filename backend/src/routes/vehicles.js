@@ -9,7 +9,6 @@ const vehicleFields = {
   stationId: { type: 'integer', minimum: 1 },
   status: { type: 'string', enum: ['available', 'cleaning', 'maintenance'] },
   cabinCondition: { type: 'string', enum: ['clean', 'average', 'dirty'] },
-  healthScore: { type: 'integer', minimum: 0, maximum: 100 },
   todayMileage: { type: 'number', minimum: 0 },
   latestAnomaly: nullableText
 };
@@ -55,6 +54,17 @@ function validCabinCondition(status, cabinCondition) {
   if (status === 'available') return cabinCondition === 'clean' || cabinCondition === 'average';
   if (status === 'cleaning') return cabinCondition === 'dirty';
   return true;
+}
+
+function calculateHealthScore(status, cabinCondition) {
+  const cabinScores = { clean: 100, average: 70, dirty: 40 };
+  const exteriorScore = status === 'maintenance' ? 40 : 100;
+  const score = (cabinScores[cabinCondition] + exteriorScore) / 2;
+  return status === 'maintenance' ? Math.min(score, 70) : score;
+}
+
+function presentVehicle(vehicle) {
+  return { ...vehicle, healthScore: calculateHealthScore(vehicle.status, vehicle.cabinCondition) };
 }
 
 function dateTime(value) {
@@ -110,22 +120,13 @@ export default async function vehicleRoutes(app, options) {
   app.get('/', {
     preHandler: auth.authorize('fleet.view'),
     schema: { tags: ['Vehicles'] }
-  }, async () => ({
-    items: await prisma.vehicle.findMany({
+  }, async () => {
+    const items = await prisma.vehicle.findMany({
       include: vehicleInclude,
       orderBy: { licensePlate: 'asc' }
-    })
-  }));
-
-  app.get('/cleaning-list', {
-    preHandler: auth.authorize('dispatch.view'),
-    schema: { tags: ['Cleaning orders'] }
-  }, async () => ({
-    items: await prisma.vehicle.findMany({
-      include: vehicleInclude,
-      orderBy: { licensePlate: 'asc' }
-    })
-  }));
+    });
+    return { items: items.map(presentVehicle) };
+  });
 
   app.get('/map-summary', {
     preHandler: auth.authorize('fleet.view'),
@@ -141,8 +142,8 @@ export default async function vehicleRoutes(app, options) {
       select: {
         id: true,
         licensePlate: true,
-        healthScore: true,
         status: true,
+        cabinCondition: true,
         updatedAt: true,
         station: { select: { latitude: true, longitude: true } },
         _count: { select: { anomalyAlerts: true } }
@@ -163,7 +164,7 @@ export default async function vehicleRoutes(app, options) {
           plateNumber: vehicle.licensePlate,
           latitude: vehicle.station.latitude,
           longitude: vehicle.station.longitude,
-          healthScore: vehicle.healthScore,
+          healthScore: calculateHealthScore(vehicle.status, vehicle.cabinCondition),
           issueCount: vehicle._count.anomalyAlerts,
           status: vehicle.status,
           updatedAt: vehicle.updatedAt
@@ -417,7 +418,7 @@ export default async function vehicleRoutes(app, options) {
       where: { id: request.params.id },
       include: vehicleInclude
     });
-    return item ? { item } : reply.code(404).send({ error: '找不到車輛' });
+    return item ? { item: presentVehicle(item) } : reply.code(404).send({ error: '找不到車輛' });
   });
 
   app.post('/', {
@@ -442,7 +443,6 @@ export default async function vehicleRoutes(app, options) {
       stationId: request.body.stationId,
       status: request.body.status ?? 'available',
       cabinCondition: request.body.cabinCondition ?? 'clean',
-      healthScore: request.body.healthScore ?? 100,
       todayMileage: request.body.todayMileage ?? 0,
       latestAnomaly: request.body.latestAnomaly == null ? null : text(request.body.latestAnomaly)
     };
@@ -452,7 +452,6 @@ export default async function vehicleRoutes(app, options) {
     if (!validCabinCondition(data.status, data.cabinCondition)) {
       return reply.code(400).send({ error: '車內狀況與車輛狀態不相符' });
     }
-
     const item = await withAudit(prisma, transaction => transaction.vehicle.create({
       data,
       include: vehicleInclude
@@ -464,7 +463,7 @@ export default async function vehicleRoutes(app, options) {
       summary: `${request.currentUser.name} 新增車輛「${created.licensePlate}」`,
       ip: request.ip
     }));
-    return reply.code(201).send({ item });
+    return reply.code(201).send({ item: presentVehicle(item) });
   });
 
   app.patch('/:id', {
@@ -494,7 +493,7 @@ export default async function vehicleRoutes(app, options) {
       if (!data[field]) return reply.code(400).send({ error: '車輛文字欄位不可為空白' });
     }
     if (data.licensePlate) data.licensePlate = data.licensePlate.toUpperCase();
-    for (const field of ['stationId', 'status', 'cabinCondition', 'healthScore', 'todayMileage']) {
+    for (const field of ['stationId', 'status', 'cabinCondition', 'todayMileage']) {
       if (Object.hasOwn(request.body, field)) data[field] = request.body[field];
     }
     if (Object.hasOwn(request.body, 'latestAnomaly')) {
@@ -507,7 +506,6 @@ export default async function vehicleRoutes(app, options) {
     if (!validCabinCondition(nextStatus, nextCabinCondition)) {
       return reply.code(400).send({ error: '車內狀況與車輛狀態不相符' });
     }
-
     const item = await withAudit(prisma, transaction => transaction.vehicle.update({
       where: { id: current.id },
       data,
@@ -520,7 +518,7 @@ export default async function vehicleRoutes(app, options) {
       summary: `${request.currentUser.name} 更新車輛「${updated.licensePlate}」`,
       ip: request.ip
     }));
-    return { item };
+    return { item: presentVehicle(item) };
   });
 
   app.delete('/:id', {

@@ -4,6 +4,23 @@
     gap: 17px
 }
 
+.repair-order-metrics [data-repair-filter] {
+    cursor: pointer;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease
+}
+
+.repair-order-metrics [data-repair-filter]:hover,
+.repair-order-metrics [data-repair-filter]:focus-visible {
+    border-color: var(--metric-color);
+    transform: translateY(-1px);
+    outline: none
+}
+
+.repair-order-metrics [data-repair-filter].is-selected {
+    border-color: var(--metric-color);
+    box-shadow: 0 0 0 2px var(--metric-soft), 0 7px 18px rgba(21, 39, 61, .08)
+}
+
 .summary {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -141,7 +158,7 @@
     }
 
     .app-body[data-page="work-orders"] .metrics {
-        grid-template-columns: repeat(4, minmax(0, 1fr))
+        grid-template-columns: repeat(5, minmax(0, 1fr))
     }
 
     .app-body[data-page="work-orders"] .order-layout {

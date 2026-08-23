@@ -60,6 +60,7 @@
         <h1>${activePage.label}</h1>
       </div>
       <div class="app-topbar-tools">
+        ${activePage.key === 'fleet' ? '' : `
         <div class="app-search" data-global-search>
           <label class="sr-only" for="global-search-input">搜尋車輛或案件</label>
           <input id="global-search-input" type="search" placeholder="搜尋車牌、車輛、案件編號" aria-label="搜尋車牌、車輛、案件編號" autocomplete="off" aria-controls="global-search-results" aria-expanded="false">
@@ -73,7 +74,7 @@
               <p class="layout-inbox-status layout-search-status">輸入車牌、案件或工單編號開始搜尋。</p>
             </div>
           </section>
-        </div>
+        </div>`}
         <div class="app-utilities" aria-label="使用者工具">
           <div class="layout-inbox" data-inbox="notification">
             <button class="layout-utility-button" type="button" aria-label="通知" aria-controls="notification-panel" aria-expanded="false" data-inbox-trigger>
@@ -570,7 +571,7 @@
     loadInbox();
 
     const initialSearch = new URLSearchParams(window.location.search).get('search');
-    if (initialSearch) {
+    if (initialSearch && topSearch) {
       topSearch.value = initialSearch;
       pageState.globalQuery = initialSearch;
       pageState.applyFilter?.();
@@ -622,24 +623,44 @@
     });
   }
 
-  // 清潔工單：從車輛 API 載入清潔狀態、篩選與分頁。
+  // 清潔工單：從獨立 cleaning_orders API 載入歷史紀錄、篩選與分頁。
   function initDispatch() {
     const table = document.querySelector('.card table');
     const body = document.querySelector('[data-cleaning-orders-body]');
-    const status = document.querySelector('[data-cleaning-status]');
     const pageInfo = document.querySelector('[data-cleaning-page-info]');
     const pageSize = document.querySelector('[data-cleaning-page-size]');
     const pageNumbers = document.querySelector('[data-cleaning-page-numbers]');
     const previous = document.querySelector('[data-cleaning-page-previous]');
     const next = document.querySelector('[data-cleaning-page-next]');
+    const selectAll = document.querySelector('[data-cleaning-select-all]');
+    const bulkAccept = document.querySelector('[data-cleaning-bulk-accept]');
     const summary = document.querySelector('[data-cleaning-list-summary]');
-    const state = { vehicles: [], page: 1, pageSize: 5 };
-    const conditionMeta = {
-      dirty: { label: '髒污', badge: 'amber' },
-      average: { label: '普通', badge: 'blue' },
-      clean: { label: '乾淨', badge: 'green' }
+    const month = document.querySelector('[data-cleaning-month]');
+    const status = document.querySelector('[data-cleaning-status]');
+    const metricCards = document.querySelectorAll('[data-cleaning-filter]');
+    const metricNotes = {
+      unassigned: document.querySelector('[data-cleaning-metric-note="unassigned"]'),
+      clean: document.querySelector('[data-cleaning-metric-note="clean"]'),
+      average: document.querySelector('[data-cleaning-metric-note="average"]'),
+      dirty: document.querySelector('[data-cleaning-metric-note="dirty"]')
     };
-    const vehicleStatusMeta = { available: '可租', cleaning: '待清潔', maintenance: '待維修' };
+    const cleaningSpendTotal = document.querySelector('[data-cleaning-spend-total]');
+    const state = { items: [], page: 1, pageSize: 5, total: 0, totalPages: 1, conditionFilter: '' };
+    const conditionMeta = {
+      unassigned: { label: '待派工', badge: 'gray' },
+      dirty: { label: '待驗收', badge: 'amber' },
+      average: { label: '清潔中', badge: 'blue' },
+      clean: { label: '已清潔', badge: 'green' }
+    };
+    const originalConditionMeta = {
+      dirty: '髒污',
+      average: '普通',
+      clean: '乾淨'
+    };
+    const cleaningProviderMeta = {
+      external_company: '外部清潔公司',
+      irent_staff: 'iRent 清潔人員'
+    };
 
     const escapeText = value => {
       const element = document.createElement('span');
@@ -649,64 +670,70 @@
     const dateText = value => value
       ? new Date(value).toLocaleString('zh-TW', { hour12: false })
       : '—';
+    const money = value => `NT$ ${Number(value || 0).toLocaleString('zh-TW')}`;
 
-    function filteredVehicles() {
-      const keyword = String(pageState.globalQuery || '').trim().toLocaleLowerCase('zh-Hant');
-      return state.vehicles.filter(vehicle => {
-        const searchable = [
-          vehicle.licensePlate,
-          vehicle.model,
-          vehicle.station?.name,
-          vehicle.station?.city,
-          vehicle.station?.district,
-          conditionMeta[vehicle.cabinCondition]?.label
-        ].join(' ').toLocaleLowerCase('zh-Hant');
-        return (!status?.value || vehicle.cabinCondition === status.value)
-          && (!keyword || searchable.includes(keyword));
-      });
+    if (month) {
+      const now = new Date();
+      month.innerHTML = '<option value="">所有月份</option>';
+      for (let offset = 0; offset < 6; offset += 1) {
+        const date = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+        const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        month.insertAdjacentHTML('beforeend', `<option value="${value}">${value}</option>`);
+      }
     }
 
-    function renderMetrics() {
-      const counts = { total: state.vehicles.length, dirty: 0, average: 0, clean: 0 };
-      state.vehicles.forEach(vehicle => {
-        if (counts[vehicle.cabinCondition] != null) counts[vehicle.cabinCondition] += 1;
-      });
+    function renderMetrics(summaryData) {
+      const counts = {
+        unassigned: summaryData.unassigned || 0,
+        clean: summaryData.clean || 0,
+        average: summaryData.average || 0,
+        dirty: summaryData.dirty || 0
+      };
       Object.entries(counts).forEach(([key, count]) => {
         const element = document.querySelector(`[data-cleaning-metric-card="${key}"] b`);
         if (element) element.textContent = count;
       });
+      if (metricNotes.clean) metricNotes.clean.textContent = `本月完成 ${summaryData.currentMonthCleaned || 0} 件`;
+      if (metricNotes.unassigned) metricNotes.unassigned.textContent = `目前 ${counts.unassigned} 件待派工`;
+      if (metricNotes.average) metricNotes.average.textContent = `目前 ${counts.average} 件清潔中`;
+      if (metricNotes.dirty) metricNotes.dirty.textContent = `目前 ${counts.dirty} 件待驗收`;
+      if (cleaningSpendTotal) {
+        cleaningSpendTotal.textContent = `NT$ ${Number(summaryData.currentMonthCleaningCost || 0).toLocaleString('zh-TW')}`;
+      }
     }
 
     function renderRows() {
       if (!body) return;
-      const vehicles = filteredVehicles();
-      const totalPages = Math.max(1, Math.ceil(vehicles.length / state.pageSize));
-      state.page = Math.min(state.page, totalPages);
       const pageStart = (state.page - 1) * state.pageSize;
-      const pageItems = vehicles.slice(pageStart, pageStart + state.pageSize);
       body.hidden = false;
-      body.innerHTML = pageItems.length
-        ? pageItems.map((vehicle, index) => {
-          const condition = conditionMeta[vehicle.cabinCondition] || { label: vehicle.cabinCondition, badge: 'gray' };
+      body.innerHTML = state.items.length
+        ? state.items.map((order, index) => {
+          const vehicle = order.vehicle || {};
+          const condition = conditionMeta[order.status] || conditionMeta[order.condition] || { label: order.status || order.condition, badge: 'gray' };
           return `
             <tr>
+              <td>${order.status === 'dirty'
+                ? `<input type="checkbox" data-cleaning-select value="${order.id}" aria-label="選取 ${escapeText(order.orderNumber)}">`
+                : '—'}</td>
               <td>${pageStart + index + 1}</td>
-              <td><span class="cell-title">${escapeText(vehicle.licensePlate)}</span><span class="cell-meta">${escapeText(vehicle.model)}・${escapeText(vehicle.color)}</span></td>
+              <td><span class="cell-title">${escapeText(order.orderNumber)}</span><span class="cell-meta">${escapeText(order.vehicleLicensePlate)}・${escapeText(vehicle.model)}</span></td>
               <td><span class="cell-title">${escapeText(vehicle.station?.name || '未分配')}</span><span class="cell-meta">${escapeText([vehicle.station?.city, vehicle.station?.district].filter(Boolean).join(''))}</span></td>
               <td><span class="badge ${condition.badge}">${escapeText(condition.label)}</span></td>
-              <td>${escapeText(vehicleStatusMeta[vehicle.status] || vehicle.status)}</td>
-              <td><b>${Number(vehicle.healthScore || 0)}</b></td>
-              <td>${dateText(vehicle.updatedAt)}</td>
+              <td>${escapeText(originalConditionMeta[order.originalCondition] || '—')}</td>
+              <td>${escapeText(cleaningProviderMeta[order.cleaningProvider] || '—')}</td>
+              <td>${money(order.cleaningFee)}</td>
+              <td>${escapeText(order.note || '—')}</td>
+              <td>${dateText(order.createdAt)}</td>
             </tr>`;
         }).join('')
-        : '<tr><td colspan="7" class="empty-state">沒有符合條件的清潔資料</td></tr>';
+        : '<tr><td colspan="10" class="empty-state">沒有符合條件的清潔工單</td></tr>';
 
-      if (summary) summary.textContent = `共 ${vehicles.length} 筆清潔狀態資料`;
-      if (pageInfo) pageInfo.textContent = `第 ${state.page} / ${totalPages} 頁，共 ${vehicles.length} 筆`;
+      if (summary) summary.textContent = `共 ${state.total} 筆歷史清潔工單`;
+      if (pageInfo) pageInfo.textContent = `第 ${state.page} / ${state.totalPages} 頁，共 ${state.total} 筆`;
       if (previous) previous.disabled = state.page <= 1;
-      if (next) next.disabled = state.page >= totalPages;
+      if (next) next.disabled = state.page >= state.totalPages;
       if (pageNumbers) {
-        pageNumbers.innerHTML = Array.from({ length: totalPages }, (_, index) => {
+        pageNumbers.innerHTML = Array.from({ length: state.totalPages }, (_, index) => {
           const page = index + 1;
           const current = page === state.page ? ' aria-current="page"' : '';
           return `<button class="btn small" type="button" data-cleaning-page="${page}"${current}>${page}</button>`;
@@ -714,44 +741,184 @@
       }
     }
 
-    pageState.applyFilter = () => {
-      state.page = 1;
-      renderRows();
-    };
-    status?.addEventListener('change', pageState.applyFilter);
+    function updateBulkAcceptState() {
+      const selected = document.querySelectorAll('[data-cleaning-select]:checked');
+      const all = document.querySelectorAll('[data-cleaning-select]');
+      if (bulkAccept) bulkAccept.disabled = selected.length === 0;
+      if (selectAll) {
+        selectAll.disabled = all.length === 0;
+        selectAll.checked = all.length > 0 && selected.length === all.length;
+        selectAll.indeterminate = selected.length > 0 && selected.length < all.length;
+      }
+    }
+
+    async function loadOrders(page = state.page) {
+      if (!window.IRentCleaningOrderApi?.list || !body) return;
+      body.hidden = false;
+      body.innerHTML = '<tr><td colspan="10" class="empty-state">清潔工單載入中…</td></tr>';
+      try {
+        const result = await window.IRentCleaningOrderApi.list({
+          page,
+          pageSize: state.pageSize,
+          status: status?.value || state.conditionFilter,
+          month: month?.value || '',
+          search: String(pageState.globalQuery || '').trim()
+        });
+        state.items = result.items;
+        state.page = result.pagination.page;
+        state.total = result.pagination.total;
+        state.totalPages = result.pagination.totalPages;
+        renderRows();
+        updateBulkAcceptState();
+      } catch (error) {
+        body.innerHTML = `<tr><td colspan="10" class="empty-state">${escapeText(error.message || '無法載入清潔工單')}</td></tr>`;
+      }
+    }
+
+    async function loadMetrics() {
+      if (!window.IRentCleaningOrderApi?.summary) return;
+      try {
+        renderMetrics(await window.IRentCleaningOrderApi.summary({ month: month?.value || '' }));
+      } catch (error) {
+        console.error('[iRent cleaning orders]', error);
+      }
+    }
+
+    async function createCleaningOrder() {
+      if (!window.Swal?.fire || !window.IRentCleaningOrderApi?.create) return;
+      const result = await window.Swal.fire({
+        title: '建立清潔工單',
+        html: `
+          <input id="cleaning-vehicle-plate" class="swal2-input" placeholder="車牌號碼">
+          <select id="cleaning-condition" class="swal2-select">
+            <option value="dirty">待驗收</option>
+            <option value="average">清潔中</option>
+            <option value="clean">已清潔</option>
+          </select>
+          <select id="cleaning-original-condition" class="swal2-select" aria-label="車子原始狀況">
+            <option value="dirty">車子原始狀況：髒污</option>
+            <option value="average">車子原始狀況：普通</option>
+            <option value="clean">車子原始狀況：乾淨</option>
+          </select>
+          <input id="cleaning-fee" class="swal2-input" type="number" min="0" step="1" placeholder="清潔費用">
+          <select id="cleaning-provider" class="swal2-select">
+            <option value="external_company">外部清潔公司</option>
+            <option value="irent_staff">iRent 清潔人員</option>
+          </select>
+          <textarea id="cleaning-note" class="swal2-textarea" placeholder="備註（選填）"></textarea>`,
+        showCancelButton: true,
+        confirmButtonText: '建立工單',
+        cancelButtonText: '取消',
+        focusConfirm: false,
+        preConfirm: () => {
+          const vehicleLicensePlate = document.querySelector('#cleaning-vehicle-plate')?.value.trim().toUpperCase();
+          if (!vehicleLicensePlate) {
+            window.Swal.showValidationMessage('請輸入車牌號碼');
+            return false;
+          }
+          const condition = document.querySelector('#cleaning-condition')?.value;
+          const originalCondition = document.querySelector('#cleaning-original-condition')?.value;
+          if (['clean', 'average'].includes(condition) && originalCondition === 'clean') {
+            window.Swal.showValidationMessage('已清潔或清潔中的工單原始狀況只能是普通或髒污');
+            return false;
+          }
+          const cleaningFee = Number(document.querySelector('#cleaning-fee')?.value);
+          const cleaningProvider = document.querySelector('#cleaning-provider')?.value;
+          if (!Number.isInteger(cleaningFee) || cleaningFee < 0) {
+            window.Swal.showValidationMessage('請輸入 0 以上的整數清潔費用');
+            return false;
+          }
+          if (originalCondition === 'dirty'
+            && (cleaningProvider !== 'external_company' || cleaningFee <= 0)) {
+            window.Swal.showValidationMessage('原始狀況為髒污時，必須由外部清潔公司處理並填寫清潔費用');
+            return false;
+          }
+          return {
+            vehicleLicensePlate,
+            condition,
+            originalCondition,
+            cleaningFee,
+            cleaningProvider,
+            note: document.querySelector('#cleaning-note')?.value.trim() || ''
+          };
+        }
+      });
+      if (!result.isConfirmed) return;
+
+      try {
+        await window.IRentCleaningOrderApi.create(result.value);
+        notify('清潔工單已建立');
+        await Promise.all([loadMetrics(), loadOrders(1)]);
+      } catch (error) {
+        notify(error.message || '清潔工單建立失敗');
+      }
+    }
+
+    async function acceptOrders(ids) {
+      if (!ids.length || !window.IRentCleaningOrderApi) return;
+      try {
+        if (ids.length === 1) await window.IRentCleaningOrderApi.accept(ids[0]);
+        else await window.IRentCleaningOrderApi.bulkAccept(ids);
+        await Promise.all([loadMetrics(), loadOrders(state.page)]);
+      } catch (error) {
+        window.alert(error.message || '驗收失敗，請稍後再試');
+      }
+    }
+
+    function applyCleaningFilter(value) {
+      state.conditionFilter = value;
+      if (status) status.value = value;
+      metricCards.forEach(card => {
+        const selected = card.dataset.cleaningFilter === value;
+        card.classList.toggle('is-selected', selected);
+        card.setAttribute('aria-pressed', String(selected));
+      });
+      loadOrders(1);
+    }
+
+    pageState.applyFilter = () => loadOrders(1);
+    status?.addEventListener('change', () => applyCleaningFilter(status.value));
+    month?.addEventListener('change', () => {
+      loadMetrics();
+      loadOrders(1);
+    });
+    metricCards.forEach(card => {
+      card.addEventListener('click', () => applyCleaningFilter(card.dataset.cleaningFilter));
+      card.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        applyCleaningFilter(card.dataset.cleaningFilter);
+      });
+    });
     pageSize?.addEventListener('change', event => {
       state.pageSize = Number(event.currentTarget.value) || 5;
-      state.page = 1;
-      renderRows();
+      loadOrders(1);
     });
-    previous?.addEventListener('click', () => {
-      state.page -= 1;
-      renderRows();
+    selectAll?.addEventListener('change', event => {
+      document.querySelectorAll('[data-cleaning-select]').forEach(input => {
+        input.checked = event.currentTarget.checked;
+      });
+      updateBulkAcceptState();
     });
-    next?.addEventListener('click', () => {
-      state.page += 1;
-      renderRows();
+    body?.addEventListener('change', event => {
+      if (event.target.matches('[data-cleaning-select]')) updateBulkAcceptState();
     });
+    bulkAccept?.addEventListener('click', () => {
+      const ids = Array.from(document.querySelectorAll('[data-cleaning-select]:checked'), input => Number(input.value));
+      acceptOrders(ids);
+    });
+    previous?.addEventListener('click', () => loadOrders(state.page - 1));
+    next?.addEventListener('click', () => loadOrders(state.page + 1));
     pageNumbers?.addEventListener('click', event => {
       const button = event.target.closest('[data-cleaning-page]');
       if (!button) return;
-      state.page = Number(button.dataset.cleaningPage);
-      renderRows();
+      loadOrders(Number(button.dataset.cleaningPage));
     });
     findButton(document, '匯出工單')?.addEventListener('click', () => downloadCsv('irent-cleaning-orders.csv', getTableRows(table)));
+    findButton(document, '建立工單')?.addEventListener('click', createCleaningOrder);
 
-    if (!window.IRentVehicleApi?.cleaningList || !body) return;
-    body.hidden = false;
-    body.innerHTML = '<tr><td colspan="7" class="empty-state">清潔資料載入中…</td></tr>';
-    window.IRentVehicleApi.cleaningList()
-      .then(vehicles => {
-        state.vehicles = vehicles;
-        renderMetrics();
-        renderRows();
-      })
-      .catch(error => {
-        body.innerHTML = `<tr><td colspan="7" class="empty-state">${escapeText(error.message || '無法載入清潔資料')}</td></tr>`;
-      });
+    loadMetrics();
+    applyCleaningFilter('');
   }
 
   // 案件清單切換時使用的靜態展示資料。
@@ -835,6 +1002,7 @@
     const table = document.querySelector('.order-layout table');
     const body = table?.querySelector('tbody');
     const status = document.querySelector('.filters .select');
+    const repairFilterCards = document.querySelectorAll('[data-repair-filter]');
     let month = document.querySelector('[data-repair-month]');
     if (!month && status?.parentElement) {
       month = document.createElement('select');
@@ -860,11 +1028,13 @@
     const selectAll = document.querySelector('[data-repair-select-all]');
     const bulkAccept = document.querySelector('[data-repair-bulk-accept]');
     const statusCards = {
+      unassigned: document.querySelector('[data-repair-status-card="unassigned"] b'),
       completed: document.querySelector('[data-repair-status-card="completed"] b'),
       'in-progress': document.querySelector('[data-repair-status-card="in-progress"] b'),
       pending: document.querySelector('[data-repair-status-card="pending"] b')
     };
     const statusNotes = {
+      unassigned: document.querySelector('[data-repair-status-note="unassigned"]'),
       completed: document.querySelector('[data-repair-status-note="completed"]'),
       'in-progress': document.querySelector('[data-repair-status-note="in-progress"]'),
       pending: document.querySelector('[data-repair-status-note="pending"]')
@@ -872,7 +1042,7 @@
     const spendTotal = document.querySelector('[data-repair-spend-total]');
     const spendComparison = document.querySelector('[data-repair-spend-comparison]');
     const state = { page: 1, pageSize: 5, totalPages: 1, items: [] };
-    const statusClass = { 待驗收: 'amber', 維修中: 'blue', 維修完畢: 'green' };
+    const statusClass = { 待派工: 'gray', 待驗收: 'amber', 維修中: 'blue', 維修完畢: 'green' };
 
     const escapeText = value => {
       const element = document.createElement('span');
@@ -908,8 +1078,9 @@
     }
 
     function renderStatusCards(items) {
-      const counts = { completed: 0, 'in-progress': 0, pending: 0 };
+      const counts = { unassigned: 0, completed: 0, 'in-progress': 0, pending: 0 };
       const statusKeys = {
+        '\u5f85\u6d3e\u5de5': 'unassigned',
         '\u7dad\u4fee\u5b8c\u7562': 'completed',
         '\u7dad\u4fee\u4e2d': 'in-progress',
         '\u5f85\u9a57\u6536': 'pending'
@@ -938,6 +1109,7 @@
         if (element) element.textContent = counts[key];
       });
       if (statusNotes.completed) statusNotes.completed.textContent = `本月完成 ${currentMonthCompleted} 件`;
+      if (statusNotes.unassigned) statusNotes.unassigned.textContent = `目前 ${counts.unassigned} 件待派工`;
       if (statusNotes['in-progress']) statusNotes['in-progress'].textContent = `目前 ${counts['in-progress']} 件維修中`;
       if (statusNotes.pending) statusNotes.pending.textContent = `目前 ${counts.pending} 件待驗收`;
     }
@@ -1028,8 +1200,41 @@
       }
     }
 
+    function applyRepairFilter(value) {
+      if (!status) return;
+      const nextValue = status.value === value ? '全部狀態' : value;
+      status.value = nextValue;
+      repairFilterCards.forEach(card => {
+        const selected = card.dataset.repairFilter === nextValue;
+        card.classList.toggle('is-selected', selected);
+        card.setAttribute('aria-pressed', String(selected));
+      });
+      loadRepairOrders(1);
+    }
+
+    function syncRepairFilterCards() {
+      const selectedValue = status?.value || '';
+      repairFilterCards.forEach(card => {
+        const selected = card.dataset.repairFilter === selectedValue;
+        card.classList.toggle('is-selected', selected);
+        card.setAttribute('aria-pressed', String(selected));
+      });
+    }
+
     pageState.applyFilter = () => loadRepairOrders(1);
-    status?.addEventListener('change', pageState.applyFilter);
+    status?.addEventListener('change', () => {
+      syncRepairFilterCards();
+      loadRepairOrders(1);
+    });
+    repairFilterCards.forEach(card => {
+      const applyFilter = () => applyRepairFilter(card.dataset.repairFilter);
+      card.addEventListener('click', applyFilter);
+      card.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        applyFilter();
+      });
+    });
     month?.addEventListener('change', pageState.applyFilter);
     pageSize?.addEventListener('change', event => {
       state.pageSize = Number(event.currentTarget.value) || 5;
@@ -1059,6 +1264,7 @@
       if (button) loadRepairOrders(Number(button.dataset.repairPage));
     });
     findButton(document, '匯出工單')?.addEventListener('click', () => downloadCsv('irent-work-orders.csv', getTableRows(table)));
+    syncRepairFilterCards();
     loadRepairOrders();
   }
 

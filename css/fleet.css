@@ -106,8 +106,60 @@
     font-weight: 700
 }
 
+.fleet-signal {
+    width: 62px;
+    text-align: center
+}
+
+.fleet-traffic-light {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    vertical-align: middle
+}
+
+.fleet-traffic-light.is-red {
+    background: var(--red);
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, .14)
+}
+
+.fleet-traffic-light.is-yellow {
+    background: #f2a93b;
+    box-shadow: 0 0 0 3px rgba(242, 169, 59, .14)
+}
+
+.fleet-traffic-light.is-green {
+    background: var(--green);
+    box-shadow: 0 0 0 3px rgba(32, 166, 106, .14)
+}
+
 .fleet-vehicle-table th {
     font-size: 11px
+}
+
+.fleet-vehicle-table .fleet-column-filters th {
+    padding-top: 7px;
+    padding-bottom: 9px;
+    background: #f8fafc
+}
+
+.fleet-column-filter {
+    width: 100%;
+    min-width: 72px;
+    height: 31px;
+    padding: 5px 8px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: #fff;
+    color: var(--navy);
+    font: inherit;
+    font-size: 12px
+}
+
+.fleet-column-filter:focus {
+    outline: 2px solid rgba(8, 119, 93, .22);
+    border-color: var(--green)
 }
 
 .fleet-vehicle-table td {
@@ -130,6 +182,15 @@
     color: var(--navy);
     font-style: normal;
     font-weight: 800
+}
+
+.fleet-overall-status.is-maintenance {
+    color: var(--red)
+}
+
+.fleet-health-score.is-risk,
+.fleet-map-health-score.is-risk {
+    color: var(--red)
 }
 
 .fleet-cabin-condition {

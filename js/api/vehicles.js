@@ -5,7 +5,6 @@
 
   globalObject.IRentVehicleApi = {
     list: async () => (await request('/vehicles')).items,
-    cleaningList: async () => (await request('/vehicles/cleaning-list')).items,
     mapSummary: () => request('/vehicles/map-summary'),
     getHistory: id => request(`/vehicles/${id}/history`),
     createRentalHistory: (id, payload) => request(`/vehicles/${id}/history/rentals`, {

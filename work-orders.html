@@ -40,7 +40,15 @@
             </div>
           </section>
           <section class="metrics dashboard-style-metrics repair-order-metrics">
-            <article class="metric is-green" data-repair-status-card="completed">
+            <article class="metric is-slate" data-repair-status-card="unassigned" data-repair-filter="待派工" role="button" tabindex="0">
+              <div class="metric-label">
+                <span>待派工</span>
+                <span class="metric-icon">○</span>
+              </div>
+              <b>0</b>
+              <small data-repair-status-note="unassigned">目前 0 件待派工</small>
+            </article>
+            <article class="metric is-green" data-repair-status-card="completed" data-repair-filter="維修完畢" role="button" tabindex="0">
               <div class="metric-label">
                 <span>維修完畢</span>
                 <span class="metric-icon">
@@ -54,7 +62,7 @@
                 本月完成 0 件
               </small>
             </article>
-            <article class="metric is-blue" data-repair-status-card="in-progress">
+            <article class="metric is-blue" data-repair-status-card="in-progress" data-repair-filter="維修中" role="button" tabindex="0">
               <div class="metric-label">
                 <span>維修中</span>
                 <span class="metric-icon">
@@ -68,7 +76,7 @@
                 目前 0 件維修中
               </small>
             </article>
-            <article class="metric is-amber" data-repair-status-card="pending">
+            <article class="metric is-amber" data-repair-status-card="pending" data-repair-filter="待驗收" role="button" tabindex="0">
               <div class="metric-label">
                 <span>待驗收</span>
                 <span class="metric-icon">
@@ -117,6 +125,7 @@
                     <option>
                       全部狀態
                     </option>
+                    <option>待派工</option>
                     <option>
                       維修中
                     </option>

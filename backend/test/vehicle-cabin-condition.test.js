@@ -53,6 +53,84 @@ test('新增車輛可儲存車內狀況', async () => {
   });
 });
 
+test('車輛健康分數由車內與車外各占一半計算', async () => {
+  await withAuthenticatedApp(async ({ app, prisma, cookie }) => {
+    const station = await prisma.station.findFirstOrThrow();
+    const cases = [
+      { suffix: '01', status: 'available', cabinCondition: 'clean', expected: 100 },
+      { suffix: '02', status: 'available', cabinCondition: 'average', expected: 85 },
+      { suffix: '03', status: 'cleaning', cabinCondition: 'dirty', expected: 70 },
+      { suffix: '04', status: 'maintenance', cabinCondition: 'clean', expected: 70 },
+      { suffix: '05', status: 'maintenance', cabinCondition: 'average', expected: 55 },
+      { suffix: '06', status: 'maintenance', cabinCondition: 'dirty', expected: 40 }
+    ];
+
+    for (const item of cases) {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/v1/vehicles',
+        headers: { cookie },
+        payload: {
+          licensePlate: `RHS-99${item.suffix}`,
+          model: 'Health Score Test',
+          color: '白',
+          stationId: station.id,
+          status: item.status,
+          cabinCondition: item.cabinCondition
+        }
+      });
+
+      assert.equal(response.statusCode, 201);
+      assert.equal(response.json().item.healthScore, item.expected);
+    }
+  });
+});
+
+test('修改車內或車外狀況時會重新計算健康分數', async () => {
+  await withAuthenticatedApp(async ({ app, prisma, cookie }) => {
+    const vehicle = await prisma.vehicle.findFirstOrThrow({
+      where: { cabinCondition: 'clean', status: 'available' }
+    });
+    const response = await app.inject({
+      method: 'PATCH',
+      url: `/api/v1/vehicles/${vehicle.id}`,
+      headers: { cookie },
+      payload: { status: 'maintenance', cabinCondition: 'average' }
+    });
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.json().item.healthScore, 55);
+  });
+});
+
+test('車輛資料表不儲存健康分數', async () => {
+  await withAuthenticatedApp(async ({ prisma }) => {
+    const columns = await prisma.$queryRawUnsafe('PRAGMA table_info("vehicles")');
+    assert.equal(columns.some(column => column.name === 'health_score'), false);
+  });
+});
+
+test('查詢車輛時依最新車內與車外狀況動態計算健康分數', async () => {
+  await withAuthenticatedApp(async ({ app, prisma, cookie }) => {
+    const vehicle = await prisma.vehicle.findFirstOrThrow({
+      where: { cabinCondition: 'clean', status: 'available' }
+    });
+    await prisma.vehicle.update({
+      where: { id: vehicle.id },
+      data: { status: 'maintenance', cabinCondition: 'average' }
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/v1/vehicles/${vehicle.id}`,
+      headers: { cookie }
+    });
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.json().item.healthScore, 55);
+  });
+});
+
 test('修改車輛時只接受三種車內狀況', async () => {
   await withAuthenticatedApp(async ({ app, prisma, cookie }) => {
     const vehicle = await prisma.vehicle.findFirstOrThrow();
@@ -105,19 +183,54 @@ test('可租用車輛不可設定髒污且待清潔必須設定髒污', async ()
   });
 });
 
-test('清潔工單可取得車輛清潔狀態資料', async () => {
-  await withAuthenticatedApp(async ({ app, cookie }) => {
+test('清潔工單使用獨立資料表並保留歷史資料', async () => {
+  await withAuthenticatedApp(async ({ app, prisma, cookie }) => {
     const response = await app.inject({
       method: 'GET',
-      url: '/api/v1/vehicles/cleaning-list',
+      url: '/api/v1/cleaning-orders?page=1&pageSize=5',
       headers: { cookie }
     });
 
-    assert.equal(response.statusCode, 200);
+    assert.equal(response.statusCode, 200, response.body);
     const body = response.json();
-    assert.ok(body.items.length > 0);
-    assert.ok(body.items.every(item => ['dirty', 'average', 'clean'].includes(item.cabinCondition)));
-    assert.ok(body.items.every(item => item.station && item.updatedAt));
+    assert.equal(body.items.length, 5);
+    assert.ok(body.pagination.total > 30);
+    assert.ok(body.items.every(item => ['dirty', 'average', 'clean'].includes(item.condition)));
+    assert.ok(body.items.every(item => item.orderNumber && item.vehicle && item.createdAt));
+
+    const history = await prisma.cleaningOrder.findMany({
+      where: { vehicleLicensePlate: 'RAC-4582' },
+      orderBy: { createdAt: 'asc' }
+    });
+    assert.ok(history.length >= 2);
+    assert.notEqual(history[0].createdAt, history.at(-1).createdAt);
+
+    const summaryResponse = await app.inject({
+      method: 'GET',
+      url: '/api/v1/cleaning-orders/summary',
+      headers: { cookie }
+    });
+    assert.equal(summaryResponse.statusCode, 200);
+    const summary = summaryResponse.json();
+    assert.equal(summary.total, body.pagination.total);
+    assert.equal(summary.total, summary.dirty + summary.average + summary.clean);
+
+    const createResponse = await app.inject({
+      method: 'POST',
+      url: '/api/v1/cleaning-orders',
+      headers: { cookie },
+      payload: {
+        vehicleLicensePlate: 'RAC-4582',
+        condition: 'clean',
+        note: '歷史資料新增測試'
+      }
+    });
+    assert.equal(createResponse.statusCode, 201, createResponse.body);
+    const createdItem = createResponse.json().item;
+    const storedItem = await prisma.cleaningOrder.findUnique({
+      where: { orderNumber: createdItem.orderNumber }
+    });
+    assert.equal(storedItem.note, '歷史資料新增測試');
   });
 });
 

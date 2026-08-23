@@ -23,13 +23,20 @@ test('車輛清單與詳情提供車內狀況顯示及修改功能', async () =>
 });
 
 test('清潔工單使用資料表呈現三種清潔狀態', async () => {
-  const clearOrdersHtml = await readFile(path.join(projectRoot, 'clear-orders.html'), 'utf8');
+  const [clearOrdersHtml, cleaningOrderApi] = await Promise.all([
+    readFile(path.join(projectRoot, 'clear-orders.html'), 'utf8'),
+    readFile(path.join(projectRoot, 'js', 'api', 'cleaning-orders.js'), 'utf8')
+  ]);
 
   assert.match(clearOrdersHtml, /data-cleaning-orders-body/);
+  assert.match(clearOrdersHtml, /工單／車輛/);
+  assert.match(clearOrdersHtml, /建立時間/);
   assert.match(clearOrdersHtml, /髒污/);
   assert.match(clearOrdersHtml, /普通/);
   assert.match(clearOrdersHtml, /乾淨/);
   assert.match(clearOrdersHtml, /data-cleaning-page-size/);
+  assert.match(cleaningOrderApi, /\/cleaning-orders/);
+  assert.match(cleaningOrderApi, /summary/);
 });
 
 test('車輛清單移除今日里程並改用整體狀態', async () => {
@@ -37,6 +44,7 @@ test('車輛清單移除今日里程並改用整體狀態', async () => {
 
   assert.match(fleetHtml, /<th>\s*整體狀態\s*<\/th>/);
   assert.doesNotMatch(fleetHtml, /<th>\s*今日里程\s*<\/th>/);
+  assert.doesNotMatch(fleetHtml, /data-fleet-search/);
 });
 
 test('整體狀態同時反映車外維修與車內清潔', async () => {
@@ -50,6 +58,71 @@ test('整體狀態同時反映車外維修與車內清潔', async () => {
   assert.equal(getOverallStatus({ status: 'maintenance', cabinCondition: 'clean' }), '待維修');
   assert.equal(getOverallStatus({ status: 'cleaning', cabinCondition: 'dirty' }), '待清潔');
   assert.equal(getOverallStatus({ status: 'available', cabinCondition: 'average' }), '可租');
+});
+
+test('車隊表格使用 TanStack Table 篩選每個資料欄位並分頁', async () => {
+  const fleetScript = await readFile(path.join(projectRoot, 'js', 'fleet.js'), 'utf8');
+  const tableCore = await import('@tanstack/table-core');
+  const sandbox = { window: { TableCore: tableCore } };
+  vm.runInNewContext(fleetScript, sandbox);
+  const table = sandbox.window.IRentFleet.createVehicleTable([
+    {
+      id: 1,
+      licensePlate: 'RAC-4582',
+      model: 'Toyota Yaris',
+      color: '白',
+      station: { name: '信義站' },
+      status: 'available',
+      cabinCondition: 'clean',
+      healthScore: 96,
+      latestAnomaly: '無'
+    },
+    {
+      id: 2,
+      licensePlate: 'RBC-2108',
+      model: 'Honda Fit',
+      color: '黑',
+      station: { name: '板橋站' },
+      status: 'cleaning',
+      cabinCondition: 'dirty',
+      healthScore: 70,
+      latestAnomaly: '輪胎異常'
+    },
+    {
+      id: 3,
+      licensePlate: 'RBA-6935',
+      model: 'Toyota Vios',
+      color: '銀',
+      station: { name: '信義站' },
+      status: 'available',
+      cabinCondition: 'average',
+      healthScore: 85,
+      latestAnomaly: '無'
+    }
+  ]);
+
+  const visibleVehicles = () => table.getRowModel().rows.map(row => row.original.licensePlate);
+  table.getColumn('vehicle').setFilterValue('RAC-4582');
+  assert.deepEqual(visibleVehicles(), ['RAC-4582']);
+  table.resetColumnFilters();
+  table.getColumn('station').setFilterValue('信義');
+  assert.deepEqual(visibleVehicles(), ['RAC-4582', 'RBA-6935']);
+  table.resetColumnFilters();
+  table.getColumn('overallStatus').setFilterValue('待清潔');
+  assert.deepEqual(visibleVehicles(), ['RBC-2108']);
+  table.resetColumnFilters();
+  table.getColumn('cabinCondition').setFilterValue('普通');
+  assert.deepEqual(visibleVehicles(), ['RBA-6935']);
+  table.resetColumnFilters();
+  table.getColumn('healthScore').setFilterValue('85');
+  assert.deepEqual(visibleVehicles(), ['RBA-6935']);
+  table.resetColumnFilters();
+  table.getColumn('latestAnomaly').setFilterValue('輪胎');
+  assert.deepEqual(visibleVehicles(), ['RBC-2108']);
+
+  table.resetColumnFilters();
+  table.setPageSize(1);
+  assert.equal(visibleVehicles().length, 1);
 });
 
 test('車輛歷程 API 使用正確端點新增及修改紀錄', async () => {
@@ -123,14 +196,16 @@ test('點擊車輛歷程會載入完整費用與三類紀錄', async () => {
     color: '白',
     stationId: 1,
     station: { name: '測試站', city: '臺北市', district: '中正區' },
-    status: 'available',
+    status: 'maintenance',
     cabinCondition: 'clean',
     healthScore: 95,
     latestAnomaly: null
   };
+  const tableCore = await import('@tanstack/table-core');
   const sandbox = {
     document,
     window: {
+      TableCore: tableCore,
       IRentVehicleApi: {
         list: async () => [vehicle],
         mapSummary: async () => ({ type: 'FeatureCollection', features: [] }),
@@ -170,6 +245,9 @@ test('點擊車輛歷程會載入完整費用與三類紀錄', async () => {
     notify() {}
   });
 
+  assert.match(body.innerHTML, /fleet-overall-status is-maintenance/);
+  assert.match(body.innerHTML, /<b class="fleet-health-score is-risk">70<\/b>/);
+  assert.doesNotMatch(body.innerHTML, /class="progress/);
   assert.match(body.innerHTML, /data-action="view-history"/);
   bodyClickListener({
     target: {

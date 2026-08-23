@@ -24,6 +24,7 @@
     mapLoaded: false,
     page: 1,
     pageSize: 5,
+    table: null,
     context: null
   };
   const text = value => String(value ?? '').trim();
@@ -33,6 +34,27 @@
     if (vehicle.status === 'maintenance') conditions.push('待維修');
     if (vehicle.status === 'cleaning' || vehicle.cabinCondition === 'dirty') conditions.push('待清潔');
     return conditions.length ? conditions.join('／') : '可租';
+  }
+
+  function calculateHealthScore(vehicle) {
+    const cabinScores = { clean: 100, average: 70, dirty: 40 };
+    const exteriorScore = vehicle.status === 'maintenance' ? 40 : 100;
+    const score = (cabinScores[vehicle.cabinCondition] + exteriorScore) / 2;
+    return vehicle.status === 'maintenance' ? Math.min(score, 70) : score;
+  }
+
+  function healthScoreClass(score) {
+    return Number(score) <= 70 ? ' is-risk' : '';
+  }
+
+  function getTrafficLight(vehicle) {
+    if (vehicle.status === 'maintenance' || vehicle.cabinCondition === 'dirty') {
+      return { tone: 'red', label: '紅燈：待維修或髒污' };
+    }
+    if (vehicle.status === 'available' && vehicle.cabinCondition === 'average') {
+      return { tone: 'yellow', label: '黃燈：可租且普通' };
+    }
+    return { tone: 'green', label: '綠燈：可租且乾淨' };
   }
 
   function escapeText(value) {
@@ -65,47 +87,82 @@
     if (element) element.textContent = value;
   }
 
-  function filteredVehicles() {
-    const search = document.querySelector('[data-fleet-search]');
-    const status = document.querySelector('[data-fleet-status]');
-    const keyword = `${state.context.getGlobalQuery()} ${search?.value || ''}`
-      .trim()
-      .toLocaleLowerCase('zh-Hant');
-    return state.vehicles.filter(vehicle => {
-      const searchable = [
-        vehicle.licensePlate,
-        vehicle.model,
-        vehicle.color,
-        vehicle.station?.code,
-        vehicle.station?.name,
-        vehicle.station?.city,
-        vehicle.station?.district,
-        cabinConditionMeta[vehicle.cabinCondition]?.label,
-        vehicle.latestAnomaly
-      ].join(' ').toLocaleLowerCase('zh-Hant');
-      const matchesStatus = !status?.value
-        || (status.value === 'cleaning'
-          ? vehicle.status === 'cleaning' || vehicle.cabinCondition === 'dirty'
-          : vehicle.status === status.value);
-      return (!keyword || searchable.includes(keyword)) && matchesStatus;
+  function createVehicleTable(vehicles) {
+    const core = globalObject.TableCore;
+    if (!core?.createTable) return null;
+    let columnFilters = [];
+    let pagination = { pageIndex: 0, pageSize: state.pageSize };
+    let table;
+    const syncState = () => table.setOptions(previous => ({
+      ...previous,
+      state: { ...previous.state, columnFilters, pagination }
+    }));
+
+    table = core.createTable({
+      data: vehicles,
+      columns: [
+        {
+          id: 'vehicle',
+          accessorFn: vehicle => `${vehicle.licensePlate} ${vehicle.model} ${vehicle.color}`,
+          filterFn: 'includesString'
+        },
+        {
+          id: 'station',
+          accessorFn: vehicle => [vehicle.station?.name, vehicle.station?.city, vehicle.station?.district].filter(Boolean).join(' '),
+          filterFn: 'includesString'
+        },
+        { id: 'overallStatus', accessorFn: getOverallStatus, filterFn: 'includesString' },
+        {
+          id: 'cabinCondition',
+          accessorFn: vehicle => cabinConditionMeta[vehicle.cabinCondition]?.label || vehicle.cabinCondition,
+          filterFn: 'includesString'
+        },
+        { id: 'healthScore', accessorFn: calculateHealthScore, filterFn: 'includesString' },
+        { id: 'latestAnomaly', accessorFn: vehicle => vehicle.latestAnomaly || '無', filterFn: 'includesString' }
+      ],
+      state: { columnFilters, pagination },
+      onColumnFiltersChange: updater => {
+        columnFilters = core.functionalUpdate(updater, columnFilters);
+        pagination = { ...pagination, pageIndex: 0 };
+        syncState();
+      },
+      onPaginationChange: updater => {
+        pagination = core.functionalUpdate(updater, pagination);
+        syncState();
+      },
+      getRowId: vehicle => String(vehicle.id),
+      getCoreRowModel: core.getCoreRowModel(),
+      getFilteredRowModel: core.getFilteredRowModel(),
+      getPaginationRowModel: core.getPaginationRowModel()
     });
+    return table;
   }
 
   function renderRows() {
     const body = document.querySelector('[data-fleet-body]');
     if (!body) return;
-    const vehicles = filteredVehicles();
-    const totalPages = Math.max(1, Math.ceil(vehicles.length / state.pageSize));
-    state.page = Math.min(state.page, totalPages);
-    const pageStart = (state.page - 1) * state.pageSize;
-    const pageVehicles = vehicles.slice(pageStart, pageStart + state.pageSize);
-    body.innerHTML = pageVehicles.map((vehicle, index) => {
+    if (!state.table) {
+      body.innerHTML = '<tr><td colspan="9" class="fleet-empty">車隊表格元件載入失敗</td></tr>';
+      return;
+    }
+    const filteredRows = state.table.getFilteredRowModel().rows;
+    const pageRows = state.table.getRowModel().rows;
+    const pagination = state.table.getState().pagination;
+    const totalPages = state.table.getPageCount();
+    state.page = pagination.pageIndex + 1;
+    const pageStart = pagination.pageIndex * pagination.pageSize;
+    body.innerHTML = pageRows.map((row, index) => {
+      const vehicle = row.original;
       const cabinCondition = cabinConditionMeta[vehicle.cabinCondition]
         || { label: vehicle.cabinCondition, badge: 'gray' };
-      const healthClass = vehicle.healthScore < 70 ? 'risk' : vehicle.healthScore < 85 ? 'warn' : '';
+      const healthScore = calculateHealthScore(vehicle);
+      const trafficLight = getTrafficLight(vehicle);
       return `
         <tr data-vehicle-id="${vehicle.id}">
           <td class="fleet-sequence">${pageStart + index + 1}</td>
+          <td class="fleet-signal">
+            <span class="fleet-traffic-light is-${trafficLight.tone}" role="img" aria-label="${trafficLight.label}" title="${trafficLight.label}"></span>
+          </td>
           <td>
             <span class="cell-title">${escapeText(vehicle.licensePlate)}</span>
             <span class="cell-meta">${escapeText(vehicle.model)}・${escapeText(vehicle.color)}</span>
@@ -114,11 +171,10 @@
             <span class="cell-title">${escapeText(vehicle.station?.name || '未分配')}</span>
             <span class="cell-meta">${escapeText([vehicle.station?.city, vehicle.station?.district].filter(Boolean).join(''))}</span>
           </td>
-          <td><span class="fleet-overall-status">${escapeText(getOverallStatus(vehicle))}</span></td>
+          <td><span class="fleet-overall-status${vehicle.status === 'maintenance' ? ' is-maintenance' : ''}">${escapeText(getOverallStatus(vehicle))}</span></td>
           <td><span class="fleet-cabin-condition is-${escapeText(vehicle.cabinCondition)}">${escapeText(cabinCondition.label)}</span></td>
           <td>
-            <b>${vehicle.healthScore}</b>
-            <div class="progress ${healthClass}"><span style="width:${vehicle.healthScore}%"></span></div>
+            <b class="fleet-health-score${healthScoreClass(healthScore)}">${healthScore}</b>
           </td>
           <td>${escapeText(vehicle.latestAnomaly || '無')}</td>
           <td>
@@ -129,17 +185,17 @@
           </td>
         </tr>
       `;
-    }).join('') || '<tr><td colspan="8" class="fleet-empty">沒有符合條件的車輛</td></tr>';
+    }).join('') || '<tr><td colspan="9" class="fleet-empty">沒有符合條件的車輛</td></tr>';
 
-    setText('[data-fleet-page-info]', `第 ${state.page} / ${totalPages} 頁，共 ${vehicles.length} 輛`);
+    setText('[data-fleet-page-info]', `第 ${state.page} / ${totalPages} 頁，共 ${filteredRows.length} 輛`);
     const previous = document.querySelector('[data-fleet-page-previous]');
     const next = document.querySelector('[data-fleet-page-next]');
-    if (previous) previous.disabled = state.page === 1;
-    if (next) next.disabled = state.page === totalPages;
+    if (previous) previous.disabled = !state.table.getCanPreviousPage();
+    if (next) next.disabled = !state.table.getCanNextPage();
   }
 
   function resetPageAndRenderRows() {
-    state.page = 1;
+    state.table?.setPageIndex(0);
     renderRows();
   }
 
@@ -170,6 +226,7 @@
   async function showVehicleDetails(vehicle) {
     const cabinCondition = cabinConditionMeta[vehicle.cabinCondition]
       || { label: vehicle.cabinCondition, badge: 'gray' };
+    const healthScore = calculateHealthScore(vehicle);
     const details = `
       <div class="fleet-vehicle-detail">
         <div class="fleet-detail-item">
@@ -178,7 +235,7 @@
         </div>
         <div class="fleet-detail-item">
           <span>整體狀態</span>
-          <strong><i class="fleet-overall-status">${escapeText(getOverallStatus(vehicle))}</i></strong>
+          <strong><i class="fleet-overall-status${vehicle.status === 'maintenance' ? ' is-maintenance' : ''}">${escapeText(getOverallStatus(vehicle))}</i></strong>
         </div>
         <div class="fleet-detail-item">
           <span>車內狀況</span>
@@ -191,7 +248,7 @@
         </div>
         <div class="fleet-detail-item">
           <span>健康分數</span>
-          <strong>${escapeText(vehicle.healthScore)}</strong>
+          <strong class="fleet-health-score${healthScoreClass(healthScore)}">${escapeText(healthScore)}</strong>
         </div>
         <div class="fleet-detail-item">
           <span>今日里程</span>
@@ -225,7 +282,7 @@
       vehicle.station?.name || '未分配站點',
       getOverallStatus(vehicle),
       `車內狀況 ${cabinCondition.label}`,
-      `健康分數 ${vehicle.healthScore}`,
+      `健康分數 ${healthScore}`,
       vehicle.latestAnomaly || '無異常'
     ].join('\n'));
   }
@@ -561,7 +618,7 @@
           'circle-color': [
             'step', ['get', 'healthScore'],
             '#dc3545',
-            70, '#f2a93b',
+            71, '#f2a93b',
             85, '#20a66a'
           ],
           'circle-opacity': .9,
@@ -576,13 +633,14 @@
       const feature = event.features?.[0];
       if (!feature) return;
       const properties = feature.properties;
+      const healthScore = Number(properties.healthScore);
       const status = statusMeta[properties.status] || { label: properties.status };
       new globalObject.maplibregl.Popup({ offset: 12 })
         .setLngLat(feature.geometry.coordinates)
         .setHTML(`
           <div class="fleet-map-popup">
             <strong>${escapeText(properties.plateNumber)}</strong>
-            <span>健康分數：${escapeText(properties.healthScore)}</span>
+            <span class="fleet-map-health-score${healthScoreClass(healthScore)}">健康分數：${escapeText(healthScore)}</span>
             <span>異常數量：${escapeText(properties.issueCount)}</span>
             <span>車輛狀態：${escapeText(status.label)}</span>
             <span>最後更新：${escapeText(new Date(properties.updatedAt).toLocaleString('zh-TW'))}</span>
@@ -622,9 +680,21 @@
       globalObject.IRentStationApi.list(),
       globalObject.IRentVehicleApi.mapSummary()
     ]);
+    const vehiclesById = new Map(vehicles.map(vehicle => [vehicle.id, vehicle]));
     state.vehicles = vehicles;
     state.stations = stations;
-    state.mapData = mapData;
+    state.table = createVehicleTable(vehicles);
+    state.mapData = {
+      ...mapData,
+      features: mapData.features.map(feature => {
+        const vehicle = vehiclesById.get(feature.properties.id);
+        if (!vehicle) return feature;
+        return {
+          ...feature,
+          properties: { ...feature.properties, healthScore: calculateHealthScore(vehicle) }
+        };
+      })
+    };
     renderRows();
     renderRegionOptions();
   }
@@ -673,7 +743,6 @@
       站點代碼: 'stationCode',
       狀態: 'status',
       車內狀況: 'cabinCondition',
-      健康分數: 'healthScore',
       今日里程: 'todayMileage',
       最近異常: 'latestAnomaly'
     };
@@ -705,7 +774,6 @@
         stationId: station.id,
         status,
         cabinCondition,
-        healthScore: record.healthScore ? Number(record.healthScore) : 100,
         todayMileage: record.todayMileage ? Number(record.todayMileage) : 0,
         latestAnomaly: record.latestAnomaly || null
       };
@@ -739,18 +807,22 @@
     state.context = context;
     initMap();
     context.setApplyFilter(resetPageAndRenderRows);
-    document.querySelector('[data-fleet-search]')?.addEventListener('input', resetPageAndRenderRows);
-    document.querySelector('[data-fleet-status]')?.addEventListener('change', resetPageAndRenderRows);
+    document.querySelectorAll?.('[data-fleet-column-filter]')?.forEach(input => {
+      input.addEventListener('input', event => {
+        state.table?.getColumn(event.currentTarget.dataset.fleetColumnFilter)
+          ?.setFilterValue(event.currentTarget.value);
+        renderRows();
+      });
+    });
     document.querySelector('[data-fleet-region]')?.addEventListener('change', updateMap);
     document.querySelector('[data-fleet-page-previous]')?.addEventListener('click', () => {
-      if (state.page === 1) return;
-      state.page -= 1;
+      if (!state.table?.getCanPreviousPage()) return;
+      state.table.previousPage();
       renderRows();
     });
     document.querySelector('[data-fleet-page-next]')?.addEventListener('click', () => {
-      const totalPages = Math.max(1, Math.ceil(filteredVehicles().length / state.pageSize));
-      if (state.page === totalPages) return;
-      state.page += 1;
+      if (!state.table?.getCanNextPage()) return;
+      state.table.nextPage();
       renderRows();
     });
     document.querySelector('[data-action="add-vehicle"]')?.addEventListener('click', async () => {
@@ -783,5 +855,5 @@
     }
   }
 
-  globalObject.IRentFleet = { init, getOverallStatus };
+  globalObject.IRentFleet = { init, getOverallStatus, createVehicleTable };
 })(window);

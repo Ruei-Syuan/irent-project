@@ -39,40 +39,24 @@
               </button>
             </div>
           </section>
-          <section class="metrics">
-            <article class="metric">
+          <section class="metrics dashboard-style-metrics repair-order-metrics">
+            <article class="metric is-green" data-repair-status-card="completed">
               <div class="metric-label">
-                待報價
-                <span class="metric-icon">
-                  $
-                </span>
-              </div>
-              <b>
-                17
-              </b>
-              <small>
-                平均等待 3.8 小時
-              </small>
-            </article>
-            <article class="metric">
-              <div class="metric-label">
-                待核准
+                <span>維修完畢</span>
                 <span class="metric-icon">
                   ✓
                 </span>
               </div>
               <b>
-                9
+                17
               </b>
-              <small>
-                <span class="bad">
-                  3 件即將逾時
-                </span>
+              <small data-repair-status-note="completed">
+                本月完成 0 件
               </small>
             </article>
-            <article class="metric">
+            <article class="metric is-blue" data-repair-status-card="in-progress">
               <div class="metric-label">
-                維修中
+                <span>維修中</span>
                 <span class="metric-icon">
                   ⚒
                 </span>
@@ -80,35 +64,35 @@
               <b>
                 34
               </b>
-              <small>
-                今日預計完工 12 件
+              <small data-repair-status-note="in-progress">
+                目前 0 件維修中
               </small>
             </article>
-            <article class="metric">
+            <article class="metric is-amber" data-repair-status-card="pending">
               <div class="metric-label">
-                待驗收
+                <span>待驗收</span>
                 <span class="metric-icon">
-                  ◎
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Zm10-3a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/></svg>
                 </span>
               </div>
               <b>
                 12
               </b>
-              <small>
-                AI 可自動驗收 8 件
+              <small data-repair-status-note="pending">
+                目前 0 件待驗收
               </small>
             </article>
-            <article class="metric">
+            <article class="metric is-violet" data-repair-spend-card>
               <div class="metric-label">
-                本月維修費
+                <span>本月維修費</span>
                 <span class="metric-icon">
                   ▥
                 </span>
               </div>
-              <b>
+              <b data-repair-spend-total>
                 1.24M
               </b>
-              <small>
+              <small data-repair-spend-comparison>
                 <span class="good">
                   ▼ 6.2%
                 </span>
@@ -121,20 +105,26 @@
               <div class="card-head">
                 <div>
                   <h2>
-                    工單清單
+                    維修清單
                   </h2>
-                  <p>
+                  <!-- <p>
                     共 72 件進行中工單
-                  </p>
+                  </p> -->
                 </div>
                 <div class="filters">
-                  <input class="search" aria-label="搜尋工單" placeholder="搜尋工單、車牌、廠商">
+                  <button class="btn primary" type="button" data-repair-bulk-accept disabled>批次驗收</button>
                   <select class="select" aria-label="工單狀態">
                     <option>
                       全部狀態
                     </option>
                     <option>
                       維修中
+                    </option>
+                    <option>
+                      待驗收
+                    </option>
+                    <option>
+                      維修完畢
                     </option>
                   </select>
                 </div>
@@ -144,29 +134,44 @@
                   <thead>
                     <tr>
                       <th>
+                        <input type="checkbox" data-repair-select-all aria-label="選取全部工單">
+                      </th>
+                      <th>
+                        序號
+                      </th>
+                      <th>
                         工單／車輛
                       </th>
                       <th>
                         維修項目
                       </th>
                       <th>
-                        優先級
+                        維修中心
                       </th>
                       <th>
-                        合作廠商
+                        指派管理員
                       </th>
                       <th>
                         預估費用
                       </th>
                       <th>
+                        實際費用
+                      </th>
+                      <th>
                         狀態
                       </th>
                       <th>
-                        預計完工
+                        建立時間
+                      </th>
+                      <th>
+                        完成時間
+                      </th>
+                      <th>
+                        操作
                       </th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody data-repair-orders-body hidden>
                     <tr style="background:#f4fffb">
                       <td>
                         <span class="cell-title">
@@ -223,8 +228,8 @@
                         NT$ 1,800
                       </td>
                       <td>
-                        <span class="badge amber">
-                          待核准
+                        <span class="badge blue">
+                          維修中
                         </span>
                       </td>
                       <td>
@@ -255,8 +260,8 @@
                         NT$ 6,500
                       </td>
                       <td>
-                        <span class="badge violet">
-                          待料
+                        <span class="badge blue">
+                          維修中
                         </span>
                       </td>
                       <td>
@@ -298,8 +303,27 @@
                   </tbody>
                 </table>
               </div>
+              <div class="repair-order-pagination" aria-label="維修清單分頁">
+                <div class="inline">
+                  <span data-repair-page-info>第 1 / 1 頁，共 0 筆</span>
+                  <label class="repair-order-page-size">
+                    每頁
+                    <select class="select" data-repair-page-size aria-label="每頁顯示筆數">
+                      <option value="5" selected>5 筆</option>
+                      <option value="10">10 筆</option>
+                      <option value="20">20 筆</option>
+                      <option value="50">50 筆</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="inline">
+                  <button class="btn small" type="button" data-repair-page-previous disabled>上一頁</button>
+                  <div class="repair-order-page-numbers" data-repair-page-numbers></div>
+                  <button class="btn small" type="button" data-repair-page-next disabled>下一頁</button>
+                </div>
+              </div>
             </article>
-            <aside class="card">
+            <!-- <aside class="card">
               <div class="card-head">
                 <div>
                   <h2>
@@ -449,11 +473,15 @@
                   </button>
                 </div>
               </div>
-            </aside>
+            </aside> -->
           </section>
         </main>
       </div>
     </div>
+    <script src="js/api/client.js" defer>
+    </script>
+    <script src="js/api/repair-orders.js" defer>
+    </script>
     <script src="js/layout.js" defer>
     </script>
   </body>

@@ -117,6 +117,16 @@ export default async function vehicleRoutes(app, options) {
     })
   }));
 
+  app.get('/cleaning-list', {
+    preHandler: auth.authorize('dispatch.view'),
+    schema: { tags: ['Cleaning orders'] }
+  }, async () => ({
+    items: await prisma.vehicle.findMany({
+      include: vehicleInclude,
+      orderBy: { licensePlate: 'asc' }
+    })
+  }));
+
   app.get('/map-summary', {
     preHandler: auth.authorize('fleet.view'),
     schema: { tags: ['Vehicles'] }

@@ -5,6 +5,9 @@ import Database from 'better-sqlite3';
 import {
   anomalySeeds,
   createRentalSeeds,
+  createAdditionalRepairOrderSeeds,
+  createLastMonthRepairOrderSeeds,
+  createRepairOrderSeeds,
   createServiceSeeds,
   customerSeeds,
   stationSeeds,
@@ -34,6 +37,10 @@ const migrations = [
   {
     table: 'vehicle_service_records',
     path: path.join(backendRoot, 'prisma', 'migrations', '0005_vehicle_history', 'migration.sql')
+  },
+  {
+    table: 'repair_orders',
+    path: path.join(backendRoot, 'prisma', 'migrations', '0006_repair_orders', 'migration.sql')
   }
 ];
 
@@ -175,6 +182,18 @@ function seedOperations(database) {
     VALUES
       (@vehicleId, @type, @performedAt, @cost, @note)
   `);
+  const insertRepairOrder = database.prepare(`
+    INSERT OR IGNORE INTO repair_orders
+      (repair_center, order_number, vehicle_license_plate, maintenance_item, status, assigned_manager_id, estimated_cost, actual_cost, completed_at)
+    VALUES
+      (@repairCenter, @orderNumber, @licensePlate, @maintenanceItem, @status, @assignedManagerId, @estimatedCost, @actualCost, @completedAt)
+  `);
+  const repairCompletedCosts = database.prepare(`
+    UPDATE repair_orders
+    SET actual_cost = estimated_cost
+    WHERE status = '維修完畢' AND actual_cost IS NULL
+  `);
+  const findManager = database.prepare('SELECT id FROM users WHERE email = @email LIMIT 1');
 
   const seed = database.transaction(() => {
     const created = {
@@ -183,7 +202,8 @@ function seedOperations(database) {
       anomalyAlerts: 0,
       customers: 0,
       rentals: 0,
-      serviceRecords: 0
+      serviceRecords: 0,
+      repairOrders: 0
     };
 
     for (const station of stationSeeds) {
@@ -241,6 +261,17 @@ function seedOperations(database) {
         vehicleId: vehicle.id
       }).changes;
     }
+
+    for (const order of [...createRepairOrderSeeds(), ...createAdditionalRepairOrderSeeds(), ...createLastMonthRepairOrderSeeds()]) {
+      const vehicle = findVehicle.get(order.licensePlate);
+      if (!vehicle) throw new Error(`Repair order vehicle seed not found: ${order.licensePlate}`);
+      const manager = findManager.get({ email: order.managerEmail ?? 'adm001@irent.example.tw' });
+      created.repairOrders += insertRepairOrder.run({
+        ...order,
+        assignedManagerId: manager?.id ?? null
+      }).changes;
+    }
+    repairCompletedCosts.run();
 
     return created;
   });

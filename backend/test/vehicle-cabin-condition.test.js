@@ -105,6 +105,22 @@ test('可租用車輛不可設定髒污且待清潔必須設定髒污', async ()
   });
 });
 
+test('清潔工單可取得車輛清潔狀態資料', async () => {
+  await withAuthenticatedApp(async ({ app, cookie }) => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/v1/vehicles/cleaning-list',
+      headers: { cookie }
+    });
+
+    assert.equal(response.statusCode, 200);
+    const body = response.json();
+    assert.ok(body.items.length > 0);
+    assert.ok(body.items.every(item => ['dirty', 'average', 'clean'].includes(item.cabinCondition)));
+    assert.ok(body.items.every(item => item.station && item.updatedAt));
+  });
+});
+
 test('可新增修改租借歷程並回傳完整租客資料與租金統計', async () => {
   await withAuthenticatedApp(async ({ app, prisma, cookie }) => {
     const station = await prisma.station.findFirstOrThrow();
@@ -217,5 +233,180 @@ test('可新增修改保養歷程並分別累計清潔與維修費', async () =>
     assert.equal(history.summary.cleaningCost, 650);
     assert.equal(history.summary.maintenanceCost, 2400);
     assert.equal(history.services.length, 2);
+  });
+});
+
+test('維修工單以車牌關聯車輛並限制工單狀態', async () => {
+  await withAuthenticatedApp(async ({ prisma }) => {
+    const vehicle = await prisma.vehicle.findFirstOrThrow();
+    const manager = await prisma.user.findFirstOrThrow();
+    const repairOrder = await prisma.repairOrder.create({
+      data: {
+        repairCenter: '信義速修中心',
+        orderNumber: 'RO-260822-001',
+        vehicleLicensePlate: vehicle.licensePlate,
+        maintenanceItem: '更換煞車皮',
+        status: '維修中',
+        assignedManagerId: manager.id,
+        estimatedCost: 4200,
+        actualCost: 3900
+      },
+      include: { vehicle: true, assignedManager: true }
+    });
+
+    assert.equal(repairOrder.vehicle.licensePlate, vehicle.licensePlate);
+    assert.equal(repairOrder.assignedManager.id, manager.id);
+    assert.equal(repairOrder.status, '維修中');
+
+    await assert.rejects(
+      prisma.repairOrder.create({
+        data: {
+          repairCenter: '信義速修中心',
+          orderNumber: 'RO-260822-002',
+          vehicleLicensePlate: vehicle.licensePlate,
+          maintenanceItem: '更換輪胎',
+          status: '待核准',
+          estimatedCost: 1800
+        }
+      })
+    );
+  });
+});
+
+test('維修工單清單支援每頁五筆分頁', async () => {
+  await withAuthenticatedApp(async ({ app, prisma, cookie }) => {
+    await prisma.repairOrder.deleteMany();
+    const vehicles = await prisma.vehicle.findMany({ take: 6, orderBy: { id: 'asc' } });
+    const manager = await prisma.user.findFirstOrThrow();
+    await prisma.repairOrder.createMany({
+      data: vehicles.map((vehicle, index) => ({
+        repairCenter: '測試維修中心',
+        orderNumber: `RO-PAGE-${String(index + 1).padStart(3, '0')}`,
+        vehicleLicensePlate: vehicle.licensePlate,
+        maintenanceItem: '分頁測試維修',
+        status: '維修中',
+        assignedManagerId: manager.id,
+        estimatedCost: 1000 + index
+      }))
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/v1/repair-orders?page=2&pageSize=5',
+      headers: { cookie }
+    });
+
+    assert.equal(response.statusCode, 200);
+    const body = response.json();
+    assert.equal(body.items.length, 1);
+    assert.deepEqual(body.pagination, { page: 2, pageSize: 5, total: 6, totalPages: 2 });
+
+    const searchResponse = await app.inject({
+      method: 'GET',
+      url: '/api/v1/repair-orders?search=RO-PAGE-006&pageSize=5',
+      headers: { cookie }
+    });
+    assert.equal(searchResponse.statusCode, 200);
+    assert.equal(searchResponse.json().pagination.total, 1);
+  });
+});
+
+test('維修工單清單同時套用月份與狀態篩選', async () => {
+  await withAuthenticatedApp(async ({ app, prisma, cookie }) => {
+    await prisma.repairOrder.deleteMany();
+    const vehicle = await prisma.vehicle.findFirstOrThrow();
+    const manager = await prisma.user.findFirstOrThrow();
+    await prisma.repairOrder.createMany({
+      data: [
+        {
+          repairCenter: '測試維修中心',
+          orderNumber: 'RO-FILTER-MATCH',
+          vehicleLicensePlate: vehicle.licensePlate,
+          maintenanceItem: '月份狀態交集測試',
+          status: '維修完畢',
+          assignedManagerId: manager.id,
+          estimatedCost: 2000,
+          completedAt: '2026-07-15T08:00:00.000Z'
+        },
+        {
+          repairCenter: '測試維修中心',
+          orderNumber: 'RO-FILTER-WRONG-STATUS',
+          vehicleLicensePlate: vehicle.licensePlate,
+          maintenanceItem: '月份狀態交集測試',
+          status: '待驗收',
+          assignedManagerId: manager.id,
+          estimatedCost: 2000,
+          completedAt: '2026-07-20T08:00:00.000Z'
+        },
+        {
+          repairCenter: '測試維修中心',
+          orderNumber: 'RO-FILTER-WRONG-MONTH',
+          vehicleLicensePlate: vehicle.licensePlate,
+          maintenanceItem: '月份狀態交集測試',
+          status: '維修完畢',
+          assignedManagerId: manager.id,
+          estimatedCost: 2000,
+          completedAt: '2026-06-20T08:00:00.000Z'
+        }
+      ]
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/v1/repair-orders?month=2026-07&status=維修完畢',
+      headers: { cookie }
+    });
+
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(response.json().items.map(item => item.orderNumber), ['RO-FILTER-MATCH']);
+  });
+});
+
+test('待驗收工單支援單筆與批次驗收', async () => {
+  await withAuthenticatedApp(async ({ app, prisma, cookie }) => {
+    await prisma.repairOrder.deleteMany();
+    const vehicles = await prisma.vehicle.findMany({ take: 3, orderBy: { id: 'asc' } });
+    const manager = await prisma.user.findFirstOrThrow();
+    const orders = await prisma.repairOrder.createManyAndReturn({
+      data: vehicles.map((vehicle, index) => ({
+        repairCenter: '測試維修中心',
+        orderNumber: `RO-ACCEPT-${String(index + 1).padStart(3, '0')}`,
+        vehicleLicensePlate: vehicle.licensePlate,
+        maintenanceItem: '驗收測試',
+        status: '待驗收',
+        assignedManagerId: manager.id,
+        estimatedCost: 1000
+      }))
+    });
+
+    const singleResponse = await app.inject({
+      method: 'PATCH',
+      url: `/api/v1/repair-orders/${orders[0].id}/accept`,
+      headers: { cookie }
+    });
+    assert.equal(singleResponse.statusCode, 200);
+    assert.equal(singleResponse.json().item.status, '維修完畢');
+    assert.ok(singleResponse.json().item.completedAt);
+
+    const batchResponse = await app.inject({
+      method: 'POST',
+      url: '/api/v1/repair-orders/bulk-accept',
+      headers: { cookie },
+      payload: { ids: orders.slice(1).map(order => order.id) }
+    });
+    assert.equal(batchResponse.statusCode, 200);
+    assert.equal(batchResponse.json().updatedCount, 2);
+
+    const remaining = await prisma.repairOrder.count({ where: { status: '待驗收' } });
+    assert.equal(remaining, 0);
+  });
+});
+
+test('維修完畢工單的實際費用不可為空', async () => {
+  await withAuthenticatedApp(async ({ prisma }) => {
+    const missingActualCost = await prisma.repairOrder.count({
+      where: { status: '維修完畢', actualCost: null }
+    });
+    assert.equal(missingActualCost, 0);
   });
 });

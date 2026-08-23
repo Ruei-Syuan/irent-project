@@ -260,3 +260,55 @@ export function createServiceSeeds() {
     }
   ]);
 }
+
+export function createRepairOrderSeeds() {
+  return [
+    ['信義速修中心', 'RO-260809-042', 'RAC-4582', '右後保桿鈑噴', '維修中', 4200],
+    ['板橋輪胎站', 'RO-260809-039', 'RAD-7731', '右前輪檢測', '維修中', 1800],
+    ['中山保修廠', 'RO-260809-036', 'RCK-5874', '右後燈更換', '維修中', 6500],
+    ['士林速修中心', 'RO-260809-031', 'RDL-6149', '左前燈修復', '待驗收', 3600]
+  ].map(([repairCenter, orderNumber, licensePlate, maintenanceItem, status, estimatedCost]) => ({
+    repairCenter,
+    orderNumber,
+    licensePlate,
+    maintenanceItem,
+    status,
+    estimatedCost,
+    actualCost: null,
+    completedAt: null
+  }));
+}
+
+export function createAdditionalRepairOrderSeeds() {
+  return [
+    ['南港維修中心', 'RO-260823-001', 'RBC-2108', '定期保養與換油', '維修完畢', 2800, 2650, '2026-08-20T09:00:00.000Z', 'ops101@irent.example.tw'],
+    ['松山汽車工坊', 'RO-260823-002', 'RBA-6935', '煞車系統檢修', '維修中', 5200, null, null, 'dsp208@irent.example.tw'],
+    ['內湖保修廠', 'RO-260823-003', 'RAF-8910', '冷氣濾網更換', '待驗收', 1600, null, null, 'flt315@irent.example.tw'],
+    ['大直維修中心', 'RO-260823-004', 'RBG-1357', '左側車門鈑金', '維修完畢', 7800, 7600, '2026-08-18T08:30:00.000Z', 'dmg422@irent.example.tw'],
+    ['士林速修中心', 'RO-260823-005', 'RAH-2468', '輪胎更換', '維修完畢', 4400, 4400, '2026-08-19T11:20:00.000Z', 'mnt536@irent.example.tw'],
+    ['北投汽車工坊', 'RO-260823-006', 'RBJ-3021', '電瓶更換', '維修中', 3100, null, null, 'rpt607@irent.example.tw'],
+    ['信義速修中心', 'RO-260823-007', 'REM-7203', '引擎異音檢查', '待驗收', 2300, null, null, 'csv718@irent.example.tw'],
+    ['板橋輪胎站', 'RO-260823-008', 'RFN-8456', '四輪定位', '維修完畢', 1200, 1200, '2026-08-17T14:00:00.000Z', 'aud829@irent.example.tw'],
+    ['中山保修廠', 'RO-260823-009', 'RGP-9312', '雨刷馬達更換', '維修完畢', 3600, 3450, '2026-08-16T10:10:00.000Z', 'ops101@irent.example.tw'],
+    ['南港維修中心', 'RO-260823-010', 'RHQ-1647', '前保桿固定座修復', '維修中', 2700, null, null, 'dsp208@irent.example.tw'],
+    ['松山汽車工坊', 'RO-260823-011', 'RJR-2580', '車內清潔與消毒', '維修完畢', 900, 900, '2026-08-15T16:40:00.000Z', 'flt315@irent.example.tw'],
+    ['內湖保修廠', 'RO-260823-012', 'RKS-3491', '輪胎胎壓感測器', '維修中', 2900, null, null, 'dmg422@irent.example.tw'],
+    ['大直維修中心', 'RO-260823-013', 'RLT-4376', '後視鏡更換', '待驗收', 4100, null, null, 'mnt536@irent.example.tw'],
+    ['北投汽車工坊', 'RO-260823-014', 'RMU-5268', '底盤異音檢修', '維修完畢', 5800, 5600, '2026-08-14T13:15:00.000Z', 'rpt607@irent.example.tw'],
+    ['信義速修中心', 'RO-260823-015', 'RNV-6184', '煞車來令片更換', '維修中', 3900, null, null, 'csv718@irent.example.tw']
+  ].map(([repairCenter, orderNumber, licensePlate, maintenanceItem, status, estimatedCost, actualCost, completedAt, managerEmail]) => ({
+    repairCenter, orderNumber, licensePlate, maintenanceItem, status, estimatedCost, actualCost, completedAt, managerEmail
+  }));
+}
+
+export function createLastMonthRepairOrderSeeds() {
+  return [
+    ['中山保修廠', 'RO-260731-001', 'RWD-5471', '引擎機油與濾芯更換', '維修完畢', 2600, 2480, '2026-07-28T09:30:00.000Z', 'ops101@irent.example.tw'],
+    ['南港維修中心', 'RO-260731-002', 'RXE-6582', '前輪軸承更換', '維修完畢', 6300, 6150, '2026-07-25T13:10:00.000Z', 'dsp208@irent.example.tw'],
+    ['板橋輪胎站', 'RO-260731-003', 'RYF-7693', '四輪輪胎更換', '維修完畢', 9800, 9600, '2026-07-22T15:40:00.000Z', 'flt315@irent.example.tw'],
+    ['信義速修中心', 'RO-260731-004', 'RZG-8704', '冷卻系統檢修', '維修完畢', 4700, 4550, '2026-07-18T10:20:00.000Z', 'mnt536@irent.example.tw'],
+    ['松山汽車工坊', 'RO-260731-005', 'RTA-2148', '車門鎖及中控檢修', '維修完畢', 3500, 3380, '2026-07-12T11:00:00.000Z', 'rpt607@irent.example.tw']
+  ].map(([repairCenter, orderNumber, licensePlate, maintenanceItem, status, estimatedCost, actualCost, completedAt, managerEmail]) => ({
+    repairCenter, orderNumber, licensePlate, maintenanceItem, status, estimatedCost, actualCost, completedAt, managerEmail
+  }));
+}

@@ -1,6 +1,6 @@
 .order-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1.25fr) minmax(320px, .72fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 17px
 }
 
@@ -70,6 +70,97 @@
     margin: 2px 0
 }
 
+.repair-order-pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 17px;
+    color: var(--muted);
+    font-size: 12px
+}
+
+.repair-order-page-numbers {
+    display: flex;
+    gap: 5px
+}
+
+.repair-order-page-size {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap
+}
+
+.repair-order-page-size .select {
+    min-height: 31px;
+    padding: 0 8px
+}
+
+.repair-order-page-numbers .btn[aria-current="page"] {
+    border-color: var(--green);
+    background: var(--green-soft);
+    color: var(--green)
+}
+
+.repair-order-pagination .btn:disabled {
+    opacity: .45;
+    cursor: not-allowed
+}
+
+@media(min-width:1081px) {
+    .app-body[data-page="work-orders"] {
+        height: 100vh;
+        overflow: hidden
+    }
+
+    .app-body[data-page="work-orders"] .app-shell,
+    .app-body[data-page="work-orders"] .app-workspace {
+        height: 100%
+    }
+
+    .app-body[data-page="work-orders"] .app-workspace,
+    .app-body[data-page="work-orders"] .page,
+    .order-layout > .card {
+        display: flex;
+        flex-direction: column
+    }
+
+    .app-body[data-page="work-orders"] .page {
+        width: 100%;
+        max-width: none;
+        flex: 1;
+        min-height: 0;
+        margin: 0;
+        padding: 16px 20px 20px
+    }
+
+    .app-body[data-page="work-orders"] .page-head,
+    .app-body[data-page="work-orders"] .metrics {
+        flex: 0 0 auto
+    }
+
+    .app-body[data-page="work-orders"] .metrics {
+        grid-template-columns: repeat(4, minmax(0, 1fr))
+    }
+
+    .app-body[data-page="work-orders"] .order-layout {
+        flex: 1;
+        min-height: 0
+    }
+
+    .order-layout > .card {
+        height: 100%;
+        min-height: 0
+    }
+
+    .order-layout > .card .table-wrap {
+        flex: 1;
+        min-height: 0;
+        overflow: auto
+    }
+}
+
 @media(max-width:1080px) {
     .order-layout {
         grid-template-columns: 1fr
@@ -77,6 +168,20 @@
 }
 
 @media(max-width:560px) {
+    .repair-order-pagination {
+        align-items: stretch;
+        flex-direction: column
+    }
+
+    .repair-order-pagination .inline {
+        display: grid;
+        grid-template-columns: auto 1fr auto
+    }
+
+    .repair-order-page-numbers {
+        justify-content: center
+    }
+
     .summary {
         grid-template-columns: 1fr
     }

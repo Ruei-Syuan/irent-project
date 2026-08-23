@@ -55,23 +55,24 @@ model RolePermission {
 }
 
 model User {
-  id           Int         @id @default(autoincrement())
-  employeeNo   String      @unique @map("employee_no")
+  id           Int           @id @default(autoincrement())
+  employeeNo   String        @unique @map("employee_no")
   name         String
-  email        String?     @unique
+  email        String?       @unique
   phone        String?
-  passwordHash String      @map("password_hash")
-  roleId       Int         @map("role_id")
-  departmentId Int         @map("department_id")
-  status       String      @default("active")
-  lastLoginAt  String?     @map("last_login_at")
-  createdAt    String      @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
-  updatedAt    String      @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
-  role         Role        @relation(fields: [roleId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  department   Department  @relation(fields: [departmentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  passwordHash String        @map("password_hash")
+  roleId       Int           @map("role_id")
+  departmentId Int           @map("department_id")
+  status       String        @default("active")
+  lastLoginAt  String?       @map("last_login_at")
+  createdAt    String        @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt    String        @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
+  role         Role          @relation(fields: [roleId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  department   Department    @relation(fields: [departmentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   sessions     Session[]
   auditLogs    AuditLog[]
   inboxItems   InboxItem[]
+  repairOrders RepairOrder[] @relation("RepairOrderManager")
 
   @@index([roleId])
   @@index([departmentId])
@@ -160,6 +161,7 @@ model Vehicle {
   anomalyAlerts  AiAnomalyAlert[]
   rentals        Rental[]
   serviceRecords VehicleServiceRecord[]
+  repairOrders   RepairOrder[]
 
   @@index([stationId, status])
   @@map("vehicles")
@@ -210,6 +212,26 @@ model VehicleServiceRecord {
   @@unique([vehicleId, type, performedAt])
   @@index([vehicleId, performedAt])
   @@map("vehicle_service_records")
+}
+
+model RepairOrder {
+  id                  Int     @id @default(autoincrement())
+  repairCenter        String  @map("repair_center")
+  orderNumber         String  @unique @map("order_number")
+  vehicleLicensePlate String  @map("vehicle_license_plate")
+  maintenanceItem     String  @map("maintenance_item")
+  status              String
+  assignedManagerId   Int?    @map("assigned_manager_id")
+  estimatedCost       Int     @default(0) @map("estimated_cost")
+  actualCost          Int?    @map("actual_cost")
+  createdAt           String  @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  completedAt         String? @map("completed_at")
+  vehicle             Vehicle @relation(fields: [vehicleLicensePlate], references: [licensePlate], onDelete: Restrict, onUpdate: Cascade)
+  assignedManager     User?   @relation("RepairOrderManager", fields: [assignedManagerId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([vehicleLicensePlate, status, createdAt])
+  @@index([assignedManagerId, status])
+  @@map("repair_orders")
 }
 
 model AiAnomalyAlert {

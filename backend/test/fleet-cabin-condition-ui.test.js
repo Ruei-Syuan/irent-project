@@ -22,6 +22,16 @@ test('車輛清單與詳情提供車內狀況顯示及修改功能', async () =>
   assert.match(vehicleApi, /update:\s*\(id, payload\)/);
 });
 
+test('清潔工單使用資料表呈現三種清潔狀態', async () => {
+  const clearOrdersHtml = await readFile(path.join(projectRoot, 'clear-orders.html'), 'utf8');
+
+  assert.match(clearOrdersHtml, /data-cleaning-orders-body/);
+  assert.match(clearOrdersHtml, /髒污/);
+  assert.match(clearOrdersHtml, /普通/);
+  assert.match(clearOrdersHtml, /乾淨/);
+  assert.match(clearOrdersHtml, /data-cleaning-page-size/);
+});
+
 test('車輛清單移除今日里程並改用整體狀態', async () => {
   const fleetHtml = await readFile(path.join(projectRoot, 'car-management.html'), 'utf8');
 

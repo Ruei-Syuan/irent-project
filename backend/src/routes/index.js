@@ -5,6 +5,7 @@ import departmentRoutes from './departments.js';
 import dashboardRoutes from './dashboard.js';
 import inboxRoutes from './inbox.js';
 import permissionRoutes from './permissions.js';
+import repairOrderRoutes from './repair-orders.js';
 import roleRoutes from './roles.js';
 import stationRoutes from './stations.js';
 import userRoutes from './users.js';
@@ -24,6 +25,7 @@ export default async function apiRoutes(app, options) {
   await app.register(stationRoutes, { ...routeOptions, prefix: '/stations' });
   await app.register(vehicleRoutes, { ...routeOptions, prefix: '/vehicles' });
   await app.register(aiAnomalyAlertRoutes, { ...routeOptions, prefix: '/ai-anomaly-alerts' });
+  await app.register(repairOrderRoutes, { ...routeOptions, prefix: '/repair-orders' });
 
   app.setNotFoundHandler((request, reply) => reply.code(404).send({ error: '找不到 API' }));
 }

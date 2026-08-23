@@ -15,7 +15,7 @@
   const searchSources = [
     { href: 'car-management.html', category: '車輛', selector: 'table tbody tr', titleSelector: '.cell-title' },
     { href: 'damage-review.html', category: '車損案件', selector: '.case-list .case', titleSelector: '.case-top b', hash: '#detail' },
-    { href: 'clear-orders.html', category: '調度任務', selector: '.kanban .task', titleSelector: 'h3' },
+    { href: 'clear-orders.html', category: '清潔工單', selector: 'table tbody tr', titleSelector: '.cell-title' },
     { href: 'work-orders.html', category: '維修工單', selector: 'table tbody tr', titleSelector: '.cell-title' }
   ];
 
@@ -622,66 +622,136 @@
     });
   }
 
-  // 智慧派工：任務篩選、指派、驗收及新增派工。
+  // 清潔工單：從車輛 API 載入清潔狀態、篩選與分頁。
   function initDispatch() {
-    const board = document.querySelector('.kanban');
-    const search = document.querySelector('.filters .search');
-    const type = document.querySelector('.filters .select');
-    const getTasks = () => board?.querySelectorAll('.task') || [];
+    const table = document.querySelector('.card table');
+    const body = document.querySelector('[data-cleaning-orders-body]');
+    const status = document.querySelector('[data-cleaning-status]');
+    const pageInfo = document.querySelector('[data-cleaning-page-info]');
+    const pageSize = document.querySelector('[data-cleaning-page-size]');
+    const pageNumbers = document.querySelector('[data-cleaning-page-numbers]');
+    const previous = document.querySelector('[data-cleaning-page-previous]');
+    const next = document.querySelector('[data-cleaning-page-next]');
+    const summary = document.querySelector('[data-cleaning-list-summary]');
+    const state = { vehicles: [], page: 1, pageSize: 5 };
+    const conditionMeta = {
+      dirty: { label: '髒污', badge: 'amber' },
+      average: { label: '普通', badge: 'blue' },
+      clean: { label: '乾淨', badge: 'green' }
+    };
+    const vehicleStatusMeta = { available: '可租', cleaning: '待清潔', maintenance: '待維修' };
+
+    const escapeText = value => {
+      const element = document.createElement('span');
+      element.textContent = String(value ?? '');
+      return element.innerHTML;
+    };
+    const dateText = value => value
+      ? new Date(value).toLocaleString('zh-TW', { hour12: false })
+      : '—';
+
+    function filteredVehicles() {
+      const keyword = String(pageState.globalQuery || '').trim().toLocaleLowerCase('zh-Hant');
+      return state.vehicles.filter(vehicle => {
+        const searchable = [
+          vehicle.licensePlate,
+          vehicle.model,
+          vehicle.station?.name,
+          vehicle.station?.city,
+          vehicle.station?.district,
+          conditionMeta[vehicle.cabinCondition]?.label
+        ].join(' ').toLocaleLowerCase('zh-Hant');
+        return (!status?.value || vehicle.cabinCondition === status.value)
+          && (!keyword || searchable.includes(keyword));
+      });
+    }
+
+    function renderMetrics() {
+      const counts = { total: state.vehicles.length, dirty: 0, average: 0, clean: 0 };
+      state.vehicles.forEach(vehicle => {
+        if (counts[vehicle.cabinCondition] != null) counts[vehicle.cabinCondition] += 1;
+      });
+      Object.entries(counts).forEach(([key, count]) => {
+        const element = document.querySelector(`[data-cleaning-metric-card="${key}"] b`);
+        if (element) element.textContent = count;
+      });
+    }
+
+    function renderRows() {
+      if (!body) return;
+      const vehicles = filteredVehicles();
+      const totalPages = Math.max(1, Math.ceil(vehicles.length / state.pageSize));
+      state.page = Math.min(state.page, totalPages);
+      const pageStart = (state.page - 1) * state.pageSize;
+      const pageItems = vehicles.slice(pageStart, pageStart + state.pageSize);
+      body.hidden = false;
+      body.innerHTML = pageItems.length
+        ? pageItems.map((vehicle, index) => {
+          const condition = conditionMeta[vehicle.cabinCondition] || { label: vehicle.cabinCondition, badge: 'gray' };
+          return `
+            <tr>
+              <td>${pageStart + index + 1}</td>
+              <td><span class="cell-title">${escapeText(vehicle.licensePlate)}</span><span class="cell-meta">${escapeText(vehicle.model)}・${escapeText(vehicle.color)}</span></td>
+              <td><span class="cell-title">${escapeText(vehicle.station?.name || '未分配')}</span><span class="cell-meta">${escapeText([vehicle.station?.city, vehicle.station?.district].filter(Boolean).join(''))}</span></td>
+              <td><span class="badge ${condition.badge}">${escapeText(condition.label)}</span></td>
+              <td>${escapeText(vehicleStatusMeta[vehicle.status] || vehicle.status)}</td>
+              <td><b>${Number(vehicle.healthScore || 0)}</b></td>
+              <td>${dateText(vehicle.updatedAt)}</td>
+            </tr>`;
+        }).join('')
+        : '<tr><td colspan="7" class="empty-state">沒有符合條件的清潔資料</td></tr>';
+
+      if (summary) summary.textContent = `共 ${vehicles.length} 筆清潔狀態資料`;
+      if (pageInfo) pageInfo.textContent = `第 ${state.page} / ${totalPages} 頁，共 ${vehicles.length} 筆`;
+      if (previous) previous.disabled = state.page <= 1;
+      if (next) next.disabled = state.page >= totalPages;
+      if (pageNumbers) {
+        pageNumbers.innerHTML = Array.from({ length: totalPages }, (_, index) => {
+          const page = index + 1;
+          const current = page === state.page ? ' aria-current="page"' : '';
+          return `<button class="btn small" type="button" data-cleaning-page="${page}"${current}>${page}</button>`;
+        }).join('');
+      }
+    }
 
     pageState.applyFilter = () => {
-      return filterElements(getTasks(), `${pageState.globalQuery} ${search?.value || ''}`, task => {
-        if (!type || type.value === '全部任務') return true;
-        const cleaning = /清潔|髒污|整理|抽洗|異味/.test(task.textContent);
-        return type.value === '清潔' ? cleaning : !cleaning;
-      });
+      state.page = 1;
+      renderRows();
     };
-    search?.addEventListener('input', pageState.applyFilter);
-    type?.addEventListener('change', pageState.applyFilter);
-
-    board?.addEventListener('click', event => {
-      const button = event.target.closest('button');
-      const task = button?.closest('.task');
-      if (!button || !task) return;
-
-      if (button.textContent.includes('指派')) {
-        const sourceColumn = task.closest('.column');
-        const assignedColumn = board.querySelectorAll('.column')[1];
-        const sourceCount = sourceColumn.querySelector('.column-title .badge');
-        const assignedCount = assignedColumn.querySelector('.column-title .badge');
-        task.querySelector('.task-foot').innerHTML = '<span>AI 智慧指派</span><span>剛剛</span>';
-        assignedColumn.append(task);
-        sourceCount.textContent = Math.max(0, Number.parseInt(sourceCount.textContent, 10) - 1);
-        assignedCount.textContent = Number.parseInt(assignedCount.textContent, 10) + 1;
-      } else if (button.textContent.includes('驗收')) {
-        const count = task.closest('.column').querySelector('.column-title .badge');
-        setBadge(task.querySelector('.badge'), '已驗收', 'green');
-        button.textContent = '驗收完成';
-        button.disabled = true;
-        count.textContent = Math.max(0, Number.parseInt(count.textContent, 10) - 1);
-      }
+    status?.addEventListener('change', pageState.applyFilter);
+    pageSize?.addEventListener('change', event => {
+      state.pageSize = Number(event.currentTarget.value) || 5;
+      state.page = 1;
+      renderRows();
     });
-
-    findButton(document, '建立派工')?.addEventListener('click', () => {
-      const plate = window.prompt('請輸入車牌');
-      if (!plate) return;
-      const task = document.createElement('article');
-      task.className = 'task';
-      task.innerHTML = `<span class="badge blue">新任務</span><h3></h3><p>待補充任務內容・預估 30 分鐘</p><div class="task-foot"><span>等待指派</span><button class="btn small">指派</button></div>`;
-      task.querySelector('h3').textContent = `${plate.toUpperCase()} 新增派工`;
-      const pendingColumn = board.querySelector('.column');
-      pendingColumn.append(task);
-      const count = pendingColumn.querySelector('.column-title .badge');
-      count.textContent = Number.parseInt(count.textContent, 10) + 1;
-      pageState.applyFilter();
+    previous?.addEventListener('click', () => {
+      state.page -= 1;
+      renderRows();
     });
-
-    const scheduleButton = findButton(document, '自動排程設定');
-    scheduleButton?.addEventListener('click', () => {
-      const enabled = scheduleButton.getAttribute('aria-pressed') !== 'true';
-      scheduleButton.setAttribute('aria-pressed', String(enabled));
-      scheduleButton.textContent = enabled ? '自動排程：開啟' : '自動排程設定';
+    next?.addEventListener('click', () => {
+      state.page += 1;
+      renderRows();
     });
+    pageNumbers?.addEventListener('click', event => {
+      const button = event.target.closest('[data-cleaning-page]');
+      if (!button) return;
+      state.page = Number(button.dataset.cleaningPage);
+      renderRows();
+    });
+    findButton(document, '匯出工單')?.addEventListener('click', () => downloadCsv('irent-cleaning-orders.csv', getTableRows(table)));
+
+    if (!window.IRentVehicleApi?.cleaningList || !body) return;
+    body.hidden = false;
+    body.innerHTML = '<tr><td colspan="7" class="empty-state">清潔資料載入中…</td></tr>';
+    window.IRentVehicleApi.cleaningList()
+      .then(vehicles => {
+        state.vehicles = vehicles;
+        renderMetrics();
+        renderRows();
+      })
+      .catch(error => {
+        body.innerHTML = `<tr><td colspan="7" class="empty-state">${escapeText(error.message || '無法載入清潔資料')}</td></tr>`;
+      });
   }
 
   // 案件清單切換時使用的靜態展示資料。
@@ -760,59 +830,236 @@
     });
   }
 
-  // 維修工單：清單篩選、詳情同步、進度更新與匯出。
+  // 維修工單：從 repair_orders API 載入清單、篩選與分頁。
   function initWorkOrders() {
     const table = document.querySelector('.order-layout table');
-    const detail = document.querySelector('.order-layout aside');
-    const search = document.querySelector('.filters .search');
+    const body = table?.querySelector('tbody');
     const status = document.querySelector('.filters .select');
-    let selectedRow = table?.querySelector('tbody tr');
-    const getRows = () => table?.querySelectorAll('tbody tr') || [];
+    let month = document.querySelector('[data-repair-month]');
+    if (!month && status?.parentElement) {
+      month = document.createElement('select');
+      month.className = 'select';
+      month.setAttribute('aria-label', '月份篩選');
+      month.dataset.repairMonth = '';
+      status.parentElement.append(month);
+    }
+    if (month) {
+      const now = new Date();
+      month.innerHTML = '<option value="">所有月份</option>';
+      for (let offset = 0; offset < 6; offset += 1) {
+        const date = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+        const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        month.insertAdjacentHTML('beforeend', `<option value="${value}">${value}</option>`);
+      }
+    }
+    const pageInfo = document.querySelector('[data-repair-page-info]');
+    const pageNumbers = document.querySelector('[data-repair-page-numbers]');
+    const previous = document.querySelector('[data-repair-page-previous]');
+    const next = document.querySelector('[data-repair-page-next]');
+    const pageSize = document.querySelector('[data-repair-page-size]');
+    const selectAll = document.querySelector('[data-repair-select-all]');
+    const bulkAccept = document.querySelector('[data-repair-bulk-accept]');
+    const statusCards = {
+      completed: document.querySelector('[data-repair-status-card="completed"] b'),
+      'in-progress': document.querySelector('[data-repair-status-card="in-progress"] b'),
+      pending: document.querySelector('[data-repair-status-card="pending"] b')
+    };
+    const statusNotes = {
+      completed: document.querySelector('[data-repair-status-note="completed"]'),
+      'in-progress': document.querySelector('[data-repair-status-note="in-progress"]'),
+      pending: document.querySelector('[data-repair-status-note="pending"]')
+    };
+    const spendTotal = document.querySelector('[data-repair-spend-total]');
+    const spendComparison = document.querySelector('[data-repair-spend-comparison]');
+    const state = { page: 1, pageSize: 5, totalPages: 1, items: [] };
+    const statusClass = { 待驗收: 'amber', 維修中: 'blue', 維修完畢: 'green' };
 
-    pageState.applyFilter = () => filterElements(getRows(), `${pageState.globalQuery} ${search?.value || ''}`, row =>
-      !status || status.value === '全部狀態' || row.textContent.includes(status.value)
-    );
-    search?.addEventListener('input', pageState.applyFilter);
+    const escapeText = value => {
+      const element = document.createElement('span');
+      element.textContent = String(value ?? '');
+      return element.innerHTML;
+    };
+    const money = value => `NT$ ${Number(value || 0).toLocaleString('zh-TW')}`;
+    const dateText = value => value
+      ? new Date(value).toLocaleString('zh-TW', { hour12: false })
+      : '—';
+
+    function calculateRepairSpendForMonth(items, monthOffset = 0) {
+      const reference = new Date();
+      const targetMonth = new Date(Date.UTC(reference.getFullYear(), reference.getMonth() + monthOffset, 1));
+      return items.reduce((sum, item) => {
+        if (item.actualCost == null) return sum;
+        const paidAt = item.completedAt || item.createdAt;
+        if (!paidAt) return sum;
+        const date = new Date(paidAt);
+        return date.getUTCFullYear() === targetMonth.getUTCFullYear()
+          && date.getUTCMonth() === targetMonth.getUTCMonth()
+          ? sum + Number(item.actualCost || 0)
+          : sum;
+      }, 0);
+    }
+
+    function calculateCurrentMonthRepairSpend(items) {
+      return calculateRepairSpendForMonth(items, 0);
+    }
+
+    function calculatePreviousMonthRepairSpend(items) {
+      return calculateRepairSpendForMonth(items, -1);
+    }
+
+    function renderStatusCards(items) {
+      const counts = { completed: 0, 'in-progress': 0, pending: 0 };
+      const statusKeys = {
+        '\u7dad\u4fee\u5b8c\u7562': 'completed',
+        '\u7dad\u4fee\u4e2d': 'in-progress',
+        '\u5f85\u9a57\u6536': 'pending'
+      };
+      items.forEach(item => {
+        const key = statusKeys[item.status];
+        if (key) counts[key] += 1;
+      });
+      const now = new Date();
+      const currentMonthCompleted = items.filter(item => {
+        if (item.status !== '維修完畢' || !item.completedAt) return false;
+        const completedAt = new Date(item.completedAt);
+        return completedAt.getFullYear() === now.getFullYear()
+          && completedAt.getMonth() === now.getMonth();
+      }).length;
+      const currentSpend = calculateCurrentMonthRepairSpend(items);
+      const previousSpend = calculatePreviousMonthRepairSpend(items);
+      const difference = currentSpend - previousSpend;
+      const percentage = previousSpend ? Math.abs(difference / previousSpend * 100) : (currentSpend ? 100 : 0);
+      if (spendTotal) spendTotal.textContent = `NT$ ${currentSpend.toLocaleString('zh-TW')}`;
+      if (spendComparison) {
+        const direction = difference >= 0 ? '增加' : '減少';
+        spendComparison.textContent = `較上月${direction} NT$ ${Math.abs(difference).toLocaleString('zh-TW')}（${percentage.toFixed(1)}%）`;
+      }
+      Object.entries(statusCards).forEach(([key, element]) => {
+        if (element) element.textContent = counts[key];
+      });
+      if (statusNotes.completed) statusNotes.completed.textContent = `本月完成 ${currentMonthCompleted} 件`;
+      if (statusNotes['in-progress']) statusNotes['in-progress'].textContent = `目前 ${counts['in-progress']} 件維修中`;
+      if (statusNotes.pending) statusNotes.pending.textContent = `目前 ${counts.pending} 件待驗收`;
+    }
+
+    function renderRows(items, page = state.page) {
+      if (!body) return;
+      body.hidden = false;
+      body.innerHTML = items.length
+        ? items.map((item, index) => `
+          <tr>
+            <td>${item.status === '待驗收'
+              ? `<input type="checkbox" data-repair-select value="${item.id}" aria-label="選取 ${escapeText(item.orderNumber)}">`
+              : '—'}</td>
+            <td>${(page - 1) * state.pageSize + index + 1}</td>
+            <td><span class="cell-title">${escapeText(item.orderNumber)}</span><span class="cell-meta">${escapeText(item.vehicleLicensePlate)}・${escapeText(item.vehicleModel)}</span></td>
+            <td>${escapeText(item.maintenanceItem)}</td>
+            <td>${escapeText(item.repairCenter)}</td>
+            <td>${escapeText(item.assignedManager?.name || '未指派')}</td>
+            <td>${money(item.estimatedCost)}</td>
+            <td>${item.actualCost == null ? '—' : money(item.actualCost)}</td>
+            <td><span class="badge ${statusClass[item.status] || 'gray'}">${escapeText(item.status)}</span></td>
+            <td>${dateText(item.createdAt)}</td>
+            <td>${dateText(item.completedAt)}</td>
+            <td>${item.status === '待驗收'
+              ? `<button class="btn small" type="button" data-repair-accept="${item.id}">驗收完畢</button>`
+              : '—'}</td>
+          </tr>
+        `).join('')
+        : '<tr><td colspan="12" class="empty-state">沒有符合條件的維修工單</td></tr>';
+    }
+
+    function updateBulkAcceptState() {
+      const selected = document.querySelectorAll('[data-repair-select]:checked');
+      const all = document.querySelectorAll('[data-repair-select]');
+      if (bulkAccept) bulkAccept.disabled = selected.length === 0;
+      if (selectAll) {
+        selectAll.disabled = all.length === 0;
+        selectAll.checked = all.length > 0 && selected.length === all.length;
+        selectAll.indeterminate = selected.length > 0 && selected.length < all.length;
+      }
+    }
+
+    function renderPagination(pagination) {
+      state.page = pagination.page;
+      state.totalPages = pagination.totalPages;
+      if (pageInfo) pageInfo.textContent = `第 ${pagination.page} / ${pagination.totalPages} 頁，共 ${pagination.total} 筆`;
+      if (previous) previous.disabled = pagination.page <= 1;
+      if (next) next.disabled = pagination.page >= pagination.totalPages;
+      if (pageNumbers) {
+        pageNumbers.innerHTML = Array.from({ length: pagination.totalPages }, (_, index) => {
+          const page = index + 1;
+          const current = page === pagination.page ? ' aria-current="page"' : '';
+          return `<button class="btn small" type="button" data-repair-page="${page}"${current}>${page}</button>`;
+        }).join('');
+      }
+    }
+
+    async function loadRepairOrders(page = 1) {
+      if (!window.IRentRepairOrderApi || !body) return;
+      body.hidden = false;
+      body.innerHTML = '<tr><td colspan="12" class="empty-state">維修工單載入中…</td></tr>';
+      try {
+        const result = await window.IRentRepairOrderApi.list({
+          page,
+          pageSize: state.pageSize,
+          month: month?.value || '',
+          status: status?.value === '全部狀態' ? '' : status?.value || ''
+        });
+        state.items = result.items;
+        renderRows(result.items, result.pagination.page);
+        updateBulkAcceptState();
+        renderPagination(result.pagination);
+        const summary = await window.IRentRepairOrderApi.list({ page: 1, pageSize: 50 });
+        renderStatusCards(summary.items);
+      } catch (error) {
+        body.innerHTML = `<tr><td colspan="12" class="empty-state">${escapeText(error.message || '無法載入維修工單')}</td></tr>`;
+      }
+    }
+
+    async function acceptOrders(ids) {
+      if (!ids.length || !window.IRentRepairOrderApi) return;
+      try {
+        if (ids.length === 1) await window.IRentRepairOrderApi.accept(ids[0]);
+        else await window.IRentRepairOrderApi.bulkAccept(ids);
+        await loadRepairOrders(state.page);
+      } catch (error) {
+        window.alert(error.message || '驗收失敗，請稍後再試');
+      }
+    }
+
+    pageState.applyFilter = () => loadRepairOrders(1);
     status?.addEventListener('change', pageState.applyFilter);
-
-    table?.addEventListener('click', event => {
-      const row = event.target.closest('tbody tr');
-      if (!row) return;
-      selectedRow = row;
-      Array.from(getRows()).forEach(item => item.removeAttribute('aria-selected'));
-      row.setAttribute('aria-selected', 'true');
-      const cells = row.children;
-      const sourceBadge = cells[5].querySelector('.badge');
-      detail.querySelector('.card-head h2').textContent = cells[0].querySelector('.cell-title').textContent.trim();
-      detail.querySelector('.card-head p').textContent = `${cells[0].querySelector('.cell-meta').textContent.trim()}・${cells[1].textContent.trim()}`;
-      detail.querySelector('.cost strong').textContent = cells[4].textContent.trim();
-      detail.querySelector('.vendor b').textContent = cells[3].textContent.trim();
-      const detailBadge = detail.querySelector('.card-head .badge');
-      detailBadge.className = sourceBadge.className;
-      detailBadge.textContent = sourceBadge.textContent.trim();
+    month?.addEventListener('change', pageState.applyFilter);
+    pageSize?.addEventListener('change', event => {
+      state.pageSize = Number(event.currentTarget.value) || 5;
+      loadRepairOrders(1);
     });
-
-    findButton(detail, '查看原始案件')?.addEventListener('click', () => { window.location.href = 'damage-review.html'; });
-    findButton(detail, '聯絡')?.addEventListener('click', () => notify(`聯絡 ${detail.querySelector('.vendor b').textContent.trim()}`));
-    findButton(detail, '更新進度')?.addEventListener('click', () => {
-      if (!selectedRow) return;
-      const rowBadge = selectedRow.children[5].querySelector('.badge');
-      const detailBadge = detail.querySelector('.card-head .badge');
-      const next = detailBadge.textContent.includes('維修中') ? ['待驗收', 'green'] : ['已完成', 'blue'];
-      setBadge(rowBadge, next[0], next[1]);
-      setBadge(detailBadge, next[0], next[1]);
+    selectAll?.addEventListener('change', event => {
+      document.querySelectorAll('[data-repair-select]').forEach(input => {
+        input.checked = event.currentTarget.checked;
+      });
+      updateBulkAcceptState();
     });
-
-    findButton(document, '建立工單')?.addEventListener('click', () => {
-      const plate = window.prompt('請輸入車牌');
-      if (!plate) return;
-      const row = document.createElement('tr');
-      row.innerHTML = `<td><span class="cell-title">#WO-NEW</span><span class="cell-meta"></span></td><td>待確認維修項目</td><td><span class="badge amber">P2</span></td><td>待指派</td><td>待報價</td><td><span class="badge amber">待報價</span></td><td>待確認</td>`;
-      row.querySelector('.cell-meta').textContent = plate.toUpperCase();
-      table.querySelector('tbody').prepend(row);
-      pageState.applyFilter();
+    body?.addEventListener('change', event => {
+      if (event.target.matches('[data-repair-select]')) updateBulkAcceptState();
+    });
+    body?.addEventListener('click', event => {
+      const button = event.target.closest('[data-repair-accept]');
+      if (button) acceptOrders([Number(button.dataset.repairAccept)]);
+    });
+    bulkAccept?.addEventListener('click', () => {
+      const ids = Array.from(document.querySelectorAll('[data-repair-select]:checked'), input => Number(input.value));
+      acceptOrders(ids);
+    });
+    previous?.addEventListener('click', () => loadRepairOrders(state.page - 1));
+    next?.addEventListener('click', () => loadRepairOrders(state.page + 1));
+    pageNumbers?.addEventListener('click', event => {
+      const button = event.target.closest('[data-repair-page]');
+      if (button) loadRepairOrders(Number(button.dataset.repairPage));
     });
     findButton(document, '匯出工單')?.addEventListener('click', () => downloadCsv('irent-work-orders.csv', getTableRows(table)));
+    loadRepairOrders();
   }
 
   /* 報表分析互動暫時停用：恢復頁面時請解除此區塊註解。

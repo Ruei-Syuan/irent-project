@@ -1,41 +1,48 @@
 <!doctype html>
 <html lang="zh-Hant">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>
-      車隊管理｜iRent 智能車況管家
-    </title>
-    <link rel="stylesheet" href="css/common.css">
-    <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
-    <link rel="stylesheet" href="css/fleet.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>車隊管理｜iRent 智能車況管家</title>
+    <link rel="stylesheet" href="css/common.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css"
+    />
+    <link rel="stylesheet" href="css/fleet.css" />
   </head>
   <body class="app-body" data-page="fleet">
     <div class="app-shell">
-      <aside class="app-sidebar" data-app-sidebar>
-      </aside>
+      <aside class="app-sidebar" data-app-sidebar></aside>
       <div class="app-workspace">
-        <header class="app-topbar" data-app-topbar>
-        </header>
+        <header class="app-topbar" data-app-topbar></header>
         <main class="page">
           <section class="page-head">
-            <div>
-              <!-- <p class="eyebrow">
-                Fleet Health
-              </p> -->
-              <!-- <h1>
-                車隊管理與車況健康度
-              </h1> -->
-              <!-- <p class="subtitle">
-                整合租借、車損、清潔與車聯網資料，依健康分數管理可租狀態。
-              </p> -->
+            <div class="fleet-score-intro">
+              <p class="eyebrow">評分機制</p>
+              <ul class="fleet-score-levels" aria-label="所有評分等級">
+                <li><strong>車內乾淨</strong><span>100 分</span></li>
+                <li><strong>車內普通</strong><span>70 分</span></li>
+                <li><strong>車內髒污</strong><span>40 分</span></li>
+                <li><strong>車外正常</strong><span>100 分</span></li>
+                <li><strong>車外待維修</strong><span>40 分</span></li>
+              </ul>
+              <p class="fleet-score-formula">總分＝（車內分數＋車外分數）／2</p>
+              <p class="fleet-score-intro-text">
+                車內與車外各占 50%；車內乾淨／普通／髒污為 100／70／40
+                分，車外正常／待維修為 100／40 分。
+              </p>
             </div>
             <div class="actions">
               <button class="btn" type="button" data-action="import-vehicles">
                 匯入車輛
               </button>
-              <button class="btn primary" type="button" data-action="add-vehicle">
+              <button
+                class="btn primary"
+                type="button"
+                data-action="add-vehicle"
+              >
                 ＋ 新增車輛
               </button>
             </div>
@@ -44,132 +51,131 @@
             <article class="card fleet-map-card">
               <div class="card-head">
                 <div>
-                  <h2>
-                    車隊即時分布
-                  </h2>
-                  <p>
-                    資料庫即時車隊・目前依站點行政區中心定位
-                  </p>
+                  <h2>車隊即時分布</h2>
+                  <p>資料庫即時車隊・目前依站點行政區中心定位</p>
                 </div>
-                <select class="select" aria-label="營運區" data-fleet-region>
-                  <option>
-                    台北都會區
-                  </option>
-                  <option>
-                    桃園
-                  </option>
-                </select>
+                <div class="fleet-map-filters">
+                  <select class="select" aria-label="營運區" data-fleet-region>
+                    <option>台北都會區</option>
+                    <option>桃園</option>
+                  </select>
+                  <select
+                    class="select"
+                    aria-label="整體狀態"
+                    data-fleet-status
+                  >
+                    <option value="">全部狀態</option>
+                    <option value="可租">可租</option>
+                    <option value="待清潔">待清潔</option>
+                    <option value="待維修">待維修</option>
+                    <option value="待維修／待清潔">待維修／待清潔</option>
+                  </select>
+                </div>
               </div>
               <div class="card-body">
                 <div class="fleet-map-shell">
-                  <div class="map" data-fleet-map role="img" aria-label="車隊即時位置地圖">
-                  </div>
+                  <div
+                    class="map"
+                    data-fleet-map
+                    role="img"
+                    aria-label="車隊即時位置地圖"
+                  ></div>
                   <p class="fleet-map-message" data-fleet-map-message>
                     地圖資料載入中
                   </p>
-                  <div class="fleet-map-legend" aria-label="車況圖例">
-                    <span><i class="is-healthy"></i>健康</span>
-                    <span><i class="is-warning"></i>注意</span>
-                    <span><i class="is-risk"></i>異常</span>
-                  </div>
                 </div>
               </div>
             </article>
             <article class="card fleet-list-card">
               <div class="card-head">
                 <div>
-                  <h2>
-                    車輛清單
-                  </h2>
-                  <p>
-                    依風險與近期任務排序
-                  </p>
+                  <h2>車輛清單</h2>
+                  <p>依風險與近期任務排序</p>
                 </div>
               </div>
               <div class="table-wrap">
                 <table class="fleet-vehicle-table">
                   <thead>
-                  <tr>
-                      <th class="fleet-sequence">
-                        序號
-                      </th>
-                      <th class="fleet-signal">
-                        燈號
+                    <tr>
+                      <th class="fleet-sequence">序號</th>
+                      <th class="fleet-signal">整體狀態</th>
+                      <th>車輛</th>
+                      <th>站點</th>
+                      <th>健康分數</th>
+                      <th>最近異常</th>
+                      <th>操作</th>
+                    </tr>
+                    <tr class="fleet-column-filters">
+                      <th></th>
+                      <th>
+                        <select
+                          class="fleet-column-filter"
+                          data-fleet-column-filter="overallStatus"
+                          aria-label="篩選狀態"
+                        >
+                          <option value="">全部狀態</option>
+                        </select>
                       </th>
                       <th>
-                        車輛
+                        <select
+                          class="fleet-column-filter"
+                          data-fleet-column-filter="vehicle"
+                          aria-label="篩選車輛"
+                        >
+                          <option value="">全部車輛</option>
+                        </select>
                       </th>
                       <th>
-                        站點
+                        <select
+                          class="fleet-column-filter"
+                          data-fleet-column-filter="station"
+                          aria-label="篩選站點"
+                        >
+                          <option value="">全部站點</option>
+                        </select>
                       </th>
                       <th>
-                        整體狀態
+                        <select
+                          class="fleet-column-filter"
+                          data-fleet-column-filter="healthScore"
+                          aria-label="篩選健康分數"
+                        >
+                          <option value="">全部分數</option>
+                        </select>
                       </th>
                       <th>
-                        車內狀況
+                        <select
+                          class="fleet-column-filter"
+                          data-fleet-column-filter="latestAnomaly"
+                          aria-label="篩選最近異常"
+                        >
+                          <option value="">全部異常</option>
+                        </select>
                       </th>
-                      <th>
-                        健康分數
-                      </th>
-                      <th>
-                        最近異常
-                      </th>
-                      <th>
-                        操作
-                    </th>
-                  </tr>
-                  <tr class="fleet-column-filters">
-                    <th></th>
-                    <th></th>
-                    <th><input class="fleet-column-filter" type="search" data-fleet-column-filter="vehicle" aria-label="篩選車輛" placeholder="篩選車輛"></th>
-                    <th><input class="fleet-column-filter" type="search" data-fleet-column-filter="station" aria-label="篩選站點" placeholder="篩選站點"></th>
-                    <th><input class="fleet-column-filter" type="search" data-fleet-column-filter="overallStatus" aria-label="篩選整體狀態" placeholder="篩選狀態"></th>
-                    <th><input class="fleet-column-filter" type="search" data-fleet-column-filter="cabinCondition" aria-label="篩選車內狀況" placeholder="篩選狀況"></th>
-                    <th><input class="fleet-column-filter" type="search" inputmode="numeric" data-fleet-column-filter="healthScore" aria-label="篩選健康分數" placeholder="篩選分數"></th>
-                    <th><input class="fleet-column-filter" type="search" data-fleet-column-filter="latestAnomaly" aria-label="篩選最近異常" placeholder="篩選異常"></th>
-                    <th></th>
-                  </tr>
+                      <th></th>
+                    </tr>
                   </thead>
                   <tbody data-fleet-body>
                     <tr>
-                      <td colspan="8" class="fleet-empty">
-                        車輛資料載入中
-                      </td>
+                      <td colspan="7" class="fleet-empty">車輛資料載入中</td>
                     </tr>
                   </tbody>
                 </table>
-              </div>
-              <div class="fleet-pagination" aria-label="車輛清單分頁">
-                <span data-fleet-page-info>
-                  第 1 / 1 頁，共 0 輛
-                </span>
-                <div class="inline">
-                  <button class="btn small" type="button" data-fleet-page-previous>
-                    上一頁
-                  </button>
-                  <button class="btn small" type="button" data-fleet-page-next>
-                    下一頁
-                  </button>
-                </div>
               </div>
             </article>
           </section>
         </main>
       </div>
     </div>
-    <script src="js/api/client.js" defer>
-    </script>
-    <script src="js/api/vehicles.js" defer>
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer>
-    </script>
-    <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js" defer>
-    </script>
-    <script src="/vendor/tanstack-table/index.production.js" defer>
-    </script>
-    <script src="js/fleet.js" defer>
-    </script>
-    <script src="js/layout.js" defer>
-    </script>
+    <script src="js/api/client.js" defer></script>
+    <script src="js/api/vehicles.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+    <script
+      src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"
+      defer
+    ></script>
+    <script src="/vendor/tanstack-table/index.production.js" defer></script>
+    <script src="js/fleet.js" defer></script>
+    <script src="js/layout.js" defer></script>
   </body>
 </html>

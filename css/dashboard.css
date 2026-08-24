@@ -22,7 +22,7 @@
   align-items: center;
   gap: 13px;
   background: var(--dash-surface);
-  box-shadow: 0 5px 14px rgba(21, 39, 61, .045);
+  box-shadow: 0 5px 14px rgba(21, 39, 61, 0.045);
 }
 
 .metric-visual {
@@ -63,7 +63,7 @@
   color: var(--metric-color);
   font-size: clamp(23px, 2vw, 29px);
   line-height: 1.15;
-  letter-spacing: -.03em;
+  letter-spacing: -0.03em;
 }
 
 .metric-content small {
@@ -71,13 +71,33 @@
   font-size: 8px;
 }
 
-.dashboard-metric.is-green { --metric-color: #0aa66f; --metric-soft: #e1f8ef; }
-.dashboard-metric.is-slate { --metric-color: #526276; --metric-soft: #e9eef4; }
-.dashboard-metric.is-blue { --metric-color: #2d78d7; --metric-soft: #e7f1ff; }
-.dashboard-metric.is-amber { --metric-color: #ed8c0f; --metric-soft: #fff1dc; }
-.dashboard-metric.is-violet { --metric-color: #8b5ce5; --metric-soft: #f0eaff; }
-.dashboard-metric.is-red { --metric-color: #e43c45; --metric-soft: #ffe8ea; }
-.dashboard-metric.is-red .metric-content > span { color: var(--metric-color); }
+.dashboard-metric.is-green {
+  --metric-color: #0aa66f;
+  --metric-soft: #e1f8ef;
+}
+.dashboard-metric.is-slate {
+  --metric-color: #526276;
+  --metric-soft: #e9eef4;
+}
+.dashboard-metric.is-blue {
+  --metric-color: #2d78d7;
+  --metric-soft: #e7f1ff;
+}
+.dashboard-metric.is-amber {
+  --metric-color: #ed8c0f;
+  --metric-soft: #fff1dc;
+}
+.dashboard-metric.is-violet {
+  --metric-color: #8b5ce5;
+  --metric-soft: #f0eaff;
+}
+.dashboard-metric.is-red {
+  --metric-color: #e43c45;
+  --metric-soft: #ffe8ea;
+}
+.dashboard-metric.is-red .metric-content > span {
+  color: var(--metric-color);
+}
 
 .dashboard-content-grid {
   display: grid;
@@ -92,7 +112,7 @@
   border-radius: 14px;
   overflow: hidden;
   background: var(--dash-surface);
-  box-shadow: 0 5px 15px rgba(21, 39, 61, .045);
+  box-shadow: 0 5px 15px rgba(21, 39, 61, 0.045);
 }
 
 .dashboard-card-head {
@@ -109,13 +129,17 @@
   margin: 0;
   color: #1c2b3e;
   font-size: 13px;
-  letter-spacing: -.01em;
+  letter-spacing: -0.01em;
 }
 
 .dashboard-card-head p {
   margin: 2px 0 0;
   color: #8a96a4;
   font-size: 8px;
+}
+
+.dashboard-week-range {
+  white-space: nowrap;
 }
 
 .trend-legend {
@@ -140,14 +164,28 @@
   border-radius: 50%;
 }
 
-.legend-green { background: var(--dash-green); }
-.legend-blue { background: var(--dash-blue); }
-.legend-amber { background: var(--dash-amber); }
-.legend-violet { background: var(--dash-violet); }
-.legend-red { background: var(--dash-red); }
+.legend-green {
+  background: var(--dash-green);
+}
+.legend-blue {
+  background: var(--dash-blue);
+}
+.legend-amber {
+  background: var(--dash-amber);
+}
+.legend-violet {
+  background: var(--dash-violet);
+}
+.legend-red {
+  background: var(--dash-red);
+}
 
-.trend-legend .legend-green { background: #10B981; }
-.trend-legend .legend-blue { background: #3B82F6; }
+.trend-legend .legend-green {
+  background: #10b981;
+}
+.trend-legend .legend-blue {
+  background: #3b82f6;
+}
 
 .trend-chart {
   position: relative;
@@ -169,7 +207,7 @@
   place-items: center;
   color: #778596;
   font-size: 12px;
-  background: rgba(255, 255, 255, .88);
+  background: rgba(255, 255, 255, 0.88);
 }
 
 .trend-chart-message[hidden],
@@ -228,7 +266,7 @@
   place-items: center;
   color: #778596;
   font-size: 12px;
-  background: rgba(255, 255, 255, .88);
+  background: rgba(255, 255, 255, 0.88);
 }
 
 .region-map-message[hidden] {
@@ -251,7 +289,7 @@
   font-size: 13px;
 }
 
-@media(min-width:1280px) {
+@media (min-width: 1280px) {
   .app-body[data-page="dashboard"] {
     height: 100vh;
     overflow: hidden;
@@ -307,7 +345,7 @@
   }
 }
 
-@media(max-width:1279px) {
+@media (max-width: 1279px) {
   .dashboard-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -332,7 +370,7 @@
   }
 }
 
-@media(max-width:899px) {
+@media (max-width: 899px) {
   .dashboard-content-grid {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -345,10 +383,12 @@
   }
 
   .region-map-wrap,
-  .region-map-canvas { min-height: 350px; }
+  .region-map-canvas {
+    min-height: 350px;
+  }
 }
 
-@media(max-width:639px) {
+@media (max-width: 639px) {
   .dashboard-main {
     padding: 12px 10px 25px;
   }
@@ -374,7 +414,9 @@
     height: 23px;
   }
 
-  .metric-content strong { font-size: 23px; }
+  .metric-content strong {
+    font-size: 23px;
+  }
 
   .dashboard-content-grid {
     width: 100%;
@@ -400,7 +442,11 @@
   }
 
   .region-map-wrap,
-  .region-map-canvas { min-height: 310px; }
+  .region-map-canvas {
+    min-height: 310px;
+  }
   .rental-city-chart-wrap,
-  .rental-city-chart { min-height: 310px; }
+  .rental-city-chart {
+    min-height: 310px;
+  }
 }

@@ -1,84 +1,102 @@
 (function fleetModule(globalObject) {
-  'use strict';
+  "use strict";
 
   const statusMeta = {
-    available: { label: '可租', badge: 'green' },
-    cleaning: { label: '待清潔', badge: 'amber' },
-    maintenance: { label: '待維修', badge: 'red' }
+    available: { label: "可租", badge: "green" },
+    cleaning: { label: "待清潔", badge: "amber" },
+    maintenance: { label: "待維修", badge: "red" },
   };
   const cabinConditionMeta = {
-    clean: { label: '乾淨', badge: 'green' },
-    average: { label: '普通', badge: 'blue' },
-    dirty: { label: '髒污', badge: 'amber' }
+    clean: { label: "乾淨", badge: "green", score: 100 },
+    average: { label: "普通", badge: "blue", score: 70 },
+    dirty: { label: "髒污", badge: "amber", score: 40 },
   };
   const rentalStatusMeta = {
-    active: '租借中',
-    completed: '已完成',
-    cancelled: '已取消'
+    active: "租借中",
+    completed: "已完成",
+    cancelled: "已取消",
   };
   const state = {
     vehicles: [],
     stations: [],
-    mapData: { type: 'FeatureCollection', features: [] },
+    mapData: { type: "FeatureCollection", features: [] },
     map: null,
     mapLoaded: false,
     page: 1,
     pageSize: 5,
     table: null,
-    context: null
+    context: null,
+    selectedVehicleId: null,
   };
-  const text = value => String(value ?? '').trim();
+  const text = (value) => String(value ?? "").trim();
 
   function getOverallStatus(vehicle) {
     const conditions = [];
-    if (vehicle.status === 'maintenance') conditions.push('待維修');
-    if (vehicle.status === 'cleaning' || vehicle.cabinCondition === 'dirty') conditions.push('待清潔');
-    return conditions.length ? conditions.join('／') : '可租';
+    if (vehicle.status === "maintenance") conditions.push("待維修");
+    if (vehicle.status === "cleaning" || vehicle.cabinCondition === "dirty")
+      conditions.push("待清潔");
+    return conditions.length ? conditions.join("／") : "可租";
+  }
+
+  function getHealthScoreBreakdown(vehicle) {
+    const cabinScore = cabinConditionMeta[vehicle.cabinCondition]?.score ?? 0;
+    const exteriorScore = vehicle.status === "maintenance" ? 40 : 100;
+    const averageScore = (cabinScore + exteriorScore) / 2;
+    return {
+      cabinScore,
+      exteriorScore,
+      score:
+        vehicle.status === "maintenance"
+          ? Math.min(averageScore, 70)
+          : averageScore,
+    };
   }
 
   function calculateHealthScore(vehicle) {
-    const cabinScores = { clean: 100, average: 70, dirty: 40 };
-    const exteriorScore = vehicle.status === 'maintenance' ? 40 : 100;
-    const score = (cabinScores[vehicle.cabinCondition] + exteriorScore) / 2;
-    return vehicle.status === 'maintenance' ? Math.min(score, 70) : score;
+    return getHealthScoreBreakdown(vehicle).score;
   }
 
   function healthScoreClass(score) {
-    return Number(score) <= 70 ? ' is-risk' : '';
+    return Number(score) <= 70 ? " is-risk" : "";
   }
 
   function getTrafficLight(vehicle) {
-    if (vehicle.status === 'maintenance' || vehicle.cabinCondition === 'dirty') {
-      return { tone: 'red', label: '紅燈：待維修或髒污' };
+    const overallStatus = getOverallStatus(vehicle);
+    if (overallStatus === "可租") {
+      return { tone: "green", label: "可租" };
     }
-    if (vehicle.status === 'available' && vehicle.cabinCondition === 'average') {
-      return { tone: 'yellow', label: '黃燈：可租且普通' };
+    if (overallStatus === "待清潔") {
+      return { tone: "yellow", label: "待清潔" };
     }
-    return { tone: 'green', label: '綠燈：可租且乾淨' };
+    return { tone: "red", label: overallStatus };
   }
 
   function escapeText(value) {
-    const element = document.createElement('span');
-    element.textContent = String(value ?? '');
+    const element = document.createElement("span");
+    element.textContent = String(value ?? "");
     return element.innerHTML;
   }
 
   function escapeAttribute(value) {
-    return escapeText(value).replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+    return escapeText(value).replaceAll('"', "&quot;").replaceAll("'", "&#39;");
   }
 
   function formatMoney(value) {
-    return `NT$ ${Number(value || 0).toLocaleString('zh-TW')}`;
+    return `NT$ ${Number(value || 0).toLocaleString("zh-TW")}`;
   }
 
   function formatDateTime(value) {
-    return value ? new Date(value).toLocaleString('zh-TW', { hour12: false }) : '尚未還車';
+    return value
+      ? new Date(value).toLocaleString("zh-TW", { hour12: false })
+      : "尚未還車";
   }
 
   function dateTimeInputValue(value) {
-    if (!value) return '';
+    if (!value) return "";
     const date = new Date(value);
-    const localTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    const localTime = new Date(
+      date.getTime() - date.getTimezoneOffset() * 60000,
+    );
     return localTime.toISOString().slice(0, 16);
   }
 
@@ -87,96 +105,173 @@
     if (element) element.textContent = value;
   }
 
+  function populateFilterOptions(vehicles) {
+    const filterDefinitions = [
+      {
+        id: "overallStatus",
+        emptyLabel: "全部狀態",
+        getValue: getOverallStatus,
+        getLabel: getOverallStatus,
+      },
+      {
+        id: "vehicle",
+        emptyLabel: "全部車輛",
+        getValue: (vehicle) => vehicle.licensePlate,
+        getLabel: (vehicle) => `${vehicle.licensePlate} ${vehicle.model}`,
+      },
+      {
+        id: "station",
+        emptyLabel: "全部站點",
+        getValue: (vehicle) => vehicle.station?.name || "未分配",
+        getLabel: (vehicle) => vehicle.station?.name || "未分配",
+      },
+      {
+        id: "healthScore",
+        emptyLabel: "全部分數",
+        getValue: (vehicle) => String(calculateHealthScore(vehicle)),
+        getLabel: (vehicle) => String(calculateHealthScore(vehicle)),
+      },
+      {
+        id: "latestAnomaly",
+        emptyLabel: "全部異常",
+        getValue: (vehicle) => vehicle.latestAnomaly || "無",
+        getLabel: (vehicle) => vehicle.latestAnomaly || "無",
+      },
+    ];
+
+    filterDefinitions.forEach(({ id, emptyLabel, getValue, getLabel }) => {
+      const select = document.querySelector(
+        `[data-fleet-column-filter="${id}"]`,
+      );
+      if (!select) return;
+      const selectedValue = select.value;
+      const options = new Map();
+      vehicles.forEach((vehicle) => {
+        const value = String(getValue(vehicle));
+        if (!options.has(value)) options.set(value, String(getLabel(vehicle)));
+      });
+      select.replaceChildren(new Option(emptyLabel, ""));
+      [...options.entries()]
+        .sort(([, first], [, second]) => first.localeCompare(second, "zh-Hant"))
+        .forEach(([value, label]) => {
+          select.append(new Option(label, value));
+        });
+      if (
+        [...select.options].some((option) => option.value === selectedValue)
+      ) {
+        select.value = selectedValue;
+      }
+    });
+  }
+
   function createVehicleTable(vehicles) {
     const core = globalObject.TableCore;
     if (!core?.createTable) return null;
     let columnFilters = [];
-    let pagination = { pageIndex: 0, pageSize: state.pageSize };
     let table;
-    const syncState = () => table.setOptions(previous => ({
-      ...previous,
-      state: { ...previous.state, columnFilters, pagination }
-    }));
+    const syncState = () =>
+      table.setOptions((previous) => ({
+        ...previous,
+        state: { ...previous.state, columnFilters },
+      }));
 
     table = core.createTable({
       data: vehicles,
       columns: [
         {
-          id: 'vehicle',
-          accessorFn: vehicle => `${vehicle.licensePlate} ${vehicle.model} ${vehicle.color}`,
-          filterFn: 'includesString'
+          id: "vehicle",
+          accessorFn: (vehicle) =>
+            `${vehicle.licensePlate} ${vehicle.model} ${vehicle.color}`,
+          filterFn: "includesString",
         },
         {
-          id: 'station',
-          accessorFn: vehicle => [vehicle.station?.name, vehicle.station?.city, vehicle.station?.district].filter(Boolean).join(' '),
-          filterFn: 'includesString'
+          id: "station",
+          accessorFn: (vehicle) =>
+            [
+              vehicle.station?.name,
+              vehicle.station?.city,
+              vehicle.station?.district,
+            ]
+              .filter(Boolean)
+              .join(" "),
+          filterFn: "includesString",
         },
-        { id: 'overallStatus', accessorFn: getOverallStatus, filterFn: 'includesString' },
         {
-          id: 'cabinCondition',
-          accessorFn: vehicle => cabinConditionMeta[vehicle.cabinCondition]?.label || vehicle.cabinCondition,
-          filterFn: 'includesString'
+          id: "overallStatus",
+          accessorFn: getOverallStatus,
+          filterFn: "includesString",
         },
-        { id: 'healthScore', accessorFn: calculateHealthScore, filterFn: 'includesString' },
-        { id: 'latestAnomaly', accessorFn: vehicle => vehicle.latestAnomaly || '無', filterFn: 'includesString' }
+        {
+          id: "healthScore",
+          accessorFn: calculateHealthScore,
+          filterFn: "includesString",
+        },
+        {
+          id: "latestAnomaly",
+          accessorFn: (vehicle) => vehicle.latestAnomaly || "無",
+          filterFn: "includesString",
+        },
       ],
-      state: { columnFilters, pagination },
-      onColumnFiltersChange: updater => {
+      state: { columnFilters },
+      onColumnFiltersChange: (updater) => {
         columnFilters = core.functionalUpdate(updater, columnFilters);
-        pagination = { ...pagination, pageIndex: 0 };
         syncState();
       },
-      onPaginationChange: updater => {
-        pagination = core.functionalUpdate(updater, pagination);
-        syncState();
-      },
-      getRowId: vehicle => String(vehicle.id),
+      getRowId: (vehicle) => String(vehicle.id),
       getCoreRowModel: core.getCoreRowModel(),
       getFilteredRowModel: core.getFilteredRowModel(),
-      getPaginationRowModel: core.getPaginationRowModel()
     });
     return table;
   }
 
   function renderRows() {
-    const body = document.querySelector('[data-fleet-body]');
+    const body = document.querySelector("[data-fleet-body]");
     if (!body) return;
     if (!state.table) {
-      body.innerHTML = '<tr><td colspan="9" class="fleet-empty">車隊表格元件載入失敗</td></tr>';
+      body.innerHTML =
+        '<tr><td colspan="7" class="fleet-empty">車隊表格元件載入失敗</td></tr>';
       return;
     }
-    const filteredRows = state.table.getFilteredRowModel().rows;
     const pageRows = state.table.getRowModel().rows;
-    const pagination = state.table.getState().pagination;
-    const totalPages = state.table.getPageCount();
-    state.page = pagination.pageIndex + 1;
-    const pageStart = pagination.pageIndex * pagination.pageSize;
-    body.innerHTML = pageRows.map((row, index) => {
-      const vehicle = row.original;
-      const cabinCondition = cabinConditionMeta[vehicle.cabinCondition]
-        || { label: vehicle.cabinCondition, badge: 'gray' };
-      const healthScore = calculateHealthScore(vehicle);
-      const trafficLight = getTrafficLight(vehicle);
-      return `
-        <tr data-vehicle-id="${vehicle.id}">
-          <td class="fleet-sequence">${pageStart + index + 1}</td>
+    body.innerHTML =
+      pageRows
+        .map((row, index) => {
+          const vehicle = row.original;
+          const cabinCondition = cabinConditionMeta[vehicle.cabinCondition] || {
+            label: vehicle.cabinCondition,
+            badge: "gray",
+          };
+          const scoreBreakdown = getHealthScoreBreakdown(vehicle);
+          const healthScore = scoreBreakdown.score;
+          const trafficLight = getTrafficLight(vehicle);
+          const isSelected = state.selectedVehicleId === vehicle.id;
+          return `
+        <tr
+          class="fleet-vehicle-row${isSelected ? " is-selected" : ""}"
+          data-vehicle-id="${vehicle.id}"
+          tabindex="0"
+          aria-selected="${isSelected}"
+        >
+          <td class="fleet-sequence">${index + 1}</td>
           <td class="fleet-signal">
-            <span class="fleet-traffic-light is-${trafficLight.tone}" role="img" aria-label="${trafficLight.label}" title="${trafficLight.label}"></span>
+            <span class="fleet-status-value">
+              <span class="fleet-traffic-light is-${trafficLight.tone}" role="img" aria-label="${trafficLight.label}" title="${trafficLight.label}"></span>
+              <span class="fleet-overall-status${vehicle.status === "maintenance" ? " is-maintenance" : ""}">${escapeText(getOverallStatus(vehicle))}</span>
+            </span>
           </td>
           <td>
             <span class="cell-title">${escapeText(vehicle.licensePlate)}</span>
             <span class="cell-meta">${escapeText(vehicle.model)}・${escapeText(vehicle.color)}</span>
           </td>
           <td>
-            <span class="cell-title">${escapeText(vehicle.station?.name || '未分配')}</span>
-            <span class="cell-meta">${escapeText([vehicle.station?.city, vehicle.station?.district].filter(Boolean).join(''))}</span>
+            <span class="cell-title">${escapeText(vehicle.station?.name || "未分配")}</span>
+            <span class="cell-meta">${escapeText([vehicle.station?.city, vehicle.station?.district].filter(Boolean).join(""))}</span>
           </td>
-          <td><span class="fleet-overall-status${vehicle.status === 'maintenance' ? ' is-maintenance' : ''}">${escapeText(getOverallStatus(vehicle))}</span></td>
-          <td><span class="fleet-cabin-condition is-${escapeText(vehicle.cabinCondition)}">${escapeText(cabinCondition.label)}</span></td>
           <td>
             <b class="fleet-health-score${healthScoreClass(healthScore)}">${healthScore}</b>
+            <span class="cell-meta">車內 ${scoreBreakdown.cabinScore}／車外 ${scoreBreakdown.exteriorScore}</span>
           </td>
-          <td>${escapeText(vehicle.latestAnomaly || '無')}</td>
+          <td>${escapeText(vehicle.latestAnomaly || "無")}</td>
           <td>
             <div class="inline fleet-row-actions">
               <button class="btn small" type="button" data-action="view-vehicle">查看</button>
@@ -185,48 +280,49 @@
           </td>
         </tr>
       `;
-    }).join('') || '<tr><td colspan="9" class="fleet-empty">沒有符合條件的車輛</td></tr>';
-
-    setText('[data-fleet-page-info]', `第 ${state.page} / ${totalPages} 頁，共 ${filteredRows.length} 輛`);
-    const previous = document.querySelector('[data-fleet-page-previous]');
-    const next = document.querySelector('[data-fleet-page-next]');
-    if (previous) previous.disabled = !state.table.getCanPreviousPage();
-    if (next) next.disabled = !state.table.getCanNextPage();
+        })
+        .join("") ||
+      '<tr><td colspan="7" class="fleet-empty">沒有符合條件的車輛</td></tr>';
   }
 
   function resetPageAndRenderRows() {
-    state.table?.setPageIndex(0);
     renderRows();
   }
 
   async function editCabinCondition(vehicle) {
-    const inputOptions = vehicle.status === 'available'
-      ? { clean: '乾淨', average: '普通' }
-      : vehicle.status === 'cleaning'
-        ? { dirty: '髒污' }
-        : { clean: '乾淨', average: '普通', dirty: '髒污' };
+    const inputOptions =
+      vehicle.status === "available"
+        ? { clean: "乾淨", average: "普通" }
+        : vehicle.status === "cleaning"
+          ? { dirty: "髒污" }
+          : { clean: "乾淨", average: "普通", dirty: "髒污" };
     const result = await globalObject.Swal.fire({
       title: `修改 ${escapeText(vehicle.licensePlate)} 車內狀況`,
-      input: 'select',
+      input: "select",
       inputOptions,
       inputValue: vehicle.cabinCondition,
       showCancelButton: true,
-      confirmButtonText: '儲存',
-      cancelButtonText: '取消',
-      confirmButtonColor: '#08775d',
-      inputValidator: value => value ? undefined : '請選擇車內狀況'
+      confirmButtonText: "儲存",
+      cancelButtonText: "取消",
+      confirmButtonColor: "#08775d",
+      inputValidator: (value) => (value ? undefined : "請選擇車內狀況"),
     });
     if (!result.isConfirmed) return;
 
-    await globalObject.IRentVehicleApi.update(vehicle.id, { cabinCondition: result.value });
+    await globalObject.IRentVehicleApi.update(vehicle.id, {
+      cabinCondition: result.value,
+    });
     await refresh();
     state.context.notify(`已更新 ${vehicle.licensePlate} 車內狀況`);
   }
 
   async function showVehicleDetails(vehicle) {
-    const cabinCondition = cabinConditionMeta[vehicle.cabinCondition]
-      || { label: vehicle.cabinCondition, badge: 'gray' };
-    const healthScore = calculateHealthScore(vehicle);
+    const cabinCondition = cabinConditionMeta[vehicle.cabinCondition] || {
+      label: vehicle.cabinCondition,
+      badge: "gray",
+    };
+    const scoreBreakdown = getHealthScoreBreakdown(vehicle);
+    const healthScore = scoreBreakdown.score;
     const details = `
       <div class="fleet-vehicle-detail">
         <div class="fleet-detail-item">
@@ -235,7 +331,7 @@
         </div>
         <div class="fleet-detail-item">
           <span>整體狀態</span>
-          <strong><i class="fleet-overall-status${vehicle.status === 'maintenance' ? ' is-maintenance' : ''}">${escapeText(getOverallStatus(vehicle))}</i></strong>
+          <strong><i class="fleet-overall-status${vehicle.status === "maintenance" ? " is-maintenance" : ""}">${escapeText(getOverallStatus(vehicle))}</i></strong>
         </div>
         <div class="fleet-detail-item">
           <span>車內狀況</span>
@@ -243,12 +339,13 @@
         </div>
         <div class="fleet-detail-item fleet-detail-wide">
           <span>目前站點</span>
-          <strong>${escapeText(vehicle.station?.name || '未分配')}</strong>
-          <small>${escapeText([vehicle.station?.city, vehicle.station?.district].filter(Boolean).join(''))}</small>
+          <strong>${escapeText(vehicle.station?.name || "未分配")}</strong>
+          <small>${escapeText([vehicle.station?.city, vehicle.station?.district].filter(Boolean).join(""))}</small>
         </div>
         <div class="fleet-detail-item">
           <span>健康分數</span>
           <strong class="fleet-health-score${healthScoreClass(healthScore)}">${escapeText(healthScore)}</strong>
+          <small>車內 ${scoreBreakdown.cabinScore}／車外 ${scoreBreakdown.exteriorScore}，各占 50%</small>
         </div>
         <div class="fleet-detail-item">
           <span>今日里程</span>
@@ -256,7 +353,7 @@
         </div>
         <div class="fleet-detail-item fleet-detail-wide">
           <span>最近異常</span>
-          <strong>${escapeText(vehicle.latestAnomaly || '無')}</strong>
+          <strong>${escapeText(vehicle.latestAnomaly || "無")}</strong>
         </div>
       </div>
     `;
@@ -266,30 +363,35 @@
         title: escapeText(vehicle.licensePlate),
         html: details,
         showCancelButton: true,
-        confirmButtonText: '修改車內狀況',
-        cancelButtonText: '關閉',
-        confirmButtonColor: '#08775d',
-        customClass: { popup: 'fleet-vehicle-dialog' },
-        width: 'min(560px, calc(100vw - 28px))'
+        confirmButtonText: "修改車內狀況",
+        cancelButtonText: "關閉",
+        confirmButtonColor: "#08775d",
+        customClass: { popup: "fleet-vehicle-dialog" },
+        width: "min(560px, calc(100vw - 28px))",
       });
       if (result.isConfirmed) await editCabinCondition(vehicle);
       return;
     }
 
-    state.context.notify([
-      vehicle.licensePlate,
-      `${vehicle.model}・${vehicle.color}`,
-      vehicle.station?.name || '未分配站點',
-      getOverallStatus(vehicle),
-      `車內狀況 ${cabinCondition.label}`,
-      `健康分數 ${healthScore}`,
-      vehicle.latestAnomaly || '無異常'
-    ].join('\n'));
+    state.context.notify(
+      [
+        vehicle.licensePlate,
+        `${vehicle.model}・${vehicle.color}`,
+        vehicle.station?.name || "未分配站點",
+        getOverallStatus(vehicle),
+        `車內狀況 ${cabinCondition.label}`,
+        `健康分數 ${healthScore}`,
+        vehicle.latestAnomaly || "無異常",
+      ].join("\n"),
+    );
   }
 
   function rentalHistoryHtml(rentals) {
-    if (!rentals.length) return '<p class="fleet-history-empty">尚無租借紀錄</p>';
-    return rentals.map(rental => `
+    if (!rentals.length)
+      return '<p class="fleet-history-empty">尚無租借紀錄</p>';
+    return rentals
+      .map(
+        (rental) => `
       <article class="fleet-history-entry">
         <div class="fleet-history-entry-head">
           <div>
@@ -299,30 +401,37 @@
           <b>${escapeText(formatMoney(rental.rentalFee))}</b>
         </div>
         <div class="fleet-history-customer">
-          <span>租客：${escapeText(rental.customer?.fullName || '未登記')}</span>
-          <span>會員編號：${escapeText(rental.customer?.memberNo || '—')}</span>
-          <span>電話：${escapeText(rental.customer?.phone || '—')}</span>
+          <span>租客：${escapeText(rental.customer?.fullName || "未登記")}</span>
+          <span>會員編號：${escapeText(rental.customer?.memberNo || "—")}</span>
+          <span>電話：${escapeText(rental.customer?.phone || "—")}</span>
         </div>
         <button class="btn small" type="button" data-history-edit="rental" data-record-id="${rental.id}">修改紀錄</button>
       </article>
-    `).join('');
+    `,
+      )
+      .join("");
   }
 
   function serviceHistoryHtml(services, type) {
-    const records = services.filter(record => record.type === type);
-    if (!records.length) return `<p class="fleet-history-empty">尚無${type === 'cleaning' ? '清潔' : '維修'}紀錄</p>`;
-    return records.map(record => `
+    const records = services.filter((record) => record.type === type);
+    if (!records.length)
+      return `<p class="fleet-history-empty">尚無${type === "cleaning" ? "清潔" : "維修"}紀錄</p>`;
+    return records
+      .map(
+        (record) => `
       <article class="fleet-history-entry">
         <div class="fleet-history-entry-head">
           <div>
             <strong>${escapeText(formatDateTime(record.performedAt))}</strong>
-            <small>${escapeText(record.note || '未填寫備註')}</small>
+            <small>${escapeText(record.note || "未填寫備註")}</small>
           </div>
           <b>${escapeText(formatMoney(record.cost))}</b>
         </div>
         <button class="btn small" type="button" data-history-edit="service" data-record-id="${record.id}">修改紀錄</button>
       </article>
-    `).join('');
+    `,
+      )
+      .join("");
   }
 
   function vehicleHistoryHtml(history) {
@@ -339,18 +448,18 @@
         </section>
         <section class="fleet-history-section">
           <h3>清潔紀錄</h3>
-          ${serviceHistoryHtml(history.services, 'cleaning')}
+          ${serviceHistoryHtml(history.services, "cleaning")}
         </section>
         <section class="fleet-history-section">
           <h3>維修紀錄</h3>
-          ${serviceHistoryHtml(history.services, 'maintenance')}
+          ${serviceHistoryHtml(history.services, "maintenance")}
         </section>
       </div>
     `;
   }
 
   function formValue(id) {
-    return document.getElementById(id)?.value.trim() || '';
+    return document.getElementById(id)?.value.trim() || "";
   }
 
   function formDateTime(value) {
@@ -361,106 +470,133 @@
   async function showRentalHistoryForm(vehicle, rental = null) {
     const customer = rental?.customer || {};
     const result = await globalObject.Swal.fire({
-      title: rental ? '修改租借紀錄' : '新增租借紀錄',
+      title: rental ? "修改租借紀錄" : "新增租借紀錄",
       html: `
         <div class="fleet-history-form">
-          <label>租客全名<input id="history-customer-name" value="${escapeAttribute(customer.fullName || '')}"></label>
-          <label>會員編號<input id="history-member-no" value="${escapeAttribute(customer.memberNo || '')}"></label>
-          <label>完整電話<input id="history-phone" inputmode="tel" value="${escapeAttribute(customer.phone || '')}"></label>
+          <label>租客全名<input id="history-customer-name" value="${escapeAttribute(customer.fullName || "")}"></label>
+          <label>會員編號<input id="history-member-no" value="${escapeAttribute(customer.memberNo || "")}"></label>
+          <label>完整電話<input id="history-phone" inputmode="tel" value="${escapeAttribute(customer.phone || "")}"></label>
           <label>租借時間<input id="history-started-at" type="datetime-local" value="${escapeAttribute(dateTimeInputValue(rental?.startedAt || new Date()))}"></label>
           <label>還車時間<input id="history-ended-at" type="datetime-local" value="${escapeAttribute(dateTimeInputValue(rental?.endedAt))}"></label>
           <label>租借狀態
             <select id="history-rental-status">
-              <option value="active" ${rental?.status === 'active' ? 'selected' : ''}>租借中</option>
-              <option value="completed" ${!rental || rental.status === 'completed' ? 'selected' : ''}>已完成</option>
-              <option value="cancelled" ${rental?.status === 'cancelled' ? 'selected' : ''}>已取消</option>
+              <option value="active" ${rental?.status === "active" ? "selected" : ""}>租借中</option>
+              <option value="completed" ${!rental || rental.status === "completed" ? "selected" : ""}>已完成</option>
+              <option value="cancelled" ${rental?.status === "cancelled" ? "selected" : ""}>已取消</option>
             </select>
           </label>
           <label>租金（元）<input id="history-rental-fee" type="number" min="0" step="1" value="${escapeAttribute(rental?.rentalFee ?? 0)}"></label>
         </div>
       `,
       showCancelButton: true,
-      confirmButtonText: '儲存',
-      cancelButtonText: '取消',
-      confirmButtonColor: '#08775d',
-      customClass: { popup: 'fleet-history-form-dialog' },
+      confirmButtonText: "儲存",
+      cancelButtonText: "取消",
+      confirmButtonColor: "#08775d",
+      customClass: { popup: "fleet-history-form-dialog" },
       preConfirm: () => {
-        const fullName = formValue('history-customer-name');
-        const memberNo = formValue('history-member-no').toUpperCase();
-        const phone = formValue('history-phone');
-        const startedAt = formDateTime(formValue('history-started-at'));
-        const endedValue = formValue('history-ended-at');
+        const fullName = formValue("history-customer-name");
+        const memberNo = formValue("history-member-no").toUpperCase();
+        const phone = formValue("history-phone");
+        const startedAt = formDateTime(formValue("history-started-at"));
+        const endedValue = formValue("history-ended-at");
         const endedAt = endedValue ? formDateTime(endedValue) : null;
-        const rentalFee = Number(formValue('history-rental-fee'));
-        if (!fullName || !memberNo || !/^09\d{8}$/.test(phone) || !startedAt || !Number.isInteger(rentalFee) || rentalFee < 0) {
-          globalObject.Swal.showValidationMessage('請完整填寫租客、日期與正確費用');
+        const rentalFee = Number(formValue("history-rental-fee"));
+        if (
+          !fullName ||
+          !memberNo ||
+          !/^09\d{8}$/.test(phone) ||
+          !startedAt ||
+          !Number.isInteger(rentalFee) ||
+          rentalFee < 0
+        ) {
+          globalObject.Swal.showValidationMessage(
+            "請完整填寫租客、日期與正確費用",
+          );
           return false;
         }
         if (endedValue && (!endedAt || endedAt < startedAt)) {
-          globalObject.Swal.showValidationMessage('還車時間不可早於租借時間');
+          globalObject.Swal.showValidationMessage("還車時間不可早於租借時間");
           return false;
         }
         return {
           customer: { fullName, memberNo, phone },
           startedAt,
           endedAt,
-          status: formValue('history-rental-status'),
-          rentalFee
+          status: formValue("history-rental-status"),
+          rentalFee,
         };
-      }
+      },
     });
     if (!result.isConfirmed) return false;
     if (rental) {
-      await globalObject.IRentVehicleApi.updateRentalHistory(vehicle.id, rental.id, result.value);
+      await globalObject.IRentVehicleApi.updateRentalHistory(
+        vehicle.id,
+        rental.id,
+        result.value,
+      );
     } else {
-      await globalObject.IRentVehicleApi.createRentalHistory(vehicle.id, result.value);
+      await globalObject.IRentVehicleApi.createRentalHistory(
+        vehicle.id,
+        result.value,
+      );
     }
     state.context.notify(`${vehicle.licensePlate} 租借歷程已儲存`);
     return true;
   }
 
-  async function showServiceHistoryForm(vehicle, service = null, defaultType = 'cleaning') {
+  async function showServiceHistoryForm(
+    vehicle,
+    service = null,
+    defaultType = "cleaning",
+  ) {
     const selectedType = service?.type || defaultType;
     const result = await globalObject.Swal.fire({
-      title: service ? '修改紀錄' : '新增保養紀錄',
+      title: service ? "修改紀錄" : "新增保養紀錄",
       html: `
         <div class="fleet-history-form">
           <label>紀錄類型
             <select id="history-service-type">
-              <option value="cleaning" ${selectedType === 'cleaning' ? 'selected' : ''}>清潔</option>
-              <option value="maintenance" ${selectedType === 'maintenance' ? 'selected' : ''}>維修</option>
+              <option value="cleaning" ${selectedType === "cleaning" ? "selected" : ""}>清潔</option>
+              <option value="maintenance" ${selectedType === "maintenance" ? "selected" : ""}>維修</option>
             </select>
           </label>
           <label>處理時間<input id="history-performed-at" type="datetime-local" value="${escapeAttribute(dateTimeInputValue(service?.performedAt || new Date()))}"></label>
           <label>費用（元）<input id="history-service-cost" type="number" min="0" step="1" value="${escapeAttribute(service?.cost ?? 0)}"></label>
-          <label class="fleet-history-form-wide">備註<textarea id="history-service-note" rows="3">${escapeText(service?.note || '')}</textarea></label>
+          <label class="fleet-history-form-wide">備註<textarea id="history-service-note" rows="3">${escapeText(service?.note || "")}</textarea></label>
         </div>
       `,
       showCancelButton: true,
-      confirmButtonText: '儲存',
-      cancelButtonText: '取消',
-      confirmButtonColor: '#08775d',
-      customClass: { popup: 'fleet-history-form-dialog' },
+      confirmButtonText: "儲存",
+      cancelButtonText: "取消",
+      confirmButtonColor: "#08775d",
+      customClass: { popup: "fleet-history-form-dialog" },
       preConfirm: () => {
-        const performedAt = formDateTime(formValue('history-performed-at'));
-        const cost = Number(formValue('history-service-cost'));
+        const performedAt = formDateTime(formValue("history-performed-at"));
+        const cost = Number(formValue("history-service-cost"));
         if (!performedAt || !Number.isInteger(cost) || cost < 0) {
-          globalObject.Swal.showValidationMessage('請填寫正確的處理時間與費用');
+          globalObject.Swal.showValidationMessage("請填寫正確的處理時間與費用");
           return false;
         }
         return {
-          type: formValue('history-service-type'),
+          type: formValue("history-service-type"),
           performedAt,
           cost,
-          note: formValue('history-service-note')
+          note: formValue("history-service-note"),
         };
-      }
+      },
     });
     if (!result.isConfirmed) return false;
     if (service) {
-      await globalObject.IRentVehicleApi.updateServiceHistory(vehicle.id, service.id, result.value);
+      await globalObject.IRentVehicleApi.updateServiceHistory(
+        vehicle.id,
+        service.id,
+        result.value,
+      );
     } else {
-      await globalObject.IRentVehicleApi.createServiceHistory(vehicle.id, result.value);
+      await globalObject.IRentVehicleApi.createServiceHistory(
+        vehicle.id,
+        result.value,
+      );
     }
     state.context.notify(`${vehicle.licensePlate} 保養歷程已儲存`);
     return true;
@@ -468,28 +604,28 @@
 
   async function addVehicleHistory(vehicle) {
     const result = await globalObject.Swal.fire({
-      title: '新增歷程',
-      input: 'select',
+      title: "新增歷程",
+      input: "select",
       inputOptions: {
-        rental: '租借紀錄',
-        cleaning: '清潔紀錄',
-        maintenance: '維修紀錄'
+        rental: "租借紀錄",
+        cleaning: "清潔紀錄",
+        maintenance: "維修紀錄",
       },
-      inputPlaceholder: '請選擇紀錄類型',
+      inputPlaceholder: "請選擇紀錄類型",
       showCancelButton: true,
-      confirmButtonText: '下一步',
-      cancelButtonText: '取消',
-      confirmButtonColor: '#08775d',
-      inputValidator: value => value ? undefined : '請選擇紀錄類型'
+      confirmButtonText: "下一步",
+      cancelButtonText: "取消",
+      confirmButtonColor: "#08775d",
+      inputValidator: (value) => (value ? undefined : "請選擇紀錄類型"),
     });
     if (!result.isConfirmed) return false;
-    if (result.value === 'rental') return showRentalHistoryForm(vehicle);
+    if (result.value === "rental") return showRentalHistoryForm(vehicle);
     return showServiceHistoryForm(vehicle, null, result.value);
   }
 
   async function showVehicleHistory(vehicle) {
     if (!globalObject.Swal?.fire) {
-      state.context.notify('歷程視窗元件載入失敗');
+      state.context.notify("歷程視窗元件載入失敗");
       return;
     }
     const history = await globalObject.IRentVehicleApi.getHistory(vehicle.id);
@@ -498,52 +634,81 @@
       title: `${escapeText(vehicle.licensePlate)} 車輛歷程`,
       html: vehicleHistoryHtml(history),
       showCancelButton: true,
-      confirmButtonText: '新增歷程',
-      cancelButtonText: '關閉',
-      confirmButtonColor: '#08775d',
-      width: 'min(880px, calc(100vw - 24px))',
-      customClass: { popup: 'fleet-history-dialog' },
-      didOpen: popup => {
-        popup.addEventListener('click', event => {
-          const button = event.target.closest('[data-history-edit]');
+      confirmButtonText: "新增歷程",
+      cancelButtonText: "關閉",
+      confirmButtonColor: "#08775d",
+      width: "min(880px, calc(100vw - 24px))",
+      customClass: { popup: "fleet-history-dialog" },
+      didOpen: (popup) => {
+        popup.addEventListener("click", (event) => {
+          const button = event.target.closest("[data-history-edit]");
           if (!button) return;
           editTarget = {
             kind: button.dataset.historyEdit,
-            id: Number(button.dataset.recordId)
+            id: Number(button.dataset.recordId),
           };
           globalObject.Swal.close();
         });
-      }
+      },
     });
 
     if (editTarget) {
-      const record = editTarget.kind === 'rental'
-        ? history.rentals.find(item => item.id === editTarget.id)
-        : history.services.find(item => item.id === editTarget.id);
+      const record =
+        editTarget.kind === "rental"
+          ? history.rentals.find((item) => item.id === editTarget.id)
+          : history.services.find((item) => item.id === editTarget.id);
       if (!record) return;
-      const saved = editTarget.kind === 'rental'
-        ? await showRentalHistoryForm(vehicle, record)
-        : await showServiceHistoryForm(vehicle, record);
+      const saved =
+        editTarget.kind === "rental"
+          ? await showRentalHistoryForm(vehicle, record)
+          : await showServiceHistoryForm(vehicle, record);
       if (saved) await showVehicleHistory(vehicle);
       return;
     }
-    if (result.isConfirmed && await addVehicleHistory(vehicle)) {
+    if (result.isConfirmed && (await addVehicleHistory(vehicle))) {
       await showVehicleHistory(vehicle);
     }
   }
 
   function selectedMapFeatures() {
-    const region = document.querySelector('[data-fleet-region]');
+    const region = document.querySelector("[data-fleet-region]");
+    const status = document.querySelector("[data-fleet-status]");
     const selectedCity = region?.value;
-    if (!selectedCity) return state.mapData.features;
-    const vehicleIds = new Set(state.vehicles
-      .filter(vehicle => vehicle.station?.city === selectedCity)
-      .map(vehicle => vehicle.id));
-    return state.mapData.features.filter(feature => vehicleIds.has(feature.properties.id));
+    const selectedStatus = status?.value;
+    if (!selectedCity && !selectedStatus) return state.mapData.features;
+    const vehicleIds = new Set(
+      state.vehicles
+        .filter(
+          (vehicle) =>
+            (!selectedCity || vehicle.station?.city === selectedCity) &&
+            (!selectedStatus || getOverallStatus(vehicle) === selectedStatus),
+        )
+        .map((vehicle) => vehicle.id),
+    );
+    return state.mapData.features.filter((feature) =>
+      vehicleIds.has(feature.properties.id),
+    );
   }
 
-  function setMapMessage(message = '') {
-    const element = document.querySelector('[data-fleet-map-message]');
+  function syncOverallStatusFilter(value) {
+    const normalizedValue = value || "";
+    const select = document.querySelector("[data-fleet-status]");
+    const input = document.querySelector(
+      '[data-fleet-column-filter="overallStatus"]',
+    );
+    if (select && select.value !== normalizedValue) {
+      select.value = normalizedValue;
+    }
+    if (input && input.value !== normalizedValue) {
+      input.value = normalizedValue;
+    }
+    state.table?.getColumn("overallStatus")?.setFilterValue(normalizedValue);
+    state.table?.setPageIndex(0);
+    renderRows();
+  }
+
+  function setMapMessage(message = "") {
+    const element = document.querySelector("[data-fleet-map-message]");
     if (!element) return;
     element.textContent = message;
     element.hidden = !message;
@@ -556,29 +721,67 @@
       return;
     }
     const bounds = new globalObject.maplibregl.LngLatBounds();
-    features.forEach(feature => bounds.extend(feature.geometry.coordinates));
+    features.forEach((feature) => bounds.extend(feature.geometry.coordinates));
     state.map.fitBounds(bounds, { padding: 42, maxZoom: 13, duration: 500 });
   }
 
-  function updateMap() {
-    const features = selectedMapFeatures();
-    const selectedCity = document.querySelector('[data-fleet-region]')?.value;
-    document.querySelector('[data-fleet-map]')
-      ?.setAttribute('aria-label', `${selectedCity || '全台'}車隊即時位置地圖`);
-    setMapMessage(features.length ? '' : '目前沒有可顯示的車輛座標');
+  function selectVehicleRow(vehicleId) {
+    state.selectedVehicleId = vehicleId;
+    document
+      .querySelectorAll("[data-fleet-body] [data-vehicle-id]")
+      .forEach((row) => {
+        const isSelected = Number(row.dataset.vehicleId) === vehicleId;
+        row.classList.toggle("is-selected", isSelected);
+        row.setAttribute("aria-selected", String(isSelected));
+      });
+  }
+
+  function focusVehicleOnMap(vehicleId) {
+    const feature = state.mapData.features.find(
+      (item) => Number(item.properties.id) === vehicleId,
+    );
+    if (!feature) {
+      state.context?.notify("此車輛尚無地圖定位資料");
+      return;
+    }
+
+    selectVehicleRow(vehicleId);
+    updateMap(false);
     if (!state.mapLoaded) return;
-    state.map.getSource('fleet-vehicles')?.setData({
-      type: 'FeatureCollection',
-      features
+    state.map.flyTo({
+      center: feature.geometry.coordinates,
+      zoom: Math.max(state.map.getZoom(), 13),
+      duration: 500,
+      essential: true,
     });
-    fitMapToFeatures(features);
+  }
+
+  function updateMap(shouldFit = true) {
+    const features = selectedMapFeatures().map((feature) => ({
+      ...feature,
+      properties: {
+        ...feature.properties,
+        selected: Number(feature.properties.id) === state.selectedVehicleId,
+      },
+    }));
+    const selectedCity = document.querySelector("[data-fleet-region]")?.value;
+    document
+      .querySelector("[data-fleet-map]")
+      ?.setAttribute("aria-label", `${selectedCity || "全台"}車隊即時位置地圖`);
+    setMapMessage(features.length ? "" : "目前沒有可顯示的車輛座標");
+    if (!state.mapLoaded) return;
+    state.map.getSource("fleet-vehicles")?.setData({
+      type: "FeatureCollection",
+      features,
+    });
+    if (shouldFit) fitMapToFeatures(features);
   }
 
   function initMap() {
-    const container = document.querySelector('[data-fleet-map]');
+    const container = document.querySelector("[data-fleet-map]");
     if (!container) return;
     if (!globalObject.maplibregl) {
-      setMapMessage('地圖元件載入失敗');
+      setMapMessage("地圖元件載入失敗");
       return;
     }
 
@@ -588,89 +791,136 @@
         version: 8,
         sources: {
           osm: {
-            type: 'raster',
-            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+            type: "raster",
+            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
             tileSize: 256,
-            attribution: '© OpenStreetMap contributors'
-          }
+            attribution: "© OpenStreetMap contributors",
+          },
         },
-        layers: [{ id: 'osm', type: 'raster', source: 'osm' }]
+        layers: [{ id: "osm", type: "raster", source: "osm" }],
       },
       center: [120.95, 23.7],
-      zoom: 5.8
+      zoom: 5.8,
     });
-    state.map.addControl(new globalObject.maplibregl.NavigationControl(), 'top-right');
-    state.map.on('load', () => {
-      state.map.addSource('fleet-vehicles', {
-        type: 'geojson',
-        data: { type: 'FeatureCollection', features: [] }
+    state.map.addControl(
+      new globalObject.maplibregl.NavigationControl(),
+      "top-right",
+    );
+    state.map.on("load", () => {
+      state.map.addSource("fleet-vehicles", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
       });
       state.map.addLayer({
-        id: 'fleet-vehicles',
-        type: 'circle',
-        source: 'fleet-vehicles',
+        id: "fleet-vehicles",
+        type: "circle",
+        source: "fleet-vehicles",
         paint: {
-          'circle-radius': [
-            'interpolate', ['linear'], ['get', 'issueCount'],
-            0, 7,
-            5, 15
+          "circle-radius": [
+            "interpolate",
+            ["linear"],
+            ["get", "issueCount"],
+            0,
+            7,
+            5,
+            15,
           ],
-          'circle-color': [
-            'step', ['get', 'healthScore'],
-            '#dc3545',
-            71, '#f2a93b',
-            85, '#20a66a'
+          "circle-color": [
+            "match",
+            ["get", "overallStatus"],
+            "可租",
+            "#20a66a",
+            "待清潔",
+            "#f2a93b",
+            "待維修",
+            "#dc3545",
+            "待維修／待清潔",
+            "#dc3545",
+            "#dc3545",
           ],
-          'circle-opacity': .9,
-          'circle-stroke-color': '#ffffff',
-          'circle-stroke-width': 2
-        }
+          "circle-opacity": 0.9,
+          "circle-stroke-color": [
+            "case",
+            ["boolean", ["get", "selected"], false],
+            "#071a35",
+            "#ffffff",
+          ],
+          "circle-stroke-width": [
+            "case",
+            ["boolean", ["get", "selected"], false],
+            4,
+            2,
+          ],
+        },
       });
       state.mapLoaded = true;
       updateMap();
     });
-    state.map.on('click', 'fleet-vehicles', event => {
+    state.map.on("click", "fleet-vehicles", (event) => {
       const feature = event.features?.[0];
       if (!feature) return;
       const properties = feature.properties;
+      const vehicleId = Number(properties.id);
+      selectVehicleRow(vehicleId);
+      updateMap(false);
       const healthScore = Number(properties.healthScore);
-      const status = statusMeta[properties.status] || { label: properties.status };
+      const vehicle = state.vehicles.find(
+        (item) => item.id === Number(properties.id),
+      );
+      const scoreBreakdown = vehicle ? getHealthScoreBreakdown(vehicle) : null;
+      const statusLabel =
+        properties.overallStatus ||
+        statusMeta[properties.status]?.label ||
+        properties.status;
       new globalObject.maplibregl.Popup({ offset: 12 })
         .setLngLat(feature.geometry.coordinates)
-        .setHTML(`
+        .setHTML(
+          `
           <div class="fleet-map-popup">
             <strong>${escapeText(properties.plateNumber)}</strong>
             <span class="fleet-map-health-score${healthScoreClass(healthScore)}">健康分數：${escapeText(healthScore)}</span>
+            ${scoreBreakdown ? `<span>評分組成：車內 ${escapeText(scoreBreakdown.cabinScore)}／車外 ${escapeText(scoreBreakdown.exteriorScore)}</span>` : ""}
             <span>異常數量：${escapeText(properties.issueCount)}</span>
-            <span>車輛狀態：${escapeText(status.label)}</span>
-            <span>最後更新：${escapeText(new Date(properties.updatedAt).toLocaleString('zh-TW'))}</span>
+            <span>車輛狀態：${escapeText(statusLabel)}</span>
+            <span>最後更新：${escapeText(new Date(properties.updatedAt).toLocaleString("zh-TW"))}</span>
           </div>
-        `)
+        `,
+        )
         .addTo(state.map);
     });
-    state.map.on('mouseenter', 'fleet-vehicles', () => {
-      state.map.getCanvas().style.cursor = 'pointer';
+    state.map.on("mouseenter", "fleet-vehicles", () => {
+      state.map.getCanvas().style.cursor = "pointer";
     });
-    state.map.on('mouseleave', 'fleet-vehicles', () => {
-      state.map.getCanvas().style.cursor = '';
+    state.map.on("mouseleave", "fleet-vehicles", () => {
+      state.map.getCanvas().style.cursor = "";
     });
   }
 
   function renderRegionOptions() {
-    const select = document.querySelector('[data-fleet-region]');
+    const select = document.querySelector("[data-fleet-region]");
     if (!select) return;
-    const cities = [...new Set(state.vehicles.map(vehicle => vehicle.station?.city).filter(Boolean))];
-    select.innerHTML = '<option value="">全台</option>' + cities.map(city =>
-      `<option value="${escapeText(city)}">${escapeText(city)}</option>`
-    ).join('');
+    const cities = [
+      ...new Set(
+        state.vehicles.map((vehicle) => vehicle.station?.city).filter(Boolean),
+      ),
+    ];
+    select.innerHTML =
+      '<option value="">全台</option>' +
+      cities
+        .map(
+          (city) =>
+            `<option value="${escapeText(city)}">${escapeText(city)}</option>`,
+        )
+        .join("");
     updateMap();
   }
 
   function findStation(value) {
-    const normalized = text(value).toLocaleLowerCase('zh-Hant');
-    return state.stations.find(station =>
-      station.code.toLocaleLowerCase('zh-Hant') === normalized
-      || station.name.toLocaleLowerCase('zh-Hant') === normalized
+    const normalized = text(value).toLocaleLowerCase("zh-Hant");
+    return state.stations.find(
+      (station) =>
+        station.code.toLocaleLowerCase("zh-Hant") === normalized ||
+        station.name.toLocaleLowerCase("zh-Hant") === normalized,
     );
   }
 
@@ -678,48 +928,57 @@
     const [vehicles, stations, mapData] = await Promise.all([
       globalObject.IRentVehicleApi.list(),
       globalObject.IRentStationApi.list(),
-      globalObject.IRentVehicleApi.mapSummary()
+      globalObject.IRentVehicleApi.mapSummary(),
     ]);
-    const vehiclesById = new Map(vehicles.map(vehicle => [vehicle.id, vehicle]));
+    const vehiclesById = new Map(
+      vehicles.map((vehicle) => [vehicle.id, vehicle]),
+    );
     state.vehicles = vehicles;
     state.stations = stations;
+    populateFilterOptions(vehicles);
     state.table = createVehicleTable(vehicles);
     state.mapData = {
       ...mapData,
-      features: mapData.features.map(feature => {
+      features: mapData.features.map((feature) => {
         const vehicle = vehiclesById.get(feature.properties.id);
         if (!vehicle) return feature;
         return {
           ...feature,
-          properties: { ...feature.properties, healthScore: calculateHealthScore(vehicle) }
+          properties: {
+            ...feature.properties,
+            healthScore: calculateHealthScore(vehicle),
+            overallStatus: getOverallStatus(vehicle),
+          },
         };
-      })
+      }),
     };
     renderRows();
     renderRegionOptions();
   }
 
   async function addVehicle() {
-    const licensePlate = window.prompt('請輸入車牌，例如 RAA-1234');
+    const licensePlate = window.prompt("請輸入車牌，例如 RAA-1234");
     if (!licensePlate) return;
-    const model = window.prompt('請輸入車型', 'Toyota Yaris');
+    const model = window.prompt("請輸入車型", "Toyota Yaris");
     if (!model) return;
-    const color = window.prompt('請輸入顏色', '白');
+    const color = window.prompt("請輸入顏色", "白");
     if (!color) return;
     const stationInput = window.prompt(
-      '請輸入停靠站代碼或完整名稱',
-      state.stations[0]?.code || ''
+      "請輸入停靠站代碼或完整名稱",
+      state.stations[0]?.code || "",
     );
     if (!stationInput) return;
     const station = findStation(stationInput);
-    if (!station) throw new Error('找不到指定停靠站，請輸入站點代碼或完整名稱');
-    const cabinInput = window.prompt('請輸入車內狀況：乾淨或普通', '乾淨');
+    if (!station) throw new Error("找不到指定停靠站，請輸入站點代碼或完整名稱");
+    const cabinInput = window.prompt("請輸入車內狀況：乾淨或普通", "乾淨");
     if (!cabinInput) return;
-    const cabinCondition = Object.entries(cabinConditionMeta).find(([key, meta]) =>
-      key === text(cabinInput).toLowerCase() || meta.label === text(cabinInput)
+    const cabinCondition = Object.entries(cabinConditionMeta).find(
+      ([key, meta]) =>
+        key === text(cabinInput).toLowerCase() ||
+        meta.label === text(cabinInput),
     )?.[0];
-    if (!['clean', 'average'].includes(cabinCondition)) {
-      throw new Error('可租用車輛的車內狀況只能是乾淨或普通');
+    if (!["clean", "average"].includes(cabinCondition)) {
+      throw new Error("可租用車輛的車內狀況只能是乾淨或普通");
     }
 
     await globalObject.IRentVehicleApi.create({
@@ -727,46 +986,61 @@
       model: text(model),
       color: text(color),
       stationId: station.id,
-      cabinCondition
+      cabinCondition,
     });
     await refresh();
     state.context.notify(`已新增車輛 ${text(licensePlate).toUpperCase()}`);
   }
 
   function parseCsv(content) {
-    const lines = String(content).replace(/^\uFEFF/, '').split(/\r?\n/).filter(line => line.trim());
+    const lines = String(content)
+      .replace(/^\uFEFF/, "")
+      .split(/\r?\n/)
+      .filter((line) => line.trim());
     if (lines.length < 2) return [];
     const aliases = {
-      車牌: 'licensePlate',
-      車型: 'model',
-      顏色: 'color',
-      站點代碼: 'stationCode',
-      狀態: 'status',
-      車內狀況: 'cabinCondition',
-      今日里程: 'todayMileage',
-      最近異常: 'latestAnomaly'
+      車牌: "licensePlate",
+      車型: "model",
+      顏色: "color",
+      站點代碼: "stationCode",
+      狀態: "status",
+      車內狀況: "cabinCondition",
+      今日里程: "todayMileage",
+      最近異常: "latestAnomaly",
     };
-    const headers = lines[0].split(',').map(value => aliases[text(value)] || text(value));
-    return lines.slice(1).map(line => {
-      const values = line.split(',').map(text);
-      return Object.fromEntries(headers.map((header, index) => [header, values[index] ?? '']));
+    const headers = lines[0]
+      .split(",")
+      .map((value) => aliases[text(value)] || text(value));
+    return lines.slice(1).map((line) => {
+      const values = line.split(",").map(text);
+      return Object.fromEntries(
+        headers.map((header, index) => [header, values[index] ?? ""]),
+      );
     });
   }
 
   async function importVehicles(file) {
     const records = parseCsv(await file.text());
-    if (!records.length) throw new Error('CSV 沒有可匯入的資料');
-    const payloads = records.map(record => {
+    if (!records.length) throw new Error("CSV 沒有可匯入的資料");
+    const payloads = records.map((record) => {
       const station = findStation(record.stationCode);
-      if (!station) throw new Error(`${record.licensePlate || '未知車牌'} 的站點代碼不存在`);
-      const status = record.status || 'available';
-      const defaultCabinCondition = status === 'cleaning' ? 'dirty' : 'clean';
+      if (!station)
+        throw new Error(
+          `${record.licensePlate || "未知車牌"} 的站點代碼不存在`,
+        );
+      const status = record.status || "available";
+      const defaultCabinCondition = status === "cleaning" ? "dirty" : "clean";
       const cabinCondition = record.cabinCondition
-        ? Object.entries(cabinConditionMeta).find(([key, meta]) =>
-          key === text(record.cabinCondition).toLowerCase() || meta.label === text(record.cabinCondition)
-        )?.[0]
+        ? Object.entries(cabinConditionMeta).find(
+            ([key, meta]) =>
+              key === text(record.cabinCondition).toLowerCase() ||
+              meta.label === text(record.cabinCondition),
+          )?.[0]
         : defaultCabinCondition;
-      if (!cabinCondition) throw new Error(`${record.licensePlate || '未知車牌'} 的車內狀況不正確`);
+      if (!cabinCondition)
+        throw new Error(
+          `${record.licensePlate || "未知車牌"} 的車內狀況不正確`,
+        );
       return {
         licensePlate: text(record.licensePlate).toUpperCase(),
         model: text(record.model),
@@ -775,23 +1049,25 @@
         status,
         cabinCondition,
         todayMileage: record.todayMileage ? Number(record.todayMileage) : 0,
-        latestAnomaly: record.latestAnomaly || null
+        latestAnomaly: record.latestAnomaly || null,
       };
     });
-    const results = await Promise.allSettled(payloads.map(payload =>
-      globalObject.IRentVehicleApi.create(payload)
-    ));
-    const succeeded = results.filter(result => result.status === 'fulfilled').length;
+    const results = await Promise.allSettled(
+      payloads.map((payload) => globalObject.IRentVehicleApi.create(payload)),
+    );
+    const succeeded = results.filter(
+      (result) => result.status === "fulfilled",
+    ).length;
     const failed = results.length - succeeded;
     await refresh();
     state.context.notify(`匯入完成：成功 ${succeeded} 輛，失敗 ${failed} 輛`);
   }
 
   function chooseCsv() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.csv,text/csv';
-    input.addEventListener('change', async () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".csv,text/csv";
+    input.addEventListener("change", async () => {
       const file = input.files?.[0];
       if (!file) return;
       try {
@@ -807,53 +1083,88 @@
     state.context = context;
     initMap();
     context.setApplyFilter(resetPageAndRenderRows);
-    document.querySelectorAll?.('[data-fleet-column-filter]')?.forEach(input => {
-      input.addEventListener('input', event => {
-        state.table?.getColumn(event.currentTarget.dataset.fleetColumnFilter)
-          ?.setFilterValue(event.currentTarget.value);
-        renderRows();
+    document
+      .querySelectorAll?.("[data-fleet-column-filter]")
+      ?.forEach((input) => {
+        input.addEventListener("change", (event) => {
+          const filterName = event.currentTarget.dataset.fleetColumnFilter;
+          const value = event.currentTarget.value;
+          state.table?.getColumn(filterName)?.setFilterValue(value);
+          if (filterName === "overallStatus") {
+            syncOverallStatusFilter(value);
+            updateMap();
+            return;
+          }
+          state.table?.setPageIndex(0);
+          renderRows();
+        });
       });
-    });
-    document.querySelector('[data-fleet-region]')?.addEventListener('change', updateMap);
-    document.querySelector('[data-fleet-page-previous]')?.addEventListener('click', () => {
-      if (!state.table?.getCanPreviousPage()) return;
-      state.table.previousPage();
-      renderRows();
-    });
-    document.querySelector('[data-fleet-page-next]')?.addEventListener('click', () => {
-      if (!state.table?.getCanNextPage()) return;
-      state.table.nextPage();
-      renderRows();
-    });
-    document.querySelector('[data-action="add-vehicle"]')?.addEventListener('click', async () => {
-      try {
-        await addVehicle();
-      } catch (error) {
-        context.notify(error.message);
+    document
+      .querySelector("[data-fleet-region]")
+      ?.addEventListener("change", updateMap);
+    document
+      .querySelector("[data-fleet-status]")
+      ?.addEventListener("change", (event) => {
+        syncOverallStatusFilter(event.currentTarget.value);
+        updateMap();
+      });
+    document
+      .querySelector('[data-action="add-vehicle"]')
+      ?.addEventListener("click", async () => {
+        try {
+          await addVehicle();
+        } catch (error) {
+          context.notify(error.message);
+        }
+      });
+    document
+      .querySelector('[data-action="import-vehicles"]')
+      ?.addEventListener("click", chooseCsv);
+    const fleetBody = document.querySelector("[data-fleet-body]");
+    fleetBody?.addEventListener("click", (event) => {
+      const row = event.target.closest("[data-vehicle-id]");
+      if (row && !event.target.closest("[data-action]")) {
+        focusVehicleOnMap(Number(row.dataset.vehicleId));
+        return;
       }
-    });
-    document.querySelector('[data-action="import-vehicles"]')?.addEventListener('click', chooseCsv);
-    document.querySelector('[data-fleet-body]')?.addEventListener('click', event => {
-      const button = event.target.closest('[data-action]');
+      const button = event.target.closest("[data-action]");
       if (!button) return;
-      const vehicle = state.vehicles.find(item =>
-        item.id === Number(button.closest('[data-vehicle-id]')?.dataset.vehicleId)
+      const vehicle = state.vehicles.find(
+        (item) =>
+          item.id ===
+          Number(button.closest("[data-vehicle-id]")?.dataset.vehicleId),
       );
       if (!vehicle) return;
-      const action = button.dataset.action === 'view-history'
-        ? showVehicleHistory(vehicle)
-        : showVehicleDetails(vehicle);
-      action.catch(error => context.notify(error.message));
+      const action =
+        button.dataset.action === "view-history"
+          ? showVehicleHistory(vehicle)
+          : showVehicleDetails(vehicle);
+      action.catch((error) => context.notify(error.message));
+    });
+    fleetBody?.addEventListener("keydown", (event) => {
+      if (!["Enter", " "].includes(event.key)) return;
+      const row = event.target.closest("[data-vehicle-id]");
+      if (!row || event.target.closest("[data-action]")) return;
+      event.preventDefault();
+      focusVehicleOnMap(Number(row.dataset.vehicleId));
     });
 
     try {
       await refresh();
     } catch (error) {
-      setMapMessage('車隊地圖資料載入失敗');
-      const body = document.querySelector('[data-fleet-body]');
-      if (body) body.innerHTML = `<tr><td colspan="8" class="fleet-empty">${escapeText(error.message)}</td></tr>`;
+      setMapMessage("車隊地圖資料載入失敗");
+      const body = document.querySelector("[data-fleet-body]");
+      if (body)
+        body.innerHTML = `<tr><td colspan="8" class="fleet-empty">${escapeText(error.message)}</td></tr>`;
     }
   }
 
-  globalObject.IRentFleet = { init, getOverallStatus, createVehicleTable };
+  globalObject.IRentFleet = {
+    init,
+    getOverallStatus,
+    getTrafficLight,
+    getHealthScoreBreakdown,
+    calculateHealthScore,
+    createVehicleTable,
+  };
 })(window);

@@ -1,4 +1,4 @@
-.review-layout {
+﻿.review-layout {
   display: grid;
   grid-template-columns: minmax(310px, 0.8fr) minmax(500px, 1.55fr);
   gap: 17px;
@@ -137,6 +137,56 @@
   padding-top: 14px;
 }
 
+@media (min-width: 1081px) {
+  .app-body[data-page="damage-review"] {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .app-body[data-page="damage-review"] .app-shell,
+  .app-body[data-page="damage-review"] .app-workspace {
+    height: 100%;
+  }
+
+  .app-body[data-page="damage-review"] .app-workspace,
+  .app-body[data-page="damage-review"] .page,
+  .review-layout > .card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .app-body[data-page="damage-review"] .page {
+    width: 100%;
+    max-width: none;
+    flex: 1;
+    min-height: 0;
+    margin: 0;
+    padding: 16px 20px 20px;
+  }
+
+  .review-layout {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .review-layout > .card {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .review-layout > .card:first-child .case-table-wrap {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  .review-layout > .card:last-child .card-body {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+  }
+}
+
 @media (max-width: 1080px) {
   .review-layout {
     grid-template-columns: 1fr;
@@ -156,5 +206,183 @@
   .decision {
     align-items: stretch;
     flex-direction: column;
+  }
+}
+
+.marker-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #f8fbfd;
+}
+
+.marker-toolbar-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.marker-toolbar-copy b {
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.marker-toolbar-copy span,
+.marker-count {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.marker-toolbar-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.marker-toolbar-actions .btn {
+  white-space: nowrap;
+}
+
+.marker-photo {
+  position: relative;
+  overflow: hidden;
+}
+
+.damage-marker-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.damage-marker-canvas.is-active {
+  cursor: crosshair;
+  pointer-events: auto;
+}
+
+@media (max-width: 600px) {
+  .marker-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .marker-toolbar-actions {
+    justify-content: flex-start;
+  }
+}
+.marker-category {
+  min-width: 108px;
+}
+
+.annotation-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.annotation-list:empty {
+  display: none;
+}
+
+.annotation-list-item {
+  display: grid;
+  grid-template-columns: 9px minmax(130px, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.annotation-swatch {
+  width: 9px;
+  height: 24px;
+  border-radius: 4px;
+}
+
+.annotation-label {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.annotation-coordinates {
+  color: var(--muted);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.annotation-remove {
+  padding: 3px 6px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.annotation-remove:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.damage-marker-canvas.is-drawing {
+  cursor: crosshair;
+}
+
+@media (max-width: 600px) {
+  .annotation-list-item {
+    grid-template-columns: 9px minmax(0, 1fr) auto;
+  }
+
+  .annotation-coordinates {
+    display: none;
+  }
+
+  .marker-category {
+    min-width: 0;
+    width: 100%;
+  }
+}
+.save-status {
+  min-width: 110px;
+  color: var(--muted);
+  font-size: 10px;
+  text-align: right;
+}
+
+.save-status[data-tone="success"] {
+  color: #15803d;
+}
+
+.save-status[data-tone="pending"] {
+  color: #b45309;
+}
+
+.save-status[data-tone="error"] {
+  color: #b91c1c;
+}
+
+.btn:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+@media (max-width: 600px) {
+  .save-status {
+    min-width: 0;
+    text-align: left;
   }
 }

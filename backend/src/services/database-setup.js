@@ -81,6 +81,10 @@ const migrations = [
     table: 'repair_orders',
     trigger: 'repair_orders_status_before_update',
     path: path.join(backendRoot, 'prisma', 'migrations', '0014_repair_order_dispatch_status', 'migration.sql')
+  },
+  {
+    table: 'damage_annotations',
+    path: path.join(backendRoot, 'prisma', 'migrations', '0015_damage_annotations', 'migration.sql')
   }
 ];
 

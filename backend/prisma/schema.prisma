@@ -72,7 +72,8 @@ model User {
   sessions     Session[]
   auditLogs    AuditLog[]
   inboxItems   InboxItem[]
-  repairOrders RepairOrder[] @relation("RepairOrderManager")
+  repairOrders      RepairOrder[]      @relation("RepairOrderManager")
+  damageAnnotations DamageAnnotation[]
 
   @@index([roleId])
   @@index([departmentId])
@@ -267,4 +268,25 @@ model AiAnomalyAlert {
 
   @@index([vehicleId, status, detectedAt])
   @@map("ai_anomaly_alerts")
+}
+
+model DamageAnnotation {
+  id              Int      @id @default(autoincrement())
+  caseId          String   @map("case_id")
+  plateNumber     String   @map("plate_number")
+  imageSide       String   @map("image_side")
+  category        String
+  x               Float
+  y               Float
+  width           Float
+  height          Float
+  yoloCoordinates String   @map("yolo_coordinates")
+  createdById     Int?     @map("created_by_id")
+  createdAt       String   @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt       String   @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
+  createdBy       User?    @relation(fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([caseId, imageSide])
+  @@index([plateNumber, createdAt])
+  @@map("damage_annotations")
 }

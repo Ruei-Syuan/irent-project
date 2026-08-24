@@ -1,26 +1,22 @@
 <!doctype html>
 <html lang="zh-Hant">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>
-    清潔工單｜iRent 智能車況管家
-  </title>
-  <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/dispatch.css">
-</head>
-<body class="app-body" data-page="dispatch">
-  <div class="app-shell">
-    <aside class="app-sidebar" data-app-sidebar>
-    </aside>
-    <div class="app-workspace">
-      <header class="app-topbar" data-app-topbar>
-      </header>
-      <main class="page">
-        <section class="page-head">
-          <div>
-            <!-- <p class="eyebrow">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>清潔工單｜iRent 智能車況管家</title>
+    <link rel="stylesheet" href="css/common.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/dispatch.css" />
+  </head>
+  <body class="app-body" data-page="dispatch">
+    <div class="app-shell">
+      <aside class="app-sidebar" data-app-sidebar></aside>
+      <div class="app-workspace">
+        <header class="app-topbar" data-app-topbar></header>
+        <main class="page">
+          <section class="page-head">
+            <div>
+              <!-- <p class="eyebrow">
               Clear Orders
             </p>
             <h1>
@@ -29,61 +25,109 @@
             <p class="subtitle">
               依風險、地點、人力與預估工時自動排序任務，縮短車輛不可租時間。
             </p> -->
-          </div>
-          <div class="actions">
-            <button class="btn">
-              匯出工單
-            </button>
-            <button class="btn primary">
-              ＋ 建立工單
-            </button>
-          </div>
-        </section>
-        <section class="metrics dashboard-style-metrics clear-order-metrics">
-          <article class="metric is-slate" data-cleaning-metric-card="unassigned" data-cleaning-filter="unassigned" role="button" tabindex="0">
-            <div class="metric-label"><span>待派工</span><span class="metric-icon">○</span></div>
-            <b>0</b>
-            <small data-cleaning-metric-note="unassigned">目前 0 件待派工</small>
-          </article>
-          <article class="metric is-green" data-cleaning-metric-card="clean" data-cleaning-filter="clean" role="button" tabindex="0">
-            <div class="metric-label"><span>已清潔</span><span class="metric-icon">✓</span></div>
-            <b>0</b>
-            <small data-cleaning-metric-note="clean">本月完成 0 件</small>
-          </article>
-          <article class="metric is-blue" data-cleaning-metric-card="average" data-cleaning-filter="average" role="button" tabindex="0">
-            <div class="metric-label"><span>清潔中</span><span class="metric-icon">⚒</span></div>
-            <b>0</b>
-            <small data-cleaning-metric-note="average">目前 0 件清潔中</small>
-          </article>
-          <article class="metric is-amber" data-cleaning-metric-card="dirty" data-cleaning-filter="dirty" role="button" tabindex="0">
-            <div class="metric-label"><span>待驗收</span><span class="metric-icon">◉</span></div>
-            <b>0</b>
-            <small data-cleaning-metric-note="dirty">目前 0 件待驗收</small>
-          </article>
-          <article class="metric is-violet">
-            <div class="metric-label"><span>本月清潔費用</span><span class="metric-icon">▥</span></div>
-            <b data-cleaning-spend-total>NT$ 0</b>
-            <small>較上月增加 NT$ 6,040（23.1%）</small>
-          </article>
-        </section>
-        <article class="card">
+            </div>
+            <div class="actions">
+              <button class="btn">匯出工單</button>
+              <button class="btn primary">＋ 建立工單</button>
+            </div>
+          </section>
+          <section class="metrics dashboard-style-metrics clear-order-metrics">
+            <article
+              class="metric is-slate"
+              data-cleaning-metric-card="unassigned"
+              data-cleaning-filter="unassigned"
+              role="button"
+              tabindex="0"
+            >
+              <div class="metric-label">
+                <span>待派工</span><span class="metric-icon">○</span>
+              </div>
+              <b>0</b>
+              <small data-cleaning-metric-note="unassigned"
+                >目前 0 件待派工</small
+              >
+            </article>
+            <article
+              class="metric is-green"
+              data-cleaning-metric-card="clean"
+              data-cleaning-filter="clean"
+              role="button"
+              tabindex="0"
+            >
+              <div class="metric-label">
+                <span>已清潔</span><span class="metric-icon">✓</span>
+              </div>
+              <b>0</b>
+              <small data-cleaning-metric-note="clean">本月完成 0 件</small>
+            </article>
+            <article
+              class="metric is-blue"
+              data-cleaning-metric-card="average"
+              data-cleaning-filter="average"
+              role="button"
+              tabindex="0"
+            >
+              <div class="metric-label">
+                <span>清潔中</span><span class="metric-icon">⚒</span>
+              </div>
+              <b>0</b>
+              <small data-cleaning-metric-note="average">目前 0 件清潔中</small>
+            </article>
+            <article
+              class="metric is-amber"
+              data-cleaning-metric-card="dirty"
+              data-cleaning-filter="dirty"
+              role="button"
+              tabindex="0"
+            >
+              <div class="metric-label">
+                <span>待驗收</span><span class="metric-icon">◉</span>
+              </div>
+              <b>0</b>
+              <small data-cleaning-metric-note="dirty">目前 0 件待驗收</small>
+            </article>
+            <article class="metric is-violet">
+              <div class="metric-label">
+                <span>本月清潔費用</span><span class="metric-icon">▥</span>
+              </div>
+              <b data-cleaning-spend-total
+                ><span class="currency-prefix">NT$</span>
+                <span data-cleaning-spend-value>0</span></b
+              >
+              <small>較上月增加 NT$ 6,040（23.1%）</small>
+            </article>
+          </section>
+          <article class="card">
             <div class="card-head">
               <div>
-                <h2>
-                 清潔工單歷史
-                </h2>
+                <h2>清潔工單歷史</h2>
                 <p data-cleaning-list-summary>共 0 筆清潔狀態資料</p>
               </div>
               <div class="filters">
-                <button class="btn primary" type="button" data-cleaning-bulk-accept disabled>批次驗收</button>
-                <select class="select" data-cleaning-status aria-label="清潔狀態">
+                <button
+                  class="btn primary"
+                  type="button"
+                  data-cleaning-bulk-accept
+                  disabled
+                >
+                  批次驗收
+                </button>
+                <select
+                  class="select"
+                  data-cleaning-status
+                  aria-label="清潔狀態"
+                >
                   <option value="">全部狀態</option>
                   <option value="unassigned">待派工</option>
                   <option value="clean">已清潔</option>
                   <option value="average">清潔中</option>
                   <option value="dirty">待驗收</option>
                 </select>
-                <select class="select" data-cleaning-month aria-label="月份篩選"></select>
+                <select
+                  class="select"
+                  data-cleaning-month
+                  aria-label="月份篩選"
+                ></select>
               </div>
             </div>
             <div class="table-wrap">
@@ -91,35 +135,21 @@
                 <thead>
                   <tr>
                     <th>
-                      <input type="checkbox" data-cleaning-select-all aria-label="選取全部待驗收工單">
+                      <input
+                        type="checkbox"
+                        data-cleaning-select-all
+                        aria-label="選取全部待驗收工單"
+                      />
                     </th>
-                    <th>
-                      序號
-                    </th>
-                    <th>
-                      工單／車輛
-                    </th>
-                    <th>
-                      所在站點
-                    </th>
-                    <th>
-                      清潔狀態
-                    </th>
-                    <th>
-                      車子原始狀況
-                    </th>
-                    <th>
-                      清潔人員
-                    </th>
-                    <th>
-                      清潔費用
-                    </th>
-                    <th>
-                      備註
-                    </th>
-                    <th>
-                      建立時間
-                    </th>
+                    <th>序號</th>
+                    <th>工單／車輛</th>
+                    <th>所在站點</th>
+                    <th>清潔狀態</th>
+                    <th>車子原始狀況</th>
+                    <th>清潔人員</th>
+                    <th>清潔費用</th>
+                    <th>備註</th>
+                    <th>建立時間</th>
                   </tr>
                 </thead>
                 <tbody data-cleaning-orders-body hidden>
@@ -261,7 +291,11 @@
                 <span data-cleaning-page-info>第 1 / 1 頁，共 0 筆</span>
                 <label class="cleaning-order-page-size">
                   每頁
-                  <select class="select" data-cleaning-page-size aria-label="每頁顯示筆數">
+                  <select
+                    class="select"
+                    data-cleaning-page-size
+                    aria-label="每頁顯示筆數"
+                  >
                     <option value="5" selected>5 筆</option>
                     <option value="10">10 筆</option>
                     <option value="20">20 筆</option>
@@ -270,13 +304,30 @@
                 </label>
               </div>
               <div class="inline">
-                <button class="btn small" type="button" data-cleaning-page-previous disabled>上一頁</button>
-                <div class="cleaning-order-page-numbers" data-cleaning-page-numbers></div>
-                <button class="btn small" type="button" data-cleaning-page-next disabled>下一頁</button>
+                <button
+                  class="btn small"
+                  type="button"
+                  data-cleaning-page-previous
+                  disabled
+                >
+                  上一頁
+                </button>
+                <div
+                  class="cleaning-order-page-numbers"
+                  data-cleaning-page-numbers
+                ></div>
+                <button
+                  class="btn small"
+                  type="button"
+                  data-cleaning-page-next
+                  disabled
+                >
+                  下一頁
+                </button>
               </div>
             </div>
           </article>
-        <!-- <article class="card">
+          <!-- <article class="card">
           <div class="card-head">
             <div>
               <h2>
@@ -523,8 +574,8 @@
             </section>
           </div>
         </article> -->
-        <!-- 團隊負載 -->
-        <!-- <article class="card" style="margin-top:17px">
+          <!-- 團隊負載 -->
+          <!-- <article class="card" style="margin-top:17px">
           <div class="card-head">
             <div>
               <h2>
@@ -601,16 +652,12 @@
             </div>
           </div>
         </article> -->
-      </main>
+        </main>
+      </div>
     </div>
-  </div>
-  <script src="js/api/client.js" defer>
-  </script>
-  <script src="js/api/cleaning-orders.js" defer>
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer>
-  </script>
-  <script src="js/layout.js" defer>
-  </script>
-</body>
+    <script src="js/api/client.js" defer></script>
+    <script src="js/api/cleaning-orders.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+    <script src="js/layout.js" defer></script>
+  </body>
 </html>

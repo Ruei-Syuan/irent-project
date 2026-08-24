@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-Hant">
   <head>
     <meta charset="utf-8" />
@@ -14,68 +14,6 @@
       <div class="app-workspace">
         <header class="app-topbar" data-app-topbar></header>
         <main class="page">
-          <section class="page-head">
-            <div>
-              <!-- <p class="eyebrow">
-                AI Damage Review
-              </p>
-              <h1>
-                AI 車損案件與人工複核
-              </h1> -->
-              <!-- <p class="subtitle">
-                比對取還車影像、確認新增損傷並決定派工、索賠或結案。
-              </p> -->
-            </div>
-            <div class="actions">
-              <button class="btn">批次指派</button>
-              <button class="btn primary">匯出案件</button>
-            </div>
-          </section>
-          <section class="metrics">
-            <article class="metric">
-              <div class="metric-label">
-                待人工複核
-                <span class="metric-icon"> ◎ </span>
-              </div>
-              <b> 3 </b>
-              <small> 其中 1 件高風險 </small>
-            </article>
-            <article class="metric">
-              <div class="metric-label">
-                今日新增
-                <span class="metric-icon"> ＋ </span>
-              </div>
-              <b> 52 </b>
-              <small> 較昨日減少 6 件 </small>
-            </article>
-            <article class="metric">
-              <div class="metric-label">
-                AI 準確率
-                <span class="metric-icon"> ✓ </span>
-              </div>
-              <b> 94.8% </b>
-              <small> 近 30 日人工複核結果 </small>
-            </article>
-            <article class="metric">
-              <div class="metric-label">
-                平均處理時間
-                <span class="metric-icon"> ◷ </span>
-              </div>
-              <b> 4.2m </b>
-              <small>
-                <span class="good"> ▼ 18% </span>
-                較上月
-              </small>
-            </article>
-            <article class="metric">
-              <div class="metric-label">
-                預估索賠
-                <span class="metric-icon"> $ </span>
-              </div>
-              <b> 82K </b>
-              <small> 本週已確認案件 </small>
-            </article>
-          </section>
           <section class="review-layout">
             <article class="card">
               <div class="card-head">
@@ -83,7 +21,7 @@
                   <h2>案件佇列</h2>
                   <p>依風險分數排序</p>
                 </div>
-                <span class="badge red" data-queue-count> 3 待處理 </span>
+                <span class="badge red" data-queue-count> 8 待處理 </span>
               </div>
               <div class="card-body filters">
                 <input
@@ -192,6 +130,141 @@
                         <span class="cell-title">32 分鐘</span>
                       </td>
                     </tr>
+                    <tr
+                      class="case case-row"
+                      data-case-id="case-04"
+                      data-risk="高風險"
+                      role="button"
+                      tabindex="0"
+                    >
+                      <td>
+                        <div class="case-top">
+                          <b>#DMG-260809-009</b>
+                        </div>
+                        <span class="cell-meta">新增損傷案件</span>
+                      </td>
+                      <td>
+                        <p><b>RCD-8716 Nissan Kicks</b></p>
+                      </td>
+                      <td>
+                        <span class="cell-title">前保桿・裂痕</span>
+                        <span class="cell-meta">6.2 cm</span>
+                      </td>
+                      <td><span class="confidence good">93%</span></td>
+                      <td><span class="badge red">高風險</span></td>
+                      <td>
+                        <span class="cell-meta">等待</span>
+                        <span class="cell-title">44 分鐘</span>
+                      </td>
+                    </tr>
+                    <tr
+                      class="case case-row"
+                      data-case-id="case-05"
+                      data-risk="待補件"
+                      role="button"
+                      tabindex="0"
+                    >
+                      <td>
+                        <div class="case-top">
+                          <b>#DMG-260809-007</b>
+                        </div>
+                        <span class="cell-meta">新增損傷案件</span>
+                      </td>
+                      <td>
+                        <p><b>RCE-3421 Mazda 3</b></p>
+                      </td>
+                      <td>
+                        <span class="cell-title">右前葉子板・凹痕</span>
+                        <span class="cell-meta">局部變形</span>
+                      </td>
+                      <td><span class="confidence good">74%</span></td>
+                      <td><span class="badge amber">待補件</span></td>
+                      <td>
+                        <span class="cell-meta">等待</span>
+                        <span class="cell-title">51 分鐘</span>
+                      </td>
+                    </tr>
+                    <tr
+                      class="case case-row"
+                      data-case-id="case-06"
+                      data-risk="一般"
+                      role="button"
+                      tabindex="0"
+                    >
+                      <td>
+                        <div class="case-top">
+                          <b>#DMG-260809-004</b>
+                        </div>
+                        <span class="cell-meta">新增損傷案件</span>
+                      </td>
+                      <td>
+                        <p><b>RCF-5290 Toyota Corolla Cross</b></p>
+                      </td>
+                      <td>
+                        <span class="cell-title">左後車門・刮傷</span>
+                        <span class="cell-meta">11.6 cm²</span>
+                      </td>
+                      <td><span class="confidence good">86%</span></td>
+                      <td><span class="badge blue">一般</span></td>
+                      <td>
+                        <span class="cell-meta">等待</span>
+                        <span class="cell-title">1 小時</span>
+                      </td>
+                    </tr>
+                    <tr
+                      class="case case-row"
+                      data-case-id="case-07"
+                      data-risk="高風險"
+                      role="button"
+                      tabindex="0"
+                    >
+                      <td>
+                        <div class="case-top">
+                          <b>#DMG-260808-021</b>
+                        </div>
+                        <span class="cell-meta">新增損傷案件</span>
+                      </td>
+                      <td>
+                        <p><b>RCG-6194 Honda HR-V</b></p>
+                      </td>
+                      <td>
+                        <span class="cell-title">右側後視鏡・破損</span>
+                        <span class="cell-meta">鏡面裂痕</span>
+                      </td>
+                      <td><span class="confidence good">91%</span></td>
+                      <td><span class="badge red">高風險</span></td>
+                      <td>
+                        <span class="cell-meta">等待</span>
+                        <span class="cell-title">2 小時</span>
+                      </td>
+                    </tr>
+                    <tr
+                      class="case case-row"
+                      data-case-id="case-08"
+                      data-risk="一般"
+                      role="button"
+                      tabindex="0"
+                    >
+                      <td>
+                        <div class="case-top">
+                          <b>#DMG-260808-017</b>
+                        </div>
+                        <span class="cell-meta">新增損傷案件</span>
+                      </td>
+                      <td>
+                        <p><b>RCH-7038 Ford Focus</b></p>
+                      </td>
+                      <td>
+                        <span class="cell-title">後保桿・擦痕</span>
+                        <span class="cell-meta">14.3 cm²</span>
+                      </td>
+                      <td><span class="confidence good">79%</span></td>
+                      <td><span class="badge blue">一般</span></td>
+                      <td>
+                        <span class="cell-meta">等待</span>
+                        <span class="cell-title">3 小時</span>
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -205,30 +278,100 @@
                 <span class="badge red" data-detail-status> 高風險 </span>
               </div>
               <div class="card-body">
+                <div
+                  class="marker-toolbar"
+                  role="toolbar"
+                  aria-label="&#x8ECA;&#x640D;&#x6A19;&#x8A18;&#x5DE5;&#x5177;"
+                >
+                  <div class="marker-toolbar-copy">
+                    <b>&#x8ECA;&#x640D;&#x6846;&#x9078;&#x6A19;&#x8A18;</b>
+                    <span data-marker-hint
+                      >&#x555F;&#x7528;&#x5F8C;&#x62D6;&#x66F3;&#x6846;&#x9078;&#xFF0C;&#x518D;&#x9078;&#x64C7;&#x640D;&#x50B7;&#x985E;&#x5225;</span
+                    >
+                  </div>
+                  <div class="inline marker-toolbar-actions">
+                    <select
+                      class="select marker-category"
+                      data-marker-category
+                      aria-label="&#x640D;&#x50B7;&#x985E;&#x5225;"
+                    >
+                      <option value="dent">&#x51F9;&#x9665;</option>
+                      <option value="scratch">&#x522E;&#x50B7;</option>
+                      <option value="crack">&#x88C2;&#x75D5;</option>
+                      <option value="broken">&#x7834;&#x640D;</option>
+                      <option value="plateMissing">
+                        &#x8ECA;&#x724C;&#x907A;&#x5931;
+                      </option>
+                      <option value="other">&#x5176;&#x4ED6;</option>
+                    </select>
+                    <button class="btn" type="button" data-toggle-marking>
+                      &#x555F;&#x7528;&#x6846;&#x9078;
+                    </button>
+                    <button class="btn" type="button" data-clear-markers>
+                      &#x6E05;&#x9664;&#x672C;&#x6848;&#x6A19;&#x8A18;
+                    </button>
+                    <button
+                      class="btn primary"
+                      type="button"
+                      data-save-annotations
+                    >
+                      &#x5132;&#x5B58;&#x6A19;&#x8A18;
+                    </button>
+                    <span class="marker-count" data-marker-count
+                      >0 &#x500B;&#x6A19;&#x8A18;</span
+                    >
+                    <span
+                      class="save-status"
+                      data-save-status
+                      aria-live="polite"
+                    ></span>
+                  </div>
+                </div>
                 <div class="compare">
-                  <div class="photo with-image">
+                  <div
+                    class="photo with-image marker-photo"
+                    data-photo-side="before"
+                  >
                     <img
                       class="damage-photo"
                       data-before-image
-                      src="assets/damage-review/case-01-before.png"
-                      alt="RAC-4582 取車影像，右後保桿未發現明顯損傷"
+                      src="assets/damage-review/RAC-4582_20260809-09-14-00_01.png"
+                      alt="RAC-4582 pickup inspection image"
                     />
+                    <canvas
+                      class="damage-marker-canvas"
+                      data-marker-canvas="before"
+                      aria-label="Pickup image annotation canvas"
+                    ></canvas>
                     <span class="photo-label" data-before-label>
-                      取車影像 08/09 09:14
+                      &#x53D6;&#x8ECA;&#x5F71;&#x50CF; 08/09 09:14
                     </span>
                   </div>
-                  <div class="photo after with-image">
+                  <div
+                    class="photo after with-image marker-photo"
+                    data-photo-side="after"
+                  >
                     <img
                       class="damage-photo"
                       data-after-image
-                      src="assets/damage-review/case-01-after.png"
-                      alt="RAC-4582 還車影像，右後保桿出現刮傷與凹痕"
+                      src="assets/damage-review/RAC-4582_20260809-13-37-00_02.png"
+                      alt="RAC-4582 return inspection image"
                     />
+                    <canvas
+                      class="damage-marker-canvas"
+                      data-marker-canvas="after"
+                      aria-label="Return image annotation canvas"
+                    ></canvas>
                     <span class="photo-label" data-after-label>
-                      還車影像 08/09 13:37
+                      &#x9084;&#x8ECA;&#x5F71;&#x50CF; 08/09 13:37
                     </span>
                   </div>
                 </div>
+                <div
+                  class="annotation-list"
+                  data-annotation-list
+                  aria-live="polite"
+                ></div>
                 <div class="ai-result">
                   <div>
                     <small> 損傷類型 </small>
@@ -314,8 +457,10 @@
             issue: "右後保桿 刮傷",
             before: "取車影像 08/09 09:14",
             after: "還車影像 08/09 13:37",
-            beforeImage: "assets/damage-review/case-01-before.png",
-            afterImage: "assets/damage-review/case-01-after.png",
+            beforeImage:
+              "assets/damage-review/RAC-4582_20260809-09-14-00_01.png",
+            afterImage:
+              "assets/damage-review/RAC-4582_20260809-13-37-00_02.png",
             beforeAlt: "RAC-4582 取車影像，右後保桿未發現明顯損傷",
             afterAlt: "RAC-4582 還車影像，右後保桿出現刮傷與凹痕",
             damageType: "表面刮傷",
@@ -334,8 +479,10 @@
             issue: "左前車門 凹痕 白色轉移漆",
             before: "取車影像 08/09 10:22",
             after: "還車影像 08/09 14:05",
-            beforeImage: "assets/damage-review/case-02-before.png",
-            afterImage: "assets/damage-review/case-02-after.png",
+            beforeImage:
+              "assets/damage-review/RBC-2108_20260809-10-22-00_01.png",
+            afterImage:
+              "assets/damage-review/RBC-2108_20260809-14-05-00_02.png",
             beforeAlt: "RBC-2108 取車影像，左前車門外觀完整",
             afterAlt: "RBC-2108 還車影像，左前車門出現凹痕與白色轉移漆",
             damageType: "車門凹痕",
@@ -354,8 +501,10 @@
             issue: "左後尾燈 破裂 保桿擦痕",
             before: "取車影像 08/09 08:47",
             after: "還車影像 08/09 12:18",
-            beforeImage: "assets/damage-review/case-03-before.png",
-            afterImage: "assets/damage-review/case-03-after.png",
+            beforeImage:
+              "assets/damage-review/RBA-6935_20260809-08-47-00_01.png",
+            afterImage:
+              "assets/damage-review/RBA-6935_20260809-12-18-00_02.png",
             beforeAlt: "RBA-6935 取車影像，左後尾燈與保桿外觀完整",
             afterAlt: "RBA-6935 還車影像，左後尾燈破裂並有保桿擦痕",
             damageType: "燈殼破裂與擦傷",
@@ -364,6 +513,116 @@
             estimate: "NT$ 6,800–9,500",
             note: "尾燈裂紋清晰可見，且擦痕延伸至保桿飾板，初步判定為本次新增損傷。",
             renter: "租借人：吳○蓁 訂單 #IR2608094602",
+          },
+          "case-04": {
+            caseNumber: "#DMG-260809-009",
+            plate: "RCD-8716",
+            station: "台北市信義區 A07 站點",
+            risk: "高風險",
+            riskClass: "red",
+            issue: "前保桿 裂痕",
+            before: "取車影像 08/09 07:56",
+            after: "還車影像 08/09 11:42",
+            beforeImage:
+              "assets/damage-review/RAC-4582_20260809-09-14-00_01.png",
+            afterImage:
+              "assets/damage-review/RAC-4582_20260809-13-37-00_02.png",
+            beforeAlt: "RCD-8716 取車影像，前保桿外觀完整",
+            afterAlt: "RCD-8716 還車影像，前保桿出現裂痕",
+            damageType: "保桿裂痕",
+            location: "前保桿",
+            severity: "重度",
+            estimate: "NT$ 8,500–12,000",
+            note: "裂痕位於前保桿主要受力區，影像清晰且前後角度一致，建議確認新增並安排維修。",
+            renter: "租借人：張○翔 訂單 #IR2608094588",
+          },
+          "case-05": {
+            caseNumber: "#DMG-260809-007",
+            plate: "RCE-3421",
+            station: "台北市信義區 A07 站點",
+            risk: "待補件",
+            riskClass: "amber",
+            issue: "右前葉子板 凹痕",
+            before: "取車影像 08/09 09:36",
+            after: "還車影像 08/09 12:51",
+            beforeImage:
+              "assets/damage-review/RBC-2108_20260809-10-22-00_01.png",
+            afterImage:
+              "assets/damage-review/RBC-2108_20260809-14-05-00_02.png",
+            beforeAlt: "RCE-3421 取車影像，右前葉子板外觀完整",
+            afterAlt: "RCE-3421 還車影像，右前葉子板出現局部凹痕",
+            damageType: "車身凹痕",
+            location: "右前葉子板",
+            severity: "中度",
+            estimate: "NT$ 4,200–6,000",
+            note: "凹痕輪廓可辨識，但還車影像受反光影響，建議補拍右前葉子板近照確認損傷範圍。",
+            renter: "租借人：許○涵 訂單 #IR2608094551",
+          },
+          "case-06": {
+            caseNumber: "#DMG-260809-004",
+            plate: "RCF-5290",
+            station: "台北市信義區 A07 站點",
+            risk: "一般",
+            riskClass: "blue",
+            issue: "左後車門 刮傷",
+            before: "取車影像 08/09 08:18",
+            after: "還車影像 08/09 11:06",
+            beforeImage:
+              "assets/damage-review/RBA-6935_20260809-08-47-00_01.png",
+            afterImage:
+              "assets/damage-review/RBA-6935_20260809-12-18-00_02.png",
+            beforeAlt: "RCF-5290 取車影像，左後車門漆面完整",
+            afterAlt: "RCF-5290 還車影像，左後車門出現長條刮傷",
+            damageType: "漆面刮傷",
+            location: "左後車門",
+            severity: "輕度",
+            estimate: "NT$ 1,800–3,000",
+            note: "刮痕範圍有限且位置明確，前後影像光線條件可比對，建議列入一般維修排程。",
+            renter: "租借人：黃○恩 訂單 #IR2608094496",
+          },
+          "case-07": {
+            caseNumber: "#DMG-260808-021",
+            plate: "RCG-6194",
+            station: "台北市信義區 A07 站點",
+            risk: "高風險",
+            riskClass: "red",
+            issue: "右側後視鏡 破損",
+            before: "取車影像 08/08 10:04",
+            after: "還車影像 08/08 15:28",
+            beforeImage:
+              "assets/damage-review/RAC-4582_20260809-09-14-00_01.png",
+            afterImage:
+              "assets/damage-review/RAC-4582_20260809-13-37-00_02.png",
+            beforeAlt: "RCG-6194 取車影像，右側後視鏡外觀完整",
+            afterAlt: "RCG-6194 還車影像，右側後視鏡鏡面出現裂痕",
+            damageType: "後視鏡破損",
+            location: "右側後視鏡",
+            severity: "中度",
+            estimate: "NT$ 5,500–7,800",
+            note: "鏡面裂痕與外殼缺角同時出現，可能影響行車視線，建議優先確認並派工。",
+            renter: "租借人：周○萱 訂單 #IR2608084317",
+          },
+          "case-08": {
+            caseNumber: "#DMG-260808-017",
+            plate: "RCH-7038",
+            station: "台北市信義區 A07 站點",
+            risk: "一般",
+            riskClass: "blue",
+            issue: "後保桿 擦痕",
+            before: "取車影像 08/08 08:42",
+            after: "還車影像 08/08 13:16",
+            beforeImage:
+              "assets/damage-review/RBC-2108_20260809-10-22-00_01.png",
+            afterImage:
+              "assets/damage-review/RBC-2108_20260809-14-05-00_02.png",
+            beforeAlt: "RCH-7038 取車影像，後保桿漆面完整",
+            afterAlt: "RCH-7038 還車影像，後保桿出現長條擦痕",
+            damageType: "保桿擦傷",
+            location: "後保桿",
+            severity: "輕度",
+            estimate: "NT$ 2,400–3,800",
+            note: "後保桿擦痕在還車影像中清楚可見，未發現結構性變形，建議安排一般鈑金處理。",
+            renter: "租借人：鄭○哲 訂單 #IR2608084264",
           },
         };
 
@@ -386,15 +645,387 @@
           ]),
         );
 
+        const markerCanvases = {
+          before: document.querySelector('[data-marker-canvas="before"]'),
+          after: document.querySelector('[data-marker-canvas="after"]'),
+        };
+        const markerCount = document.querySelector("[data-marker-count]");
+        const markerHint = document.querySelector("[data-marker-hint]");
+        const markerCategory = document.querySelector("[data-marker-category]");
+        const annotationList = document.querySelector("[data-annotation-list]");
+        const toggleMarkingButton = document.querySelector(
+          "[data-toggle-marking]",
+        );
+        const clearMarkersButton = document.querySelector(
+          "[data-clear-markers]",
+        );
+        const markerState = {};
+        const saveButton = document.querySelector("[data-save-annotations]");
+        const saveStatus = document.querySelector("[data-save-status]");
+        const annotationApiBase = "/api/v1/damage-annotations";
+        const annotationCategories = {
+          dent: { label: "\u51f9\u9667", color: "#ef4444" },
+          scratch: { label: "\u522e\u50b7", color: "#a855f7" },
+          crack: { label: "\u88c2\u75d5", color: "#f97316" },
+          broken: { label: "\u7834\u640d", color: "#dc2626" },
+          plateMissing: { label: "\u8eca\u724c\u907a\u5931", color: "#7c3aed" },
+          other: { label: "\u5176\u4ed6", color: "#2563eb" },
+        };
+        let currentCaseId = "case-01";
+        let markingEnabled = false;
+        let activeDrawing = null;
+
+        function getCurrentAnnotations() {
+          if (!markerState[currentCaseId]) {
+            markerState[currentCaseId] = { before: [], after: [] };
+          }
+          return markerState[currentCaseId];
+        }
+
+        function getPointerPoint(event, canvas) {
+          const rect = canvas.getBoundingClientRect();
+          return {
+            x: Math.min(
+              1,
+              Math.max(0, (event.clientX - rect.left) / rect.width),
+            ),
+            y: Math.min(
+              1,
+              Math.max(0, (event.clientY - rect.top) / rect.height),
+            ),
+          };
+        }
+
+        function normalizeBox(start, end, category) {
+          return {
+            x: Math.min(start.x, end.x),
+            y: Math.min(start.y, end.y),
+            width: Math.abs(end.x - start.x),
+            height: Math.abs(end.y - start.y),
+            category,
+          };
+        }
+
+        function resizeMarkerCanvas(canvas) {
+          if (!canvas) return;
+          const rect = canvas.getBoundingClientRect();
+          const scale = window.devicePixelRatio || 1;
+          canvas.width = Math.max(1, Math.round(rect.width * scale));
+          canvas.height = Math.max(1, Math.round(rect.height * scale));
+          const context = canvas.getContext("2d");
+          context.setTransform(scale, 0, 0, scale, 0, 0);
+          drawAnnotations(canvas);
+        }
+
+        function drawAnnotation(context, annotation, index, rect) {
+          const category =
+            annotationCategories[annotation.category] ||
+            annotationCategories.other;
+          const x = annotation.x * rect.width;
+          const y = annotation.y * rect.height;
+          const width = annotation.width * rect.width;
+          const height = annotation.height * rect.height;
+          context.lineWidth = 2;
+          context.strokeStyle = category.color;
+          context.fillStyle = `${category.color}22`;
+          context.fillRect(x, y, width, height);
+          context.strokeRect(x, y, width, height);
+          const caption = `${index + 1} ${category.label}`;
+          context.font = "700 12px Arial, sans-serif";
+          const labelWidth = context.measureText(caption).width + 12;
+          const labelY = Math.max(0, y - 21);
+          context.fillStyle = category.color;
+          context.fillRect(x, labelY, labelWidth, 21);
+          context.fillStyle = "#fff";
+          context.textAlign = "left";
+          context.textBaseline = "middle";
+          context.fillText(caption, x + 6, labelY + 10.5);
+        }
+
+        function drawAnnotations(canvas) {
+          if (!canvas) return;
+          const side = canvas.dataset.markerCanvas;
+          const rect = canvas.getBoundingClientRect();
+          const context = canvas.getContext("2d");
+          context.clearRect(0, 0, rect.width, rect.height);
+          const annotations = getCurrentAnnotations()[side] || [];
+          annotations.forEach((annotation, index) =>
+            drawAnnotation(context, annotation, index, rect),
+          );
+          if (activeDrawing && activeDrawing.side === side) {
+            const box = normalizeBox(
+              activeDrawing.start,
+              activeDrawing.current,
+              markerCategory.value,
+            );
+            const category =
+              annotationCategories[box.category] || annotationCategories.other;
+            context.save();
+            context.setLineDash([7, 5]);
+            context.lineWidth = 2;
+            context.strokeStyle = category.color;
+            context.strokeRect(
+              box.x * rect.width,
+              box.y * rect.height,
+              box.width * rect.width,
+              box.height * rect.height,
+            );
+            context.restore();
+          }
+        }
+
+        function formatYoloBox(annotation) {
+          const centerX = annotation.x + annotation.width / 2;
+          const centerY = annotation.y + annotation.height / 2;
+          return `${centerX.toFixed(3)} ${centerY.toFixed(3)} ${annotation.width.toFixed(3)} ${annotation.height.toFixed(3)}`;
+        }
+
+        function renderAnnotationList() {
+          const annotationsBySide = getCurrentAnnotations();
+          const fragment = document.createDocumentFragment();
+          const sideLabels = { before: "\u53d6\u8eca", after: "\u9084\u8eca" };
+          let total = 0;
+          ["before", "after"].forEach((side) => {
+            annotationsBySide[side].forEach((annotation, index) => {
+              const category =
+                annotationCategories[annotation.category] ||
+                annotationCategories.other;
+              const item = document.createElement("div");
+              item.className = "annotation-list-item";
+              const swatch = document.createElement("span");
+              swatch.className = "annotation-swatch";
+              swatch.style.backgroundColor = category.color;
+              const label = document.createElement("span");
+              label.className = "annotation-label";
+              label.textContent = `${total + 1}. ${sideLabels[side]} / ${category.label}`;
+              const coordinates = document.createElement("code");
+              coordinates.className = "annotation-coordinates";
+              coordinates.textContent = formatYoloBox(annotation);
+              const removeButton = document.createElement("button");
+              removeButton.type = "button";
+              removeButton.className = "annotation-remove";
+              removeButton.dataset.removeAnnotation = "true";
+              removeButton.dataset.annotationSide = side;
+              removeButton.dataset.annotationIndex = String(index);
+              removeButton.textContent = "\u522a\u9664";
+              item.append(swatch, label, coordinates, removeButton);
+              fragment.append(item);
+              total += 1;
+            });
+          });
+          annotationList.replaceChildren(fragment);
+          markerCount.textContent = `${total} \u500b\u6846\u9078`;
+          toggleMarkingButton.textContent = markingEnabled
+            ? "\u505c\u6b62\u6846\u9078"
+            : "\u555f\u7528\u6846\u9078";
+          toggleMarkingButton.classList.toggle("primary", markingEnabled);
+          markerHint.textContent = markingEnabled
+            ? "\u62d6\u66f3\u6846\u9078\u640d\u50b7\uff0c\u653e\u958b\u5f8c\u5efa\u7acb\u6a19\u8a18"
+            : "\u555f\u7528\u5f8c\u62d6\u66f3\u6846\u9078\uff0c\u518d\u9078\u64c7\u640d\u50b7\u985e\u5225";
+        }
+
+        function setSaveStatus(message, tone = "") {
+          saveStatus.textContent = message;
+          saveStatus.dataset.tone = tone;
+        }
+
+        function allCurrentAnnotations() {
+          const annotations = getCurrentAnnotations();
+          return ["before", "after"].flatMap((imageSide) =>
+            annotations[imageSide].map((annotation) => ({
+              imageSide,
+              ...annotation,
+            })),
+          );
+        }
+
+        function replaceCurrentAnnotations(items = []) {
+          markerState[currentCaseId] = { before: [], after: [] };
+          items.forEach((item) => {
+            if (!markerState[currentCaseId][item.imageSide]) return;
+            markerState[currentCaseId][item.imageSide].push({
+              x: Number(item.x),
+              y: Number(item.y),
+              width: Number(item.width),
+              height: Number(item.height),
+              category: item.category,
+            });
+          });
+        }
+
+        async function loadAnnotations(caseId) {
+          setSaveStatus("\u8f09\u5165\u6a19\u8a3b\u4e2d\u2026");
+          try {
+            const response = await fetch(
+              `${annotationApiBase}/${encodeURIComponent(caseId)}`,
+              {
+                credentials: "same-origin",
+              },
+            );
+            const data = await response.json();
+            if (!response.ok)
+              throw new Error(
+                data.error || "\u7121\u6cd5\u8f09\u5165\u6a19\u8a3b",
+              );
+            if (caseId !== currentCaseId) return;
+            replaceCurrentAnnotations(data.items || []);
+            refreshMarkerCanvases();
+            setSaveStatus(
+              data.items?.length
+                ? `\u5df2\u8f09\u5165 ${data.items.length} \u500b\u6a19\u8a3b`
+                : "\u76ee\u524d\u6c92\u6709\u5df2\u5132\u5b58\u6a19\u8a3b",
+              "success",
+            );
+          } catch (error) {
+            setSaveStatus(
+              error.message || "\u8f09\u5165\u6a19\u8a3b\u5931\u6557",
+              "error",
+            );
+          }
+        }
+
+        async function saveAnnotations() {
+          const item = reviewCases[currentCaseId];
+          if (!item) return;
+          saveButton.disabled = true;
+          setSaveStatus("\u5132\u5b58\u6a19\u8a3b\u4e2d\u2026");
+          try {
+            const response = await fetch(
+              `${annotationApiBase}/${encodeURIComponent(currentCaseId)}`,
+              {
+                method: "PUT",
+                credentials: "same-origin",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  plateNumber: item.plate,
+                  annotations: allCurrentAnnotations(),
+                }),
+              },
+            );
+            const data = await response.json();
+            if (!response.ok)
+              throw new Error(
+                data.error || "\u5132\u5b58\u6a19\u8a3b\u5931\u6557",
+              );
+            replaceCurrentAnnotations(data.items || []);
+            refreshMarkerCanvases();
+            setSaveStatus(
+              `\u5df2\u5132\u5b58 ${data.items.length} \u500b\u6a19\u8a3b`,
+              "success",
+            );
+          } catch (error) {
+            setSaveStatus(
+              error.message || "\u5132\u5b58\u6a19\u8a3b\u5931\u6557",
+              "error",
+            );
+          } finally {
+            saveButton.disabled = false;
+          }
+        }
+
+        function refreshMarkerCanvases() {
+          Object.values(markerCanvases).forEach((canvas) => {
+            if (!canvas) return;
+            canvas.classList.toggle("is-active", markingEnabled);
+            canvas.classList.toggle("is-drawing", Boolean(activeDrawing));
+            resizeMarkerCanvas(canvas);
+          });
+          renderAnnotationList();
+        }
+
+        function handlePointerDown(event) {
+          if (!markingEnabled) return;
+          event.preventDefault();
+          const canvas = event.currentTarget;
+          const point = getPointerPoint(event, canvas);
+          activeDrawing = {
+            side: canvas.dataset.markerCanvas,
+            start: point,
+            current: point,
+            pointerId: event.pointerId,
+          };
+          canvas.setPointerCapture(event.pointerId);
+          refreshMarkerCanvases();
+        }
+
+        function handlePointerMove(event) {
+          if (!activeDrawing || activeDrawing.pointerId !== event.pointerId)
+            return;
+          event.preventDefault();
+          activeDrawing.current = getPointerPoint(event, event.currentTarget);
+          refreshMarkerCanvases();
+        }
+
+        function finishDrawing(event) {
+          if (!activeDrawing || activeDrawing.pointerId !== event.pointerId)
+            return;
+          event.preventDefault();
+          const canvas = event.currentTarget;
+          const box = normalizeBox(
+            activeDrawing.start,
+            getPointerPoint(event, canvas),
+            markerCategory.value,
+          );
+          activeDrawing = null;
+          if (box.width >= 0.02 && box.height >= 0.02) {
+            getCurrentAnnotations()[canvas.dataset.markerCanvas].push(box);
+            setSaveStatus(
+              "\u6709\u672a\u5132\u5b58\u7684\u6a19\u8a3b\u8b8a\u66f4",
+              "pending",
+            );
+          }
+          if (canvas.hasPointerCapture(event.pointerId))
+            canvas.releasePointerCapture(event.pointerId);
+          refreshMarkerCanvases();
+        }
+
+        Object.values(markerCanvases).forEach((canvas) => {
+          if (!canvas) return;
+          canvas.addEventListener("pointerdown", handlePointerDown);
+          canvas.addEventListener("pointermove", handlePointerMove);
+          canvas.addEventListener("pointerup", finishDrawing);
+          canvas.addEventListener("pointercancel", finishDrawing);
+        });
+        saveButton.addEventListener("click", saveAnnotations);
+        toggleMarkingButton.addEventListener("click", () => {
+          markingEnabled = !markingEnabled;
+          activeDrawing = null;
+          refreshMarkerCanvases();
+        });
+        clearMarkersButton.addEventListener("click", () => {
+          markerState[currentCaseId] = { before: [], after: [] };
+          activeDrawing = null;
+          setSaveStatus(
+            "\u5df2\u6e05\u9664\uff0c\u8acb\u6309\u5132\u5b58\u6a19\u8a3b",
+            "pending",
+          );
+          refreshMarkerCanvases();
+        });
+        annotationList.addEventListener("click", (event) => {
+          const button = event.target.closest("[data-remove-annotation]");
+          if (!button) return;
+          const side = button.dataset.annotationSide;
+          const index = Number(button.dataset.annotationIndex);
+          getCurrentAnnotations()[side].splice(index, 1);
+          setSaveStatus(
+            "\u6709\u672a\u5132\u5b58\u7684\u6a19\u8a3b\u8b8a\u66f4",
+            "pending",
+          );
+          refreshMarkerCanvases();
+        });
+        window.addEventListener("resize", refreshMarkerCanvases);
+        beforeImage.addEventListener("load", refreshMarkerCanvases);
+        afterImage.addEventListener("load", refreshMarkerCanvases);
         function renderCase(caseId) {
+          currentCaseId = caseId;
           const item = reviewCases[caseId];
           if (!item) return;
 
           caseLinks.forEach((link) => {
             link.classList.toggle("active", link.dataset.caseId === caseId);
           });
-          detailTitle.textContent = `${item.caseNumber} 新增損傷比對`;
-          detailMeta.textContent = `${item.plate}・${item.station}`;
+          detailTitle.textContent = `${item.caseNumber} \u65b0\u589e\u640d\u50b7\u6bd4\u5c0d`;
+          detailMeta.textContent = `${item.plate}\u30fb${item.station}`;
           detailStatus.className = `badge ${item.riskClass}`;
           detailStatus.textContent = item.risk;
           beforeImage.src = item.beforeImage;
@@ -409,6 +1040,7 @@
           detailFields.estimate.textContent = item.estimate;
           aiNote.textContent = item.note;
           renter.textContent = item.renter;
+          loadAnnotations(caseId);
         }
 
         function applyFilters() {

@@ -21,6 +21,10 @@
     box-shadow: 0 0 0 2px var(--metric-soft), 0 7px 18px rgba(21, 39, 61, .08)
 }
 
+.repair-order-metrics [data-repair-spend-total] {
+    font-size: 20px;
+}
+
 .summary {
     display: grid;
     grid-template-columns: 1fr 1fr;

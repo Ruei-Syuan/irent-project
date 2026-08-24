@@ -1,22 +1,18 @@
 <!doctype html>
 <html lang="zh-Hant">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>
-      AI 車損複核｜iRent 智能車況管家
-    </title>
-    <link rel="stylesheet" href="css/common.css">
-    <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/damage-review.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI 車損複核｜iRent 智能車況管家</title>
+    <link rel="stylesheet" href="css/common.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/damage-review.css" />
   </head>
   <body class="app-body" data-page="damage-review">
     <div class="app-shell">
-      <aside class="app-sidebar" data-app-sidebar>
-      </aside>
+      <aside class="app-sidebar" data-app-sidebar></aside>
       <div class="app-workspace">
-        <header class="app-topbar" data-app-topbar>
-        </header>
+        <header class="app-topbar" data-app-topbar></header>
         <main class="page">
           <section class="page-head">
             <div>
@@ -31,277 +27,268 @@
               </p> -->
             </div>
             <div class="actions">
-              <button class="btn">
-                批次指派
-              </button>
-              <button class="btn primary">
-                匯出案件
-              </button>
+              <button class="btn">批次指派</button>
+              <button class="btn primary">匯出案件</button>
             </div>
           </section>
           <section class="metrics">
             <article class="metric">
               <div class="metric-label">
                 待人工複核
-                <span class="metric-icon">
-                  ◎
-                </span>
+                <span class="metric-icon"> ◎ </span>
               </div>
-              <b>
-                28
-              </b>
-              <small>
-                其中 8 件高風險
-              </small>
+              <b> 3 </b>
+              <small> 其中 1 件高風險 </small>
             </article>
             <article class="metric">
               <div class="metric-label">
                 今日新增
-                <span class="metric-icon">
-                  ＋
-                </span>
+                <span class="metric-icon"> ＋ </span>
               </div>
-              <b>
-                52
-              </b>
-              <small>
-                較昨日減少 6 件
-              </small>
+              <b> 52 </b>
+              <small> 較昨日減少 6 件 </small>
             </article>
             <article class="metric">
               <div class="metric-label">
                 AI 準確率
-                <span class="metric-icon">
-                  ✓
-                </span>
+                <span class="metric-icon"> ✓ </span>
               </div>
-              <b>
-                94.8%
-              </b>
-              <small>
-                近 30 日人工複核結果
-              </small>
+              <b> 94.8% </b>
+              <small> 近 30 日人工複核結果 </small>
             </article>
             <article class="metric">
               <div class="metric-label">
                 平均處理時間
-                <span class="metric-icon">
-                  ◷
-                </span>
+                <span class="metric-icon"> ◷ </span>
               </div>
-              <b>
-                4.2m
-              </b>
+              <b> 4.2m </b>
               <small>
-                <span class="good">
-                  ▼ 18%
-                </span>
+                <span class="good"> ▼ 18% </span>
                 較上月
               </small>
             </article>
             <article class="metric">
               <div class="metric-label">
                 預估索賠
-                <span class="metric-icon">
-                  $
-                </span>
+                <span class="metric-icon"> $ </span>
               </div>
-              <b>
-                82K
-              </b>
-              <small>
-                本週已確認案件
-              </small>
+              <b> 82K </b>
+              <small> 本週已確認案件 </small>
             </article>
           </section>
           <section class="review-layout">
             <article class="card">
               <div class="card-head">
                 <div>
-                  <h2>
-                    案件佇列
-                  </h2>
-                  <p>
-                    依風險分數排序
-                  </p>
+                  <h2>案件佇列</h2>
+                  <p>依風險分數排序</p>
                 </div>
-                <span class="badge red">
-                  28 待處理
-                </span>
+                <span class="badge red" data-queue-count> 3 待處理 </span>
               </div>
               <div class="card-body filters">
-                <input class="search" aria-label="搜尋案件" placeholder="搜尋車牌、案件編號">
+                <input
+                  class="search"
+                  aria-label="搜尋案件"
+                  placeholder="搜尋車牌、案件編號"
+                />
                 <select class="select" aria-label="狀態">
-                  <option>
-                    全部狀態
-                  </option>
-                  <option>
-                    高風險
-                  </option>
+                  <option value="">全部狀態</option>
+                  <option value="高風險">高風險</option>
+                  <option value="待補件">待補件</option>
+                  <option value="一般">一般</option>
                 </select>
               </div>
-              <div class="case-list">
-                <a class="case active" href="#detail">
-                  <div class="case-top">
-                    <b>
-                      #DMG-260809-018
-                    </b>
-                    <span class="badge red">
-                      高風險
-                    </span>
-                  </div>
-                  <p>
-                    <b>
-                      RAC-4582 Toyota Yaris
-                    </b>
-                    <br>
-                    右後保桿・刮傷・8.4 cm²
-                  </p>
-                  <div class="case-foot">
-                    <span class="good">
-                      AI 96%
-                    </span>
-                    <small>
-                      等待 8 分鐘
-                    </small>
-                  </div>
-                </a>
-                <a class="case" href="#detail">
-                  <div class="case-top">
-                    <b>
-                      #DMG-260809-016
-                    </b>
-                    <span class="badge amber">
-                      待補件
-                    </span>
-                  </div>
-                  <p>
-                    <b>
-                      RBC-2108 Toyota Vios
-                    </b>
-                    <br>
-                    副駕座椅・液體髒污
-                  </p>
-                  <div class="case-foot">
-                    <span class="good">
-                      AI 88%
-                    </span>
-                    <small>
-                      等待 21 分鐘
-                    </small>
-                  </div>
-                </a>
-                <a class="case" href="#detail">
-                  <div class="case-top">
-                    <b>
-                      #DMG-260809-012
-                    </b>
-                    <span class="badge blue">
-                      一般
-                    </span>
-                  </div>
-                  <p>
-                    <b>
-                      RBA-6935 Honda Fit
-                    </b>
-                    <br>
-                    左前門・疑似淺刮痕
-                  </p>
-                  <div class="case-foot">
-                    <span class="good">
-                      AI 81%
-                    </span>
-                    <small>
-                      等待 32 分鐘
-                    </small>
-                  </div>
-                </a>
+              <div class="table-wrap case-table-wrap">
+                <table class="case-table">
+                  <thead>
+                    <tr>
+                      <th>案件編號</th>
+                      <th>車牌／車款</th>
+                      <th>損傷摘要</th>
+                      <th>AI 信心</th>
+                      <th>風險</th>
+                      <th>等待時間</th>
+                    </tr>
+                  </thead>
+                  <tbody class="case-list">
+                    <tr
+                      class="case case-row active"
+                      data-case-id="case-01"
+                      data-risk="高風險"
+                      role="button"
+                      tabindex="0"
+                    >
+                      <td>
+                        <div class="case-top">
+                          <b>#DMG-260809-018</b>
+                        </div>
+                        <span class="cell-meta">新增損傷案件</span>
+                      </td>
+                      <td>
+                        <p><b>RAC-4582 Toyota Yaris</b></p>
+                      </td>
+                      <td>
+                        <span class="cell-title">右後保桿・刮傷</span>
+                        <span class="cell-meta">8.4 cm²</span>
+                      </td>
+                      <td><span class="confidence good">96%</span></td>
+                      <td><span class="badge red">高風險</span></td>
+                      <td>
+                        <span class="cell-meta">等待</span>
+                        <span class="cell-title">8 分鐘</span>
+                      </td>
+                    </tr>
+                    <tr
+                      class="case case-row"
+                      data-case-id="case-02"
+                      data-risk="待補件"
+                      role="button"
+                      tabindex="0"
+                    >
+                      <td>
+                        <div class="case-top">
+                          <b>#DMG-260809-016</b>
+                        </div>
+                        <span class="cell-meta">新增損傷案件</span>
+                      </td>
+                      <td>
+                        <p><b>RBC-2108 Toyota Vios</b></p>
+                      </td>
+                      <td>
+                        <span class="cell-title">左前車門・凹痕</span>
+                        <span class="cell-meta">白色轉移漆</span>
+                      </td>
+                      <td><span class="confidence good">88%</span></td>
+                      <td><span class="badge amber">待補件</span></td>
+                      <td>
+                        <span class="cell-meta">等待</span>
+                        <span class="cell-title">21 分鐘</span>
+                      </td>
+                    </tr>
+                    <tr
+                      class="case case-row"
+                      data-case-id="case-03"
+                      data-risk="一般"
+                      role="button"
+                      tabindex="0"
+                    >
+                      <td>
+                        <div class="case-top">
+                          <b>#DMG-260809-012</b>
+                        </div>
+                        <span class="cell-meta">新增損傷案件</span>
+                      </td>
+                      <td>
+                        <p><b>RBA-6935 Honda Fit</b></p>
+                      </td>
+                      <td>
+                        <span class="cell-title">左後尾燈・破裂</span>
+                        <span class="cell-meta">保桿擦痕</span>
+                      </td>
+                      <td><span class="confidence good">81%</span></td>
+                      <td><span class="badge blue">一般</span></td>
+                      <td>
+                        <span class="cell-meta">等待</span>
+                        <span class="cell-title">32 分鐘</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </article>
             <article class="card" id="detail">
               <div class="card-head">
                 <div>
-                  <h2>
-                    #DMG-260809-018 新增損傷比對
-                  </h2>
-                  <p>
-                    RAC-4582・台北市信義區 A07 站點
-                  </p>
+                  <h2 data-detail-title>#DMG-260809-018 新增損傷比對</h2>
+                  <p data-detail-meta>RAC-4582・台北市信義區 A07 站點</p>
                 </div>
-                <span class="badge red">
-                  高風險
-                </span>
+                <span class="badge red" data-detail-status> 高風險 </span>
               </div>
               <div class="card-body">
                 <div class="compare">
-                  <div class="photo">
-                    <span class="photo-label">
+                  <div class="photo with-image">
+                    <img
+                      class="damage-photo"
+                      data-before-image
+                      src="assets/damage-review/case-01-before.png"
+                      alt="RAC-4582 取車影像，右後保桿未發現明顯損傷"
+                    />
+                    <span class="photo-label" data-before-label>
                       取車影像 08/09 09:14
                     </span>
                   </div>
-                  <div class="photo after">
-                    <span class="photo-label">
+                  <div class="photo after with-image">
+                    <img
+                      class="damage-photo"
+                      data-after-image
+                      src="assets/damage-review/case-01-after.png"
+                      alt="RAC-4582 還車影像，右後保桿出現刮傷與凹痕"
+                    />
+                    <span class="photo-label" data-after-label>
                       還車影像 08/09 13:37
                     </span>
                   </div>
                 </div>
                 <div class="ai-result">
                   <div>
-                    <small>
-                      損傷類型
-                    </small>
+                    <small> 損傷類型 </small>
                     <strong>
-                      表面刮傷
+                      <span data-detail-field="damageType">表面刮傷</span>
                     </strong>
                   </div>
                   <div>
-                    <small>
-                      位置
-                    </small>
+                    <small> 位置 </small>
                     <strong>
-                      右後保桿
+                      <span data-detail-field="location">右後保桿</span>
                     </strong>
                   </div>
                   <div>
-                    <small>
-                      嚴重程度
-                    </small>
+                    <small> 嚴重程度 </small>
                     <strong>
-                      中度
+                      <span data-detail-field="severity">中度</span>
                     </strong>
                   </div>
                   <div>
-                    <small>
-                      維修費預估
-                    </small>
+                    <small> 維修費預估 </small>
                     <strong>
-                      NT$ 3,200–4,800
+                      <span data-detail-field="estimate">NT$ 3,200–4,800</span>
                     </strong>
                   </div>
                 </div>
                 <div class="ai-note">
-                  <b>
-                    AI 歷史比對：
-                  </b>
-                  前 3 次租借影像未出現此刮傷；角度與亮度合格，建議判定為本次新增損傷。
+                  <b> AI 歷史比對： </b>
+                  <span data-ai-note
+                    >前 3
+                    次租借影像未出現此刮傷；角度與亮度合格，建議判定為本次新增損傷。</span
+                  >
                 </div>
                 <div class="decision">
                   <div>
-                    <small class="cell-meta">
+                    <small class="cell-meta" data-renter>
                       租借人：陳○宇 訂單 #IR2608094731
                     </small>
-                    <b>
-                      人工複核結果
-                    </b>
+                    <b> 人工複核結果 </b>
                   </div>
                   <div class="inline">
-                    <button class="btn">
+                    <button
+                      class="btn"
+                      type="button"
+                      data-review-action="request-photo"
+                    >
                       要求補拍
                     </button>
-                    <button class="btn">
+                    <button
+                      class="btn"
+                      type="button"
+                      data-review-action="not-this-time"
+                    >
                       判定非本次
                     </button>
-                    <button class="btn primary">
+                    <button
+                      class="btn primary"
+                      type="button"
+                      data-review-action="confirm-repair"
+                    >
                       確認新增並派工
                     </button>
                   </div>
@@ -312,7 +299,153 @@
         </main>
       </div>
     </div>
-    <script src="js/layout.js" defer>
+    <script src="js/layout.js" defer></script>
+    <script>
+      (() => {
+        "use strict";
+
+        const reviewCases = {
+          "case-01": {
+            caseNumber: "#DMG-260809-018",
+            plate: "RAC-4582",
+            station: "台北市信義區 A07 站點",
+            risk: "高風險",
+            riskClass: "red",
+            issue: "右後保桿 刮傷",
+            before: "取車影像 08/09 09:14",
+            after: "還車影像 08/09 13:37",
+            beforeImage: "assets/damage-review/case-01-before.png",
+            afterImage: "assets/damage-review/case-01-after.png",
+            beforeAlt: "RAC-4582 取車影像，右後保桿未發現明顯損傷",
+            afterAlt: "RAC-4582 還車影像，右後保桿出現刮傷與凹痕",
+            damageType: "表面刮傷",
+            location: "右後保桿",
+            severity: "中度",
+            estimate: "NT$ 3,200–4,800",
+            note: "前 3 次租借影像未出現此刮傷；角度與亮度合格，建議判定為本次新增損傷。",
+            renter: "租借人：陳○宇 訂單 #IR2608094731",
+          },
+          "case-02": {
+            caseNumber: "#DMG-260809-016",
+            plate: "RBC-2108",
+            station: "台北市信義區 A07 站點",
+            risk: "待補件",
+            riskClass: "amber",
+            issue: "左前車門 凹痕 白色轉移漆",
+            before: "取車影像 08/09 10:22",
+            after: "還車影像 08/09 14:05",
+            beforeImage: "assets/damage-review/case-02-before.png",
+            afterImage: "assets/damage-review/case-02-after.png",
+            beforeAlt: "RBC-2108 取車影像，左前車門外觀完整",
+            afterAlt: "RBC-2108 還車影像，左前車門出現凹痕與白色轉移漆",
+            damageType: "車門凹痕",
+            location: "左前車門",
+            severity: "輕度",
+            estimate: "NT$ 2,000–3,600",
+            note: "前次影像未見相同痕跡，但受光面反射較強，建議補拍左前車門局部近照後再判定。",
+            renter: "租借人：林○廷 訂單 #IR2608094718",
+          },
+          "case-03": {
+            caseNumber: "#DMG-260809-012",
+            plate: "RBA-6935",
+            station: "台北市信義區 A07 站點",
+            risk: "一般",
+            riskClass: "blue",
+            issue: "左後尾燈 破裂 保桿擦痕",
+            before: "取車影像 08/09 08:47",
+            after: "還車影像 08/09 12:18",
+            beforeImage: "assets/damage-review/case-03-before.png",
+            afterImage: "assets/damage-review/case-03-after.png",
+            beforeAlt: "RBA-6935 取車影像，左後尾燈與保桿外觀完整",
+            afterAlt: "RBA-6935 還車影像，左後尾燈破裂並有保桿擦痕",
+            damageType: "燈殼破裂與擦傷",
+            location: "左後尾燈／保桿",
+            severity: "重度",
+            estimate: "NT$ 6,800–9,500",
+            note: "尾燈裂紋清晰可見，且擦痕延伸至保桿飾板，初步判定為本次新增損傷。",
+            renter: "租借人：吳○蓁 訂單 #IR2608094602",
+          },
+        };
+
+        const caseLinks = [...document.querySelectorAll(".case[data-case-id]")];
+        const searchInput = document.querySelector(".search");
+        const statusSelect = document.querySelector(".select");
+        const detailTitle = document.querySelector("[data-detail-title]");
+        const detailMeta = document.querySelector("[data-detail-meta]");
+        const detailStatus = document.querySelector("[data-detail-status]");
+        const beforeImage = document.querySelector("[data-before-image]");
+        const afterImage = document.querySelector("[data-after-image]");
+        const beforeLabel = document.querySelector("[data-before-label]");
+        const afterLabel = document.querySelector("[data-after-label]");
+        const aiNote = document.querySelector("[data-ai-note]");
+        const renter = document.querySelector("[data-renter]");
+        const detailFields = Object.fromEntries(
+          [...document.querySelectorAll("[data-detail-field]")].map((field) => [
+            field.dataset.detailField,
+            field,
+          ]),
+        );
+
+        function renderCase(caseId) {
+          const item = reviewCases[caseId];
+          if (!item) return;
+
+          caseLinks.forEach((link) => {
+            link.classList.toggle("active", link.dataset.caseId === caseId);
+          });
+          detailTitle.textContent = `${item.caseNumber} 新增損傷比對`;
+          detailMeta.textContent = `${item.plate}・${item.station}`;
+          detailStatus.className = `badge ${item.riskClass}`;
+          detailStatus.textContent = item.risk;
+          beforeImage.src = item.beforeImage;
+          beforeImage.alt = item.beforeAlt;
+          afterImage.src = item.afterImage;
+          afterImage.alt = item.afterAlt;
+          beforeLabel.textContent = item.before;
+          afterLabel.textContent = item.after;
+          detailFields.damageType.textContent = item.damageType;
+          detailFields.location.textContent = item.location;
+          detailFields.severity.textContent = item.severity;
+          detailFields.estimate.textContent = item.estimate;
+          aiNote.textContent = item.note;
+          renter.textContent = item.renter;
+        }
+
+        function applyFilters() {
+          const query = searchInput.value.trim().toLowerCase();
+          const risk = statusSelect.value;
+          caseLinks.forEach((link) => {
+            const item = reviewCases[link.dataset.caseId];
+            const searchableText =
+              `${item.caseNumber} ${item.plate} ${item.issue || ""}`.toLowerCase();
+            link.hidden =
+              (query && !searchableText.includes(query)) ||
+              (risk && item.risk !== risk);
+          });
+        }
+
+        caseLinks.forEach((link) => {
+          link.addEventListener("click", (event) => {
+            event.preventDefault();
+            renderCase(link.dataset.caseId);
+          });
+        });
+        searchInput.addEventListener("input", applyFilters);
+        statusSelect.addEventListener("change", applyFilters);
+        document.querySelectorAll("[data-review-action]").forEach((button) => {
+          button.addEventListener("click", () => {
+            const messages = {
+              "request-photo": "已標記為待補件",
+              "not-this-time": "已標記為非本次損傷",
+              "confirm-repair": "已確認新增損傷並建立派工",
+            };
+            detailStatus.className = "badge amber";
+            detailStatus.textContent = messages[button.dataset.reviewAction];
+          });
+        });
+
+        renderCase("case-01");
+      })();
     </script>
   </body>
 </html>

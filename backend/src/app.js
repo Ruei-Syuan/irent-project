@@ -70,6 +70,11 @@ export async function buildApp(options = {}) {
     decorateReply: false
   });
   await app.register(fastifyStatic, {
+    root: path.join(projectRoot, 'assets'),
+    prefix: '/assets/',
+    decorateReply: false
+  });
+  await app.register(fastifyStatic, {
     root: path.join(projectRoot, 'backend', 'node_modules', '@tanstack', 'table-core', 'build', 'umd'),
     prefix: '/vendor/tanstack-table/',
     decorateReply: false

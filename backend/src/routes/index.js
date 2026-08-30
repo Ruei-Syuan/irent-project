@@ -6,6 +6,7 @@ import damageAnnotationRoutes from './damage-annotations.js';
 import departmentRoutes from './departments.js';
 import dashboardRoutes from './dashboard.js';
 import inboxRoutes from './inbox.js';
+import memberAuthRoutes from './member-auth.js';
 import permissionRoutes from './permissions.js';
 import pointRoutes from './points.js';
 import repairOrderRoutes from './repair-orders.js';
@@ -18,6 +19,8 @@ export default async function apiRoutes(app, options) {
   const routeOptions = { auth: options.auth, prisma: options.prisma };
 
   await app.register(authRoutes, { ...routeOptions, prefix: '/auth' });
+  // 一般會員認證 API：供前端一般會員登入使用，路徑為 /api/v1/member-auth/*。
+  await app.register(memberAuthRoutes, { prisma: options.prisma, prefix: '/member-auth' });
   await app.register(inboxRoutes, { ...routeOptions, prefix: '/inbox' });
   await app.register(roleRoutes, { ...routeOptions, prefix: '/roles' });
   await app.register(permissionRoutes, { ...routeOptions, prefix: '/permissions' });

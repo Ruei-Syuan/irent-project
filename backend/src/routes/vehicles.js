@@ -129,7 +129,7 @@ export default async function vehicleRoutes(app, options) {
   });
 
   app.get('/map-summary', {
-    preHandler: auth.authorize('fleet.view'),
+    // preHandler: auth.authorize('fleet.view'),     // 改為公開FUNCTION
     schema: { tags: ['Vehicles'] }
   }, async () => {
     const vehicles = await prisma.vehicle.findMany({

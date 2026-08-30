@@ -36,6 +36,9 @@ description: Codex 專案開發規則
 - 地圖 API 僅回傳必要欄位：`id`、`plateNumber`、`latitude`、`longitude`、`healthScore`、`issueCount`、`status`、`updatedAt`。
 - 資料量增加時，保留改用 `deck.gl` 的 `ScatterplotLayer` 與 MapLibre 整合的空間。
 
+## 彈跳視窗固定使用
+- SweetAlert2 (JavaScript 套件)
+
 # Backend API 開發規範
 
 ## 技術堆疊

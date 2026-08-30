@@ -89,6 +89,11 @@ const migrations = [
   {
     table: 'customer_point_transactions',
     path: path.join(backendRoot, 'prisma', 'migrations', '0016_customer_point_transactions', 'migration.sql')
+  },
+  {
+    table: 'customers',
+    column: 'password_hash',
+    path: path.join(backendRoot, 'prisma', 'migrations', '0017_member_auth', 'migration.sql')
   }
 ];
 

@@ -39,11 +39,31 @@ export async function buildApp(options = {}) {
   });
   await app.register(swaggerUi, { routePrefix: '/docs' });
 
+  // 允許前端開發伺服器攜帶一般會員登入 Cookie；正式環境可用 FRONTEND_ORIGINS 覆寫來源清單。
+  const frontendOrigins = new Set([
+    'http://127.0.0.1:5000',
+    'http://localhost:5000',
+    ...(process.env.FRONTEND_ORIGINS || '').split(',').map((origin) => origin.trim()).filter(Boolean)
+  ]);
+
   app.addHook('onRequest', async (request, reply) => {
     reply.header('X-Content-Type-Options', 'nosniff');
     reply.header('X-Frame-Options', 'DENY');
     reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
     reply.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+
+    const origin = request.headers.origin;
+    if (origin && frontendOrigins.has(origin)) {
+      reply.header('Access-Control-Allow-Origin', origin);
+      reply.header('Access-Control-Allow-Credentials', 'true');
+      reply.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+      reply.header('Access-Control-Allow-Headers', request.headers['access-control-request-headers'] || 'Content-Type');
+      reply.header('Vary', 'Origin');
+    }
+
+    if (request.method === 'OPTIONS') {
+      return reply.code(origin && frontendOrigins.has(origin) ? 204 : 403).send();
+    }
   });
 
   app.setErrorHandler((error, request, reply) => {

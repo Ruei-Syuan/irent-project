@@ -117,10 +117,11 @@
         <span class="brand-product">智能車況管家</span>
       </a>
       <nav class="app-nav" aria-label="主要導覽">${navigation}</nav>
-      <div class="app-sidebar-footer">
-        <span class="layout-status-dot" aria-hidden="true"></span>
-        <span>AI 服務與車聯網連線正常</span>
-      </div>`;
+      `;
+      // <div class="app-sidebar-footer">
+      //   <span class="layout-status-dot" aria-hidden="true"></span>
+      //    <span>AI 服務與車聯網連線正常</span>
+      // </div>
   }
 
   // 產生各頁共用的標題、搜尋與使用者工具列。
@@ -738,9 +739,36 @@
           `目前使用者 ${user.name}，${user.role.name}；點擊登出`,
         );
         userButton.addEventListener("click", async () => {
-          if (!window.confirm(`確定要登出 ${user.name}？`)) return;
-          await fetch("/api/auth/logout", { method: "POST" });
-          window.location.replace("/login.html");
+          const result = await window.Swal.fire({
+            title: "確定要登出嗎？",
+            text: `目前登入者：${user.name}`,
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "登出",
+            cancelButtonText: "取消",
+            reverseButtons: true,
+          });
+          if (!result.isConfirmed) return;
+
+          try {
+            const response = await fetch("/api/auth/logout", { method: "POST" });
+            if (!response.ok) throw new Error("Logout request failed");
+            await window.Swal.fire({
+              title: "已登出",
+              icon: "success",
+              timer: 900,
+              showConfirmButton: false,
+            });
+            window.location.replace("/login.html");
+          } catch (error) {
+            console.error("[iRent auth] Logout failed", error);
+            await window.Swal.fire({
+              title: "登出失敗",
+              text: "請稍後再試。",
+              icon: "error",
+              confirmButtonText: "知道了",
+            });
+          }
         });
       })
       .catch((error) => console.error("[iRent auth]", error));

@@ -77,3 +77,25 @@ test('points management navigation is available', async () => {
   assert.match(appSource, /'points-management\.html': 'points\.view'/);
   assert.match(databaseSetupSource, /\['points',\s*['"](?:積分管理|\\u7A4D\\u5206\\u7BA1\\u7406)['"]/);
 });
+
+test('management logout uses SweetAlert2 confirmation', async () => {
+  const adminPages = [
+    'dashboard.html',
+    'car-management.html',
+    'damage-review.html',
+    'clear-orders.html',
+    'work-orders.html',
+    'points-management.html',
+    'permissions.html',
+  ];
+  const [layoutScript, ...pageSources] = await Promise.all([
+    readFile(path.join(projectRoot, 'js', 'layout.js'), 'utf8'),
+    ...adminPages.map((page) => readFile(path.join(projectRoot, page), 'utf8')),
+  ]);
+
+  assert.match(layoutScript, /Swal\.fire\(/);
+  assert.doesNotMatch(layoutScript, /window\.confirm\(/);
+  for (const pageSource of pageSources) {
+    assert.match(pageSource, /cdn\.jsdelivr\.net\/npm\/sweetalert2@11/);
+  }
+});

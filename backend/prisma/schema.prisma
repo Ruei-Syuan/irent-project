@@ -191,13 +191,29 @@ model Customer {
   id        Int      @id @default(autoincrement())
   memberNo  String   @unique @map("member_no")
   fullName  String   @map("full_name")
-  phone     String
-  createdAt String   @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
-  updatedAt String   @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
-  rentals   Rental[]
+  phone       String
+  passwordHash String? @map("password_hash")
+  createdAt   String   @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt   String   @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
+  rentals     Rental[]
   pointTransactions CustomerPointTransaction[]
+  sessions    CustomerSession[]
 
   @@map("customers")
+}
+
+model CustomerSession {
+  id         Int      @id @default(autoincrement())
+  customerId Int      @map("customer_id")
+  tokenHash  String   @unique @map("token_hash")
+  ip         String?
+  userAgent  String?  @map("user_agent")
+  expiresAt  String   @map("expires_at")
+  createdAt  String   @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([tokenHash])
+  @@map("customer_sessions")
 }
 
 model CustomerPointTransaction {

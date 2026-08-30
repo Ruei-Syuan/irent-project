@@ -16,6 +16,7 @@ const pagePermissions = {
   'damage-review.html': 'damage.view',
   'clear-orders.html': 'dispatch.view',
   'work-orders.html': 'work_orders.view',
+  'points-management.html': 'points.view',
   // 報表分析暫時停用：'reports.html': 'reports.view',
   'permissions.html': 'permissions.view'
 };

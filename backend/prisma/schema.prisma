@@ -195,8 +195,23 @@ model Customer {
   createdAt String   @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
   updatedAt String   @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
   rentals   Rental[]
+  pointTransactions CustomerPointTransaction[]
 
   @@map("customers")
+}
+
+model CustomerPointTransaction {
+  id           Int      @id @default(autoincrement())
+  customerId   Int      @map("customer_id")
+  points       Int
+  balanceAfter Int      @map("balance_after")
+  type         String
+  reason       String   @default("")
+  createdAt    String   @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  customer     Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([customerId, id])
+  @@map("customer_point_transactions")
 }
 
 model VehicleServiceRecord {

@@ -64,3 +64,16 @@ test('報表分析頁面與樣式以雙橫線檔名封存並停止提供路由',
   assert.match(archivedHtml, /href="css\/--reports\.css"/);
   assert.match(archivedStyles, /\/\* 報表分析樣式暫時停用/);
 });
+
+test('points management navigation is available', async () => {
+  const [layoutScript, appSource, databaseSetupSource] = await Promise.all([
+    readFile(path.join(projectRoot, 'js', 'layout.js'), 'utf8'),
+    readFile(path.join(projectRoot, 'backend', 'src', 'app.js'), 'utf8'),
+    readFile(path.join(projectRoot, 'backend', 'src', 'services', 'database-setup.js'), 'utf8')
+  ]);
+
+  await assert.doesNotReject(access(path.join(projectRoot, 'points-management.html')));
+  assert.match(layoutScript, /key:\s*["']points["'],\s*label:\s*["']積分管理["'],\s*href:\s*["']points-management\.html["']/);
+  assert.match(appSource, /'points-management\.html': 'points\.view'/);
+  assert.match(databaseSetupSource, /\['points',\s*['"](?:積分管理|\\u7A4D\\u5206\\u7BA1\\u7406)['"]/);
+});

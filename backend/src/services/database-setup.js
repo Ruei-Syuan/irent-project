@@ -85,10 +85,15 @@ const migrations = [
   {
     table: 'damage_annotations',
     path: path.join(backendRoot, 'prisma', 'migrations', '0015_damage_annotations', 'migration.sql')
+  },
+  {
+    table: 'customer_point_transactions',
+    path: path.join(backendRoot, 'prisma', 'migrations', '0016_customer_point_transactions', 'migration.sql')
   }
 ];
 
 const permissionModules = [
+  ['points', '\u7A4D\u5206\u7BA1\u7406', ['view', 'create']],
   ['dashboard', '儀表板', ['view']],
   ['fleet', '車隊管理', ['view', 'create', 'edit', 'delete', 'export']],
   ['damage', '車損審核', ['view', 'review', 'export']],

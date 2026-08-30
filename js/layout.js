@@ -35,6 +35,12 @@
     },
     // 報表分析暫時停用：{ key: 'reports', label: '報表分析', href: 'reports.html', icon: 'chart' },
     {
+      key: "points",
+      label: "積分管理",
+      href: "points-management.html",
+      icon: "points",
+    },
+    {
       key: "permissions",
       label: "權限設定",
       href: "permissions.html",
@@ -83,6 +89,8 @@
     // 報表分析暫時停用：chart: '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 20h3V10H4v10Zm6 0h4V4h-4v16Zm7 0h3V7h-3v13Z"/></svg>',
     shield:
       '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 2 8 3v6c0 5.1-3.4 9.5-8 11-4.6-1.5-8-5.9-8-11V5l8-3Zm0 5a3 3 0 0 0-1 5.8V17h2v-4.2A3 3 0 0 0 12 7Z"/></svg>',
+    points:
+      '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2 3 6v6c0 5.5 3.8 8.9 9 10 5.2-1.1 9-4.5 9-10V6l-9-4Zm0 4 5 2.2v3.6c0 3.1-1.9 5.2-5 6.2-3.1-1-5-3.1-5-6.2V8.2L12 6Zm-1 2v3H8v2h3v3h2v-3h3v-2h-3V8h-2Z"/></svg>',
     search:
       '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m20 20-4.4-4.4m2.4-5.1a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>',
     notification:
@@ -1757,6 +1765,7 @@
       "damage-review": initDamageReview,
       dispatch: initDispatch,
       "work-orders": initWorkOrders,
+      points: () => window.IRentPointsPage?.init(),
       // 報表分析暫時停用：reports: initReports,
       permissions: () => {},
     };

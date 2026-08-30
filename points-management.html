@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>積分管理｜iRent 智能車況管家</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/points-management.css">
+  </head>
+  <body class="app-body" data-page="points">
+    <div class="app-shell">
+      <aside class="app-sidebar" data-app-sidebar></aside>
+      <div class="app-workspace">
+        <header class="app-topbar" data-app-topbar></header>
+        <main class="page points-page">
+          <!-- <section class="page-head"> -->
+            <!-- <div> -->
+              <!-- <p class="eyebrow">Member Points</p> -->
+              <!-- <h1>積分管理</h1> -->
+              <!-- <p class="subtitle">查詢會員點數餘額，並留下每次點數異動的完整紀錄。</p> -->
+            <!-- </div> -->
+            <!-- <div class="actions">
+              <button class="btn primary" type="button" data-points-add>新增記點</button>
+            </div> -->
+          <!-- </section> -->
+
+          <!-- <section class="points-metrics" aria-label="點數統計"> -->
+            <!-- <article class="points-metric"><span>會員總數</span><strong data-points-member-count>0</strong></article> -->
+            <!-- <article class="points-metric"><span>本頁點數合計</span><strong data-points-total>0</strong></article> -->
+            <!-- <article class="points-metric"><span>本頁有點數會員</span><strong data-points-active-count>0</strong></article> -->
+          <!-- </section> -->
+
+          <section class="points-layout">
+            <article class="card points-list-card" data-points-customer-list>
+            <div class="card-head">
+              <div>
+                <h2>會員清單</h2>
+                <p>點選會員可查看點數異動明細。</p>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-wrap">
+                <table class="points-table">
+                  <thead><tr><th>會員編號</th><th>會員姓名</th><th>目前點數</th></tr></thead>
+                  <tbody data-points-body><tr><td class="points-loading" colspan="3">資料載入中…</td></tr></tbody>
+                </table>
+              </div>
+              <div class="points-pagination" aria-label="會員點數清單分頁">
+                <div class="inline">
+                  <span data-points-page-info>第 1 / 1 頁，共 0 筆</span>
+                  <label class="points-page-size">
+                    每頁
+                    <select class="select" data-points-page-size aria-label="每頁顯示筆數">
+                      <option value="5">5 筆</option>
+                      <option value="10" selected>10 筆</option>
+                      <option value="20">20 筆</option>
+                      <option value="50">50 筆</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="inline">
+                  <button class="btn small" type="button" data-points-previous disabled>上一頁</button>
+                  <div class="points-page-numbers" data-points-page-numbers></div>
+                  <button class="btn small" type="button" data-points-next disabled>下一頁</button>
+                </div>
+              </div>
+            </div>
+            </article>
+            <article class="card points-detail" data-points-detail-panel>
+              <p class="points-empty">會員點數歷史紀錄預覽</p>
+            </article>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" data-points-form-dialog hidden>
+      <section class="card modal points-form-dialog" role="dialog" aria-modal="true" aria-labelledby="points-form-title">
+        <div class="card-head">
+          <div><h2 id="points-form-title">新增會員記點</h2><p>點數可填正數或負數，扣除後餘額不可低於 0。</p></div>
+          <button class="btn small" type="button" data-points-form-cancel>取消</button>
+        </div>
+        <form class="card-body points-form" data-points-form>
+          <label>會員編號<input name="memberNo" required placeholder="例如 MEM0001"></label>
+          <label>異動點數<input name="points" type="number" step="1" required placeholder="例如 100 或 -30"></label>
+          <label>異動類型<select name="type" required><option value="earn">增加</option><option value="redeem">扣除</option><option value="adjustment">調整</option></select></label>
+          <label class="points-form-wide">異動原因<textarea name="reason" required maxlength="200" placeholder="請填寫記點原因"></textarea></label>
+          <p class="points-form-message points-form-wide" data-points-form-message aria-live="polite"></p>
+          <div class="actions points-form-wide"><button class="btn primary" type="submit">儲存記點</button></div>
+        </form>
+      </section>
+    </div>
+
+    <script src="js/api/client.js" defer></script>
+    <script src="js/api/points.js" defer></script>
+    <script src="js/points-management.js" defer></script>
+    <script src="js/layout.js" defer></script>
+  </body>
+</html>

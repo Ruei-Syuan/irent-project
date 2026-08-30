@@ -7,6 +7,7 @@ import departmentRoutes from './departments.js';
 import dashboardRoutes from './dashboard.js';
 import inboxRoutes from './inbox.js';
 import permissionRoutes from './permissions.js';
+import pointRoutes from './points.js';
 import repairOrderRoutes from './repair-orders.js';
 import roleRoutes from './roles.js';
 import stationRoutes from './stations.js';
@@ -20,6 +21,7 @@ export default async function apiRoutes(app, options) {
   await app.register(inboxRoutes, { ...routeOptions, prefix: '/inbox' });
   await app.register(roleRoutes, { ...routeOptions, prefix: '/roles' });
   await app.register(permissionRoutes, { ...routeOptions, prefix: '/permissions' });
+  await app.register(pointRoutes, { ...routeOptions, prefix: '/points' });
   await app.register(departmentRoutes, { ...routeOptions, prefix: '/departments' });
   await app.register(dashboardRoutes, { ...routeOptions, prefix: '/dashboard' });
   await app.register(userRoutes, { ...routeOptions, prefix: '/users' });

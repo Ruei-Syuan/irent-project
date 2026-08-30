@@ -1,0 +1,534 @@
+.points-page {
+  display: grid;
+  gap: 18px;
+}
+
+.app-body[data-page="points"] .app-workspace {
+  min-width: 0;
+}
+
+.app-body[data-page="points"] .page {
+  width: min(1680px, calc(100vw - 64px));
+  max-width: none;
+}
+
+.points-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(280px, 1fr);
+  align-items: stretch;
+  gap: 14px;
+  min-height: min(620px, calc(100vh - 280px));
+}
+
+.points-list-card,
+.points-detail {
+  min-width: 0;
+}
+
+.points-list-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.points-list-card .card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.points-list-card .table-wrap {
+  flex: 1;
+  min-height: 0;
+}
+
+.points-table {
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.points-table th:nth-child(1) {
+  width: 42%;
+}
+
+.points-table th:nth-child(2) {
+  width: 34%;
+}
+
+.points-table th:nth-child(3) {
+  width: 24%;
+}
+
+.points-table th,
+.points-table td {
+  padding: 14px 16px;
+}
+
+.points-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.points-metric {
+  display: grid;
+  gap: 5px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.points-metric span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.points-metric strong {
+  color: var(--navy);
+  font-size: 24px;
+}
+
+.points-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 17px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.points-page-numbers {
+  display: flex;
+  gap: 5px;
+}
+
+.points-page-numbers .btn[aria-current="page"] {
+  border-color: var(--green);
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.points-pagination .btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.points-page-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.points-page-size .select {
+  min-height: 31px;
+  padding: 0 8px;
+}
+
+.points-balance {
+  color: var(--navy);
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.points-balance.is-positive {
+  color: var(--green);
+}
+
+.points-table tbody tr {
+  cursor: pointer;
+}
+
+.points-table tbody tr:hover,
+.points-table tbody tr.is-selected {
+  background: #f4fffb;
+}
+
+.points-table tbody tr.is-selected {
+  box-shadow: inset 3px 0 var(--green);
+}
+
+.points-empty,
+.points-loading {
+  padding: 28px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.points-detail {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.points-detail > .points-empty:first-child:last-child {
+  align-self: center;
+  justify-self: center;
+}
+
+.points-detail-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.points-detail-head h2,
+.points-detail-head p {
+  margin: 0;
+}
+
+.points-detail-head p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.points-detail-balance {
+  display: grid;
+  justify-items: end;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+.points-detail-balance span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.points-detail-balance strong {
+  color: var(--green);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.points-detail-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.points-detail-summary > div {
+  display: grid;
+  gap: 4px;
+  padding: 12px 10px;
+  text-align: center;
+}
+
+.points-detail-summary > div + div {
+  border-left: 1px solid var(--line);
+}
+
+.points-detail-summary span,
+.points-history-item small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.points-detail-summary strong {
+  font-size: 18px;
+}
+
+.points-monthly {
+  color: #1769e0;
+}
+
+.points-history-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.points-history-heading h3 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 15px;
+}
+
+.points-history-filters {
+  display: flex;
+  gap: 5px;
+}
+
+.points-history-filters .btn.is-active {
+  border-color: var(--green);
+  background: var(--green);
+  color: #fff;
+}
+
+.points-history {
+  min-height: 0;
+  max-height: 420px;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.points-history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #edf1f5;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+}
+
+.points-history-item:last-child {
+  border-bottom: 0;
+}
+
+.points-history {
+  display: grid;
+  gap: 8px;
+}
+
+.points-history-item-main,
+.points-history-item-value {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.points-history-item-main > div,
+.points-history-item-value {
+  display: grid;
+  gap: 3px;
+}
+
+.points-history-item-main strong {
+  color: var(--navy2);
+  font-size: 13px;
+}
+
+.points-history-item-main small,
+.points-history-item-value small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.points-history-item-value {
+  justify-items: end;
+  flex: 0 0 auto;
+}
+
+.points-history-item-value strong {
+  font-size: 16px;
+}
+
+.points-history-icon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--green-soft);
+  color: var(--green);
+  font-weight: 900;
+}
+
+.points-history-icon.is-negative {
+  background: #fff0f0;
+  color: var(--red);
+}
+
+.points-positive {
+  color: var(--green);
+}
+
+.points-negative {
+  color: var(--red);
+}
+
+.points-history .points-positive {
+  color: var(--green);
+  font-weight: 800;
+}
+
+.points-history .points-negative {
+  color: var(--red);
+  font-weight: 800;
+}
+
+.points-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.points-form label {
+  display: grid;
+  gap: 5px;
+  color: var(--navy2);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.points-form input,
+.points-form select,
+.points-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--navy2);
+  font: inherit;
+}
+
+.points-form textarea,
+.points-form .points-form-wide {
+  grid-column: 1 / -1;
+}
+
+.points-form textarea {
+  min-height: 76px;
+  resize: vertical;
+}
+
+.points-form-message {
+  min-height: 20px;
+  color: var(--red);
+  font-size: 12px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(4, 20, 38, 0.42);
+}
+
+.modal-backdrop[hidden] {
+  display: none;
+}
+
+.points-form-dialog {
+  width: min(620px, 100%);
+  max-height: calc(100vh - 36px);
+  overflow: auto;
+}
+
+@media (min-width: 1081px) {
+  .app-body[data-page="points"] {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .app-body[data-page="points"] .app-shell,
+  .app-body[data-page="points"] .app-workspace {
+    height: 100%;
+  }
+
+  .app-body[data-page="points"] .app-workspace,
+  .app-body[data-page="points"] .page,
+  .points-list-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .app-body[data-page="points"] .page {
+    width: 100%;
+    max-width: none;
+    flex: 1;
+    min-height: 0;
+    margin: 0;
+    padding: 16px 20px 20px;
+  }
+
+  .app-body[data-page="points"] .page-head {
+    flex: 0 0 auto;
+    margin-bottom: 14px;
+  }
+
+  .app-body[data-page="points"] .points-metrics {
+    flex: 0 0 auto;
+  }
+
+  .points-layout {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .points-layout > .card {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .points-list-card .table-wrap {
+    overflow: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-body[data-page="points"] .page {
+    width: auto;
+  }
+
+  .points-layout {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .points-list-card {
+    min-height: 480px;
+  }
+
+  .points-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .points-form {
+    grid-template-columns: 1fr;
+  }
+
+  .points-pagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .points-pagination > .inline:last-child {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .points-page-numbers {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .points-detail-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .points-detail-summary > div + div {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .points-history-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .points-form textarea,
+  .points-form .points-form-wide {
+    grid-column: auto;
+  }
+}

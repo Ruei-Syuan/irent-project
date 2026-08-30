@@ -126,3 +126,20 @@ test('允許前端 5000 使用會員登入 API 與 Cookie', async () => {
     assert.match(response.headers['access-control-allow-credentials'], /true/);
   });
 });
+test('允許區網前端使用會員登入 API 與 Cookie', async () => {
+  await withMemberApp(async ({ app }) => {
+    const response = await app.inject({
+      method: 'OPTIONS',
+      url: '/api/v1/member-auth/login',
+      headers: {
+        origin: 'http://192.168.1.112:5000',
+        'access-control-request-method': 'POST',
+        'access-control-request-headers': 'content-type'
+      }
+    });
+
+    assert.equal(response.statusCode, 204);
+    assert.equal(response.headers['access-control-allow-origin'], 'http://192.168.1.112:5000');
+    assert.match(response.headers['access-control-allow-credentials'], /true/);
+  });
+});

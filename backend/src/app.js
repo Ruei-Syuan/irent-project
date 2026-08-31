@@ -40,11 +40,32 @@ export async function buildApp(options = {}) {
   await app.register(swaggerUi, { routePrefix: '/docs' });
 
   // 允許前端開發伺服器攜帶一般會員登入 Cookie；正式環境可用 FRONTEND_ORIGINS 覆寫來源清單。
+
   const frontendOrigins = new Set([
     'http://127.0.0.1:5000',
     'http://localhost:5000',
     ...(process.env.FRONTEND_ORIGINS || '').split(',').map((origin) => origin.trim()).filter(Boolean)
   ]);
+
+  // ???閮勗?銝蝘?蝬脰楝??璈???甇???啣?隞?亙? FRONTEND_ORIGINS ?Ⅱ???皞?
+  const isAllowedFrontendOrigin = (origin) => {
+    if (!origin) return false;
+    if (frontendOrigins.has(origin)) return true;
+    if (process.env.NODE_ENV === 'production') return false;
+
+    try {
+      const url = new URL(origin);
+      if (url.protocol !== 'http:') return false;
+      if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return true;
+
+      const octets = url.hostname.split('.').map(Number);
+      if (octets.length !== 4 || octets.some((octet) => !Number.isInteger(octet) || octet < 0 || octet > 255)) return false;
+      const [first, second] = octets;
+      return first === 10 || (first === 172 && second >= 16 && second <= 31) || (first === 192 && second === 168);
+    } catch {
+      return false;
+    }
+  };
 
   app.addHook('onRequest', async (request, reply) => {
     reply.header('X-Content-Type-Options', 'nosniff');
@@ -53,7 +74,7 @@ export async function buildApp(options = {}) {
     reply.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
     const origin = request.headers.origin;
-    if (origin && frontendOrigins.has(origin)) {
+    if (origin && isAllowedFrontendOrigin(origin)) {
       reply.header('Access-Control-Allow-Origin', origin);
       reply.header('Access-Control-Allow-Credentials', 'true');
       reply.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
@@ -62,7 +83,7 @@ export async function buildApp(options = {}) {
     }
 
     if (request.method === 'OPTIONS') {
-      return reply.code(origin && frontendOrigins.has(origin) ? 204 : 403).send();
+      return reply.code(origin && isAllowedFrontendOrigin(origin) ? 204 : 403).send();
     }
   });
 

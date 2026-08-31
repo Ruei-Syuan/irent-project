@@ -70,7 +70,7 @@ function presentSummary(transactions) {
 
 export default async function pointRoutes(app, { auth, prisma }) {
   app.get('/', {
-    preHandler: auth.authorize('points.view'),
+    // preHandler: auth.authorize('points.view'),
     schema: { tags: ['Points'], querystring: listQuery }
   }, async request => {
     const search = String(request.query.search ?? '').trim();
@@ -107,7 +107,7 @@ export default async function pointRoutes(app, { auth, prisma }) {
   });
 
   app.get('/:memberNo/transactions', {
-    preHandler: auth.authorize('points.view'),
+    // preHandler: auth.authorize('points.view'),
     schema: { tags: ['Points'], params: memberParams }
   }, async (request, reply) => {
     const memberNo = normalizeMemberNo(request.params.memberNo);

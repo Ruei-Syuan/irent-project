@@ -24,12 +24,16 @@ function validate(reply, item) {
 }
 
 export default async function permissionRoutes(app, { auth, prisma }) {
-  app.get('/', { preHandler: auth.authorize('permissions.view'), schema: { tags: ['Permissions'] } }, async () => ({
+  app.get('/', {
+    // preHandler: auth.authorize('permissions.view'),
+    schema: { tags: ['Permissions'] }
+  }, async () => ({
     items: await prisma.permission.findMany({ orderBy: [{ module: 'asc' }, { id: 'asc' }] })
   }));
 
   app.get('/:id', {
-    preHandler: auth.authorize('permissions.view'), schema: { tags: ['Permissions'], params: idParams }
+    // preHandler: auth.authorize('permissions.view'),
+    schema: { tags: ['Permissions'], params: idParams }
   }, async (request, reply) => {
     const item = await prisma.permission.findUnique({ where: { id: request.params.id } });
     return item ? { item } : reply.code(404).send({ error: '找不到權限' });

@@ -109,6 +109,17 @@ test('一般會員可用手機號碼登入且錯誤密碼會被拒絕', async ()
   });
 });
 
+test('管理員目前資料 API 未登入時會拒絕請求', async () => {
+  await withMemberApp(async ({ app }) => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/v1/auth/me'
+    });
+
+    assert.equal(response.statusCode, 401);
+  });
+});
+
 test('允許前端 5000 使用會員登入 API 與 Cookie', async () => {
   await withMemberApp(async ({ app }) => {
     const response = await app.inject({

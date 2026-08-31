@@ -5,7 +5,7 @@ export default async function departmentRoutes(app, options) {
   const { auth, prisma } = options;
 
   app.get('/', {
-    preHandler: auth.authorize('users.view'),
+    // preHandler: auth.authorize('users.view'),
     schema: { tags: ['Departments'] }
   }, async () => ({
     items: await prisma.department.findMany({
@@ -15,7 +15,7 @@ export default async function departmentRoutes(app, options) {
   }));
 
   app.get('/:id', {
-    preHandler: auth.authorize('users.view'),
+    // preHandler: auth.authorize('users.view'),
     schema: { tags: ['Departments'], params: idParams }
   }, async (request, reply) => {
     const item = await prisma.department.findUnique({

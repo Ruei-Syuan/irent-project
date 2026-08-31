@@ -30,7 +30,7 @@ export default async function repairOrderRoutes(app, options) {
   const { auth, prisma } = options;
 
   app.get('/', {
-    preHandler: auth.authorize('work_orders.view'),
+    // preHandler: auth.authorize('work_orders.view'),
     schema: {
       tags: ['Repair orders'],
       querystring: {

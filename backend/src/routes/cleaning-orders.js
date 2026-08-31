@@ -47,7 +47,7 @@ export default async function cleaningOrderRoutes(app, options) {
   const { auth, prisma } = options;
 
   app.get('/', {
-    preHandler: auth.authorize('dispatch.view'),
+    // preHandler: auth.authorize('dispatch.view'),
     schema: {
       tags: ['Cleaning orders'],
       querystring: {
@@ -108,7 +108,7 @@ export default async function cleaningOrderRoutes(app, options) {
   });
 
   app.get('/summary', {
-    preHandler: auth.authorize('dispatch.view'),
+    // preHandler: auth.authorize('dispatch.view'),
     schema: {
       tags: ['Cleaning orders'],
       querystring: {

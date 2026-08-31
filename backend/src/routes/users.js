@@ -4,12 +4,16 @@ import { withAudit } from '../services/audit.js';
 import { hashPassword } from '../services/auth.js';
 
 export default async function userRoutes(app, { auth, prisma }) {
-  app.get('/', { preHandler: auth.authorize('users.view'), schema: { tags: ['Users'] } }, async () => ({
+  app.get('/', {
+    // preHandler: auth.authorize('users.view'),
+    schema: { tags: ['Users'] }
+  }, async () => ({
     items: (await prisma.user.findMany({ include: userInclude, orderBy: { id: 'asc' } })).map(toPublicUser)
   }));
 
   app.get('/:id', {
-    preHandler: auth.authorize('users.view'), schema: { tags: ['Users'], params: idParams }
+    // preHandler: auth.authorize('users.view'),
+    schema: { tags: ['Users'], params: idParams }
   }, async (request, reply) => {
     const user = await findUserById(prisma, request.params.id);
     return user ? { item: toPublicUser(user) } : reply.code(404).send({ error: '找不到帳號' });

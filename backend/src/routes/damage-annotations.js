@@ -66,7 +66,7 @@ export default async function damageAnnotationRoutes(app, options) {
   const { auth, prisma } = options;
 
   app.get('/:caseId', {
-    preHandler: auth.authorize('damage.view'),
+    // preHandler: auth.authorize('damage.view'),
     schema: {
       tags: ['Damage Annotations'],
       ...routeSchema

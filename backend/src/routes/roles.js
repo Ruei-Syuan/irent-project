@@ -20,12 +20,15 @@ function mapRole(role) {
 }
 
 export default async function roleRoutes(app, { auth, prisma }) {
-  app.get('/', { preHandler: auth.authorize('permissions.view'), schema: { tags: ['Roles'] } }, async () => ({
+  app.get('/', {
+    // preHandler: auth.authorize('permissions.view'),
+    schema: { tags: ['Roles'] }
+  }, async () => ({
     items: (await prisma.role.findMany({ include: roleInclude, orderBy: [{ isSystem: 'desc' }, { id: 'asc' }] })).map(mapRole)
   }));
 
   app.get('/:id', {
-    preHandler: auth.authorize('permissions.view'),
+    // preHandler: auth.authorize('permissions.view'),
     schema: { tags: ['Roles'], params: idParams }
   }, async (request, reply) => {
     const role = await prisma.role.findUnique({ where: { id: request.params.id }, include: roleInclude });

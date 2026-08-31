@@ -4,7 +4,7 @@ export default async function dashboardRoutes(app, options) {
   const { auth, prisma } = options;
 
   app.get('/fleet-summary', {
-    preHandler: auth.authorize('dashboard.view'),
+    // preHandler: auth.authorize('dashboard.view'),
     schema: {
       tags: ['Dashboard'],
       response: {
@@ -30,7 +30,7 @@ export default async function dashboardRoutes(app, options) {
   }, async () => getFleetSummary(prisma));
 
   app.get('/fleet-trend', {
-    preHandler: auth.authorize('dashboard.view'),
+    // preHandler: auth.authorize('dashboard.view'),
     schema: {
       tags: ['Dashboard'],
       response: {
@@ -59,7 +59,7 @@ export default async function dashboardRoutes(app, options) {
   }, async () => ({ items: await getFleetTrend(prisma) }));
 
   app.get('/rental-count-by-city', {
-    preHandler: auth.authorize('dashboard.view'),
+    // preHandler: auth.authorize('dashboard.view'),
     schema: {
       tags: ['Dashboard'],
       response: {

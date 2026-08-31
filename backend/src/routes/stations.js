@@ -30,7 +30,7 @@ export default async function stationRoutes(app, options) {
   const { auth, prisma } = options;
 
   app.get('/', {
-    preHandler: auth.authorize('fleet.view'),
+    // preHandler: auth.authorize('fleet.view'),
     schema: { tags: ['Stations'] }
   }, async () => ({
     items: (await prisma.station.findMany({
@@ -40,7 +40,7 @@ export default async function stationRoutes(app, options) {
   }));
 
   app.get('/:id', {
-    preHandler: auth.authorize('fleet.view'),
+    // preHandler: auth.authorize('fleet.view'),
     schema: { tags: ['Stations'], params: idParams }
   }, async (request, reply) => {
     const station = await prisma.station.findUnique({

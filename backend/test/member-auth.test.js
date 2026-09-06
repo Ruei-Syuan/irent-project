@@ -154,3 +154,112 @@ test('允許區網前端使用會員登入 API 與 Cookie', async () => {
     assert.match(response.headers['access-control-allow-credentials'], /true/);
   });
 });
+
+test('member rental API stores a pending-pickup rental for the signed-in member', async () => {
+  await withMemberApp(async ({ app, prisma }) => {
+    const vehicle = await prisma.vehicle.findFirst({ where: { status: 'available' } });
+    assert.ok(vehicle);
+
+    const registerResponse = await app.inject({
+      method: 'POST',
+      url: '/api/v1/member-auth/register',
+      payload: {
+        memberNo: 'MEMRENT1',
+        fullName: 'Frontend Member',
+        phone: '0911111111',
+        password: 'MemberPass123!'
+      }
+    });
+    assert.equal(registerResponse.statusCode, 201, registerResponse.body);
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/v1/member-auth/rentals',
+      headers: { cookie: registerResponse.headers['set-cookie'] },
+      payload: {
+        vehicleId: vehicle.id,
+        startedAt: '2026-09-05T09:30:00.000Z',
+        endedAt: '2026-09-05T11:30:00.000Z',
+        rentalFee: 384
+      }
+    });
+
+    assert.equal(response.statusCode, 201, response.body);
+    assert.equal(response.json().item.vehicleId, vehicle.id);
+    assert.equal(response.json().item.status, 'pending_pickup');
+    assert.equal(response.json().item.customer.memberNo, 'MEMRENT1');
+    assert.equal(response.json().item.rentalFee, 384);
+
+    const stored = await prisma.rental.findFirst({
+      where: { vehicleId: vehicle.id, customer: { memberNo: 'MEMRENT1' } },
+      include: { customer: true }
+    });
+    assert.ok(stored);
+    assert.equal(stored.status, 'pending_pickup');
+    assert.equal(stored.rentalFee, 384);
+  });
+});
+
+test('member rental API lists and transitions a rental through all pickup states', async () => {
+  await withMemberApp(async ({ app, prisma }) => {
+    const vehicle = await prisma.vehicle.findFirst({ where: { status: 'available' } });
+    assert.ok(vehicle);
+
+    const registerResponse = await app.inject({
+      method: 'POST',
+      url: '/api/v1/member-auth/register',
+      payload: {
+        memberNo: 'MEMRENT2',
+        fullName: 'Rental Status Member',
+        phone: '0922222222',
+        password: 'MemberPass123!'
+      }
+    });
+    assert.equal(registerResponse.statusCode, 201, registerResponse.body);
+    const cookie = registerResponse.headers['set-cookie'];
+
+    const createResponse = await app.inject({
+      method: 'POST',
+      url: '/api/v1/member-auth/rentals',
+      headers: { cookie },
+      payload: {
+        vehicleId: vehicle.id,
+        startedAt: '2026-09-06T09:30:00.000Z',
+        endedAt: '2026-09-06T11:30:00.000Z',
+        rentalFee: 384
+      }
+    });
+    assert.equal(createResponse.statusCode, 201, createResponse.body);
+    const rentalId = createResponse.json().item.id;
+    assert.equal(createResponse.json().item.status, 'pending_pickup');
+
+    const listResponse = await app.inject({
+      method: 'GET',
+      url: '/api/v1/member-auth/rentals',
+      headers: { cookie }
+    });
+    assert.equal(listResponse.statusCode, 200, listResponse.body);
+    assert.equal(listResponse.json().items.length, 1);
+    assert.equal(listResponse.json().items[0].id, rentalId);
+    assert.equal(listResponse.json().items[0].vehicle.id, vehicle.id);
+    assert.ok(listResponse.json().items[0].vehicle.station.name);
+
+    const pickupResponse = await app.inject({
+      method: 'PATCH',
+      url: `/api/v1/member-auth/rentals/${rentalId}/status`,
+      headers: { cookie },
+      payload: { status: 'active' }
+    });
+    assert.equal(pickupResponse.statusCode, 200, pickupResponse.body);
+    assert.equal(pickupResponse.json().item.status, 'active');
+
+    const returnResponse = await app.inject({
+      method: 'PATCH',
+      url: `/api/v1/member-auth/rentals/${rentalId}/status`,
+      headers: { cookie },
+      payload: { status: 'completed' }
+    });
+    assert.equal(returnResponse.statusCode, 200, returnResponse.body);
+    assert.equal(returnResponse.json().item.status, 'completed');
+  });
+});

@@ -142,6 +142,7 @@ export default async function vehicleRoutes(app, options) {
       select: {
         id: true,
         licensePlate: true,
+        model: true,
         status: true,
         cabinCondition: true,
         updatedAt: true,
@@ -162,6 +163,7 @@ export default async function vehicleRoutes(app, options) {
         properties: {
           id: vehicle.id,
           plateNumber: vehicle.licensePlate,
+          vehicleTypeName: vehicle.model || '未知車型',
           stationName: vehicle.station.name,
           stationAddress: vehicle.station.address,
           latitude: vehicle.station.latitude,
@@ -185,7 +187,7 @@ export default async function vehicleRoutes(app, options) {
     });
     if (!vehicle) return reply.code(404).send({ error: '找不到車輛' });
 
-    const [rentals, services] = await Promise.all([
+    const [rentals, services, cleaningOrders, repairOrders] = await Promise.all([
       prisma.rental.findMany({
         where: { vehicleId: vehicle.id },
         include: { customer: true },
@@ -194,8 +196,41 @@ export default async function vehicleRoutes(app, options) {
       prisma.vehicleServiceRecord.findMany({
         where: { vehicleId: vehicle.id },
         orderBy: { performedAt: 'desc' }
+      }),
+      prisma.cleaningOrder.findMany({
+        where: {
+          vehicleLicensePlate: vehicle.licensePlate,
+          condition: 'clean',
+          dispatchStatus: 'assigned'
+        },
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.repairOrder.findMany({
+        where: {
+          vehicleLicensePlate: vehicle.licensePlate,
+          status: '維修完畢',
+          completedAt: { not: null }
+        },
+        orderBy: { completedAt: 'desc' }
       })
     ]);
+
+    const maintenanceRecords = [
+      ...cleaningOrders.map(order => ({
+        id: `cleaning-order-${order.id}`,
+        type: 'cleaning',
+        performedAt: order.createdAt,
+        cost: order.cleaningFee,
+        note: order.note || `清潔工單 ${order.orderNumber}`
+      })),
+      ...repairOrders.map(order => ({
+        id: `repair-order-${order.id}`,
+        type: 'maintenance',
+        performedAt: order.completedAt,
+        cost: order.actualCost ?? order.estimatedCost,
+        note: order.maintenanceItem || `維修工單 ${order.orderNumber}`
+      }))
+    ].sort((left, right) => new Date(right.performedAt) - new Date(left.performedAt));
 
     return {
       vehicle,
@@ -209,7 +244,8 @@ export default async function vehicleRoutes(app, options) {
           .reduce((sum, record) => sum + record.cost, 0)
       },
       rentals: rentals.map(presentRental),
-      services
+      services,
+      maintenanceRecords
     };
   });
 
@@ -430,7 +466,7 @@ export default async function vehicleRoutes(app, options) {
       body: {
         type: 'object',
         additionalProperties: false,
-        required: ['licensePlate', 'model', 'color', 'stationId'],
+        required: ['licensePlate', 'color', 'stationId'],
         properties: vehicleFields
       }
     }
@@ -440,7 +476,7 @@ export default async function vehicleRoutes(app, options) {
     }
     const data = {
       licensePlate: text(request.body.licensePlate).toUpperCase(),
-      model: text(request.body.model),
+      model: text(request.body.model ?? '未知車型'),
       color: text(request.body.color),
       stationId: request.body.stationId,
       status: request.body.status ?? 'available',

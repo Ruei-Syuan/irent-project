@@ -148,7 +148,7 @@ model Station {
 model Vehicle {
   id             Int                    @id @default(autoincrement())
   licensePlate   String                 @unique @map("license_plate")
-  model          String
+  model          String                 @default("未知車型")
   color          String
   stationId      Int                    @map("station_id")
   status         String                 @default("available")

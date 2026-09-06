@@ -94,8 +94,18 @@ const migrations = [
     table: 'customers',
     column: 'password_hash',
     path: path.join(backendRoot, 'prisma', 'migrations', '0017_member_auth', 'migration.sql')
+  },
+  {
+    table: 'vehicles',
+    trigger: 'vehicles_model_default_after_insert',
+    path: path.join(backendRoot, 'prisma', 'migrations', '0018_vehicle_model_default', 'migration.sql')
   }
-];
+,
+  {
+    table: 'rentals',
+    trigger: 'rentals_status_pending_pickup_guard',
+    path: path.join(backendRoot, 'prisma', 'migrations', '0019_rental_pending_pickup_status', 'migration.sql')
+  },];
 
 const permissionModules = [
   ['points', '\u7A4D\u5206\u7BA1\u7406', ['view', 'create']],
